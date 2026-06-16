@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talks — 文档索引</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #020617; --bg-card: rgba(15, 23, 42, 0.5); --bg-card-solid: #0f172a;
+      --border: #1e293b; --text: #ffffff; --text-secondary: #94a3b8; --text-muted: #475569;
+      --accent: #22d3ee; --card-hover: rgba(30, 41, 59, 0.5);
+    }
+    [data-theme="light"] {
+      --bg: #f8fafc; --bg-card: rgba(255, 255, 255, 0.85); --bg-card-solid: #ffffff;
+      --border: #e2e8f0; --text: #1e293b; --text-secondary: #64748b; --text-muted: #94a3b8;
+      --accent: #0891b2; --card-hover: rgba(241, 245, 249, 0.8);
+    }
+    [data-theme="warm"] {
+      --bg: #fef7ed; --bg-card: rgba(255, 251, 245, 0.9); --bg-card-solid: #fffbf5;
+      --border: #fde68a; --text: #3b2f1e; --text-secondary: #78716c; --text-muted: #a8a29e;
+      --accent: #f59e0b; --card-hover: rgba(253, 230, 138, 0.3);
+    }
+    [data-theme="cool"] {
+      --bg: #f0f4f8; --bg-card: rgba(248, 250, 252, 0.9); --bg-card-solid: #f8fafc;
+      --border: #cbd5e1; --text: #1a2a3a; --text-secondary: #64748b; --text-muted: #94a3b8;
+      --accent: #6366f1; --card-hover: rgba(203, 213, 225, 0.4);
+    }
+    @media print {
+      :root, [data-theme] {
+        --bg: #ffffff; --bg-card: rgba(255, 255, 255, 0.95); --bg-card-solid: #ffffff;
+        --border: #d4d4d8; --text: #18181b; --text-secondary: #52525b; --text-muted: #a1a1aa;
+        --accent: #000000;
+      }
+      body { padding: 0; } .theme-bar { display: none !important; }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', 'Microsoft YaHei', monospace;
+      background: var(--bg); min-height: 100vh; padding: 2rem; color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+
+    /* Theme bar */
+    .theme-bar { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .theme-bar span { font-size: 0.75rem; color: var(--text-secondary); margin-right: 0.25rem; }
+    .theme-btn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: border-color 0.2s, transform 0.2s; padding: 0; }
+    .theme-btn:hover { transform: scale(1.15); }
+    .theme-btn.active { border-color: var(--text); }
+    .theme-btn.dark  { background: #020617; }
+    .theme-btn.light { background: #f8fafc; border: 2px solid #cbd5e1; }
+    .theme-btn.warm  { background: #fef7ed; border: 2px solid #fde68a; }
+    .theme-btn.cool  { background: #f0f4f8; border: 2px solid #cbd5e1; }
+
+    /* Header */
+    .header { margin-bottom: 2rem; }
+    .header-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .pulse-dot { width: 12px; height: 12px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; flex-shrink: 0; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.025em; }
+    .subtitle { color: var(--text-secondary); font-size: 0.8rem; margin-left: 1.75rem; margin-bottom: 0.25rem; }
+    .repo-link { color: var(--text-muted); font-size: 0.7rem; margin-left: 1.75rem; }
+    .repo-link a { color: var(--text-secondary); text-decoration: none; }
+    .repo-link a:hover { color: var(--accent); }
+
+    /* File list */
+    .file-list { display: flex; flex-direction: column; gap: 0.625rem; }
+    .file-card {
+      display: flex; align-items: center; gap: 1rem;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 0.75rem; padding: 1rem 1.25rem;
+      transition: background 0.3s, border-color 0.3s, transform 0.2s;
+      text-decoration: none; color: inherit;
+    }
+    .file-card:hover { background: var(--card-hover); transform: translateX(4px); border-color: var(--accent); }
+
+    .file-icon {
+      width: 42px; height: 42px; border-radius: 0.5rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
+    }
+    .file-icon.html { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+    .file-icon.md   { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+    .file-icon.other { background: rgba(168, 162, 158, 0.15); color: #a8a29e; }
+
+    .file-info { flex: 1; min-width: 0; }
+    .file-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.2rem; }
+    .file-desc { font-size: 0.7rem; color: var(--text-secondary); line-height: 1.45; }
+    .file-meta { display: flex; gap: 1rem; margin-top: 0.35rem; }
+    .file-meta span { font-size: 0.65rem; color: var(--text-muted); }
+
+    .file-arrow { color: var(--text-muted); font-size: 0.9rem; flex-shrink: 0; transition: color 0.2s, transform 0.2s; }
+    .file-card:hover .file-arrow { color: var(--accent); transform: translateX(3px); }
+
+    /* Stats bar */
+    .stats { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; margin-left: 1.75rem; }
+    .stat { font-size: 0.7rem; color: var(--text-muted); }
+    .stat strong { color: var(--text-secondary); }
+
+    /* Footer */
+    .footer { text-align: center; margin-top: 2.5rem; color: var(--text-muted); font-size: 0.65rem; }
+    .footer a { color: var(--text-secondary); text-decoration: none; }
+    .footer a:hover { color: var(--accent); }
+
+    /* New badge */
+    .badge {
+      display: inline-block; font-size: 0.6rem; padding: 0.15em 0.5em; border-radius: 1em;
+      font-weight: 600; margin-left: 0.4rem; vertical-align: middle;
+    }
+    .badge.new { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+    .badge.index { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 3rem 0; color: var(--text-muted); font-size: 0.8rem; }
+
+    @media (max-width: 640px) {
+      body { padding: 1rem; }
+      .file-card { padding: 0.875rem 1rem; gap: 0.75rem; }
+      .file-meta { flex-direction: column; gap: 0.15rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Theme Switcher -->
+    <div class="theme-bar">
+      <span>主题</span>
+      <button class="theme-btn dark active"  data-theme="dark"  title="暗夜"></button>
+      <button class="theme-btn light" data-theme="light" title="亮白"></button>
+      <button class="theme-btn warm"  data-theme="warm"  title="暖阳"></button>
+      <button class="theme-btn cool"  data-theme="cool"  title="冷杉"></button>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>Talks · 文档索引</h1>
+      </div>
+      <p class="subtitle">讨论文档集 — 用于方案讨论、架构推演与技术交流</p>
+      <p class="repo-link">
+        <a href="https://github.com/Peanut-Rice/Talks" target="_blank">github.com/Peanut-Rice/Talks</a>
+      </p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <span class="stat">文档 <strong id="doc-count">0</strong></span>
+      <span class="stat">更新 <strong id="last-update">—</strong></span>
+    </div>
+
+    <!-- File List -->
+    <div class="file-list" id="file-list">
+      <!-- ============================================
+          添加新文档：复制下面的 file-card 模板，填入信息
+          ============================================ -->
+
+      <!-- 模板示例：
+      <a href="文件名.html" class="file-card">
+        <div class="file-icon html">HTML</div>
+        <div class="file-info">
+          <div class="file-name">显示名称 <span class="badge new">NEW</span></div>
+          <div class="file-desc">一句话描述文档内容</div>
+          <div class="file-meta">
+            <span>2026-06-16</span>
+            <span>作者</span>
+          </div>
+        </div>
+        <span class="file-arrow">→</span>
+      </a>
+      -->
+
+      <!-- 条目：AI-Architecture.html -->
+      <a href="AI-Architecture.html" class="file-card">
+        <div class="file-icon html">HTML</div>
+        <div class="file-info">
+          <div class="file-name">金控集团 · 国企智能办公 AI 架构</div>
+          <div class="file-desc">面向金融控股集团的智能化办公架构方案，涵盖 AI 能力分层、系统拓扑与部署规划</div>
+          <div class="file-meta">
+            <span>2026-06-16</span>
+            <span>架构设计</span>
+          </div>
+        </div>
+        <span class="file-arrow">→</span>
+      </a>
+
+      <!-- 条目：README.md -->
+      <a href="README.md" class="file-card">
+        <div class="file-icon md">MD</div>
+        <div class="file-info">
+          <div class="file-name">README <span class="badge index">索引</span></div>
+          <div class="file-desc">仓库说明文件</div>
+          <div class="file-meta">
+            <span>2026-06-16</span>
+            <span>—</span>
+          </div>
+        </div>
+        <span class="file-arrow">→</span>
+      </a>
+
+    </div><!-- /file-list -->
+
+    <!-- Footer -->
+    <div class="footer">
+      <a href="https://github.com/Peanut-Rice/Talks" target="_blank">Peanut-Rice/Talks</a> ·
+      持续更新中
+    </div>
+
+  </div><!-- /container -->
+
+  <script>
+    // Theme switcher
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.documentElement.setAttribute('data-theme', btn.dataset.theme);
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Stats: count docs, pick latest date
+    (() => {
+      const cards = document.querySelectorAll('.file-card');
+      document.getElementById('doc-count').textContent = cards.length;
+
+      const dates = [...document.querySelectorAll('.file-meta span:first-child')]
+        .map(s => s.textContent.trim())
+        .filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d))
+        .sort()
+        .reverse();
+      document.getElementById('last-update').textContent = dates[0] || '—';
+    })();
+  </script>
+</body>
+</html>

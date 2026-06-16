@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>金控集团 · 国企智能办公 AI 架构</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #020617; --bg-card: rgba(15, 23, 42, 0.5); --bg-card-solid: #0f172a;
+      --border: #1e293b; --text: #ffffff; --text-secondary: #94a3b8; --text-muted: #475569;
+      --svg-filter: none; --card-hover: rgba(30, 41, 59, 0.5);
+    }
+    [data-theme="light"] {
+      --bg: #f8fafc; --bg-card: rgba(255, 255, 255, 0.85); --bg-card-solid: #ffffff;
+      --border: #e2e8f0; --text: #1e293b; --text-secondary: #64748b; --text-muted: #94a3b8;
+      --svg-filter: invert(1) hue-rotate(180deg) brightness(1.05); --card-hover: rgba(241, 245, 249, 0.8);
+    }
+    [data-theme="warm"] {
+      --bg: #fef7ed; --bg-card: rgba(255, 251, 245, 0.9); --bg-card-solid: #fffbf5;
+      --border: #fde68a; --text: #3b2f1e; --text-secondary: #78716c; --text-muted: #a8a29e;
+      --svg-filter: invert(1) hue-rotate(170deg) brightness(1.05) saturate(0.85); --card-hover: rgba(253, 230, 138, 0.3);
+    }
+    [data-theme="cool"] {
+      --bg: #f0f4f8; --bg-card: rgba(248, 250, 252, 0.9); --bg-card-solid: #f8fafc;
+      --border: #cbd5e1; --text: #1a2a3a; --text-secondary: #64748b; --text-muted: #94a3b8;
+      --svg-filter: invert(1) hue-rotate(190deg) brightness(1.05); --card-hover: rgba(203, 213, 225, 0.4);
+    }
+    @media print {
+      :root, [data-theme] {
+        --bg: #ffffff; --bg-card: rgba(255, 255, 255, 0.95); --bg-card-solid: #ffffff;
+        --border: #d4d4d8; --text: #18181b; --text-secondary: #52525b; --text-muted: #a1a1aa;
+        --svg-filter: invert(1) hue-rotate(180deg) brightness(1.08) contrast(0.95);
+      }
+      body { padding: 0; } .theme-bar { display: none !important; }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', 'Microsoft YaHei', monospace;
+      background: var(--bg); min-height: 100vh; padding: 2rem; color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    .container { max-width: 1300px; margin: 0 auto; }
+    .theme-bar { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .theme-bar span { font-size: 0.75rem; color: var(--text-secondary); margin-right: 0.25rem; }
+    .theme-btn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: border-color 0.2s, transform 0.2s; padding: 0; }
+    .theme-btn:hover { transform: scale(1.15); }
+    .theme-btn.active { border-color: var(--text); }
+    .theme-btn.dark  { background: #020617; }
+    .theme-btn.light { background: #f8fafc; border: 2px solid #cbd5e1; }
+    .theme-btn.warm  { background: #fef7ed; border: 2px solid #fde68a; }
+    .theme-btn.cool  { background: #f0f4f8; border: 2px solid #cbd5e1; }
+    .header { margin-bottom: 1rem; }
+    .header-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+    .pulse-dot { width: 12px; height: 12px; background: #22d3ee; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.025em; }
+    .subtitle { color: var(--text-secondary); font-size: 0.8rem; margin-left: 1.75rem; }
+    .diagram-container {
+      background: var(--bg-card); border-radius: 1rem; border: 1px solid var(--border);
+      padding: 1.5rem; overflow-x: auto; transition: background 0.3s, border-color 0.3s;
+    }
+    .diagram-container svg { width: 100%; min-width: 1150px; display: block; filter: var(--svg-filter); transition: filter 0.4s; }
+    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.875rem; margin-top: 1rem; }
+    .card { background: var(--bg-card); border-radius: 0.75rem; border: 1px solid var(--border); padding: 1rem; transition: background 0.3s, border-color 0.3s; }
+    .card:hover { background: var(--card-hover); }
+    .card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.625rem; }
+    .card-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .card-dot.highlight { width: 10px; height: 10px; background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+    .card-dot.cyan { background: #22d3ee; } .card-dot.emerald { background: #34d399; }
+    .card-dot.violet { background: #a78bfa; } .card-dot.orange { background: #fb923c; }
+    .card-dot.rose { background: #fb7185; }
+    .card h3 { font-size: 0.8rem; font-weight: 600; }
+    .card ul { list-style: none; color: var(--text-secondary); font-size: 0.7rem; }
+    .card li { margin-bottom: 0.3rem; line-height: 1.4; }
+    .footer { text-align: center; margin-top: 1rem; color: var(--text-muted); font-size: 0.7rem; }
+  </style>
+</head>
+<body>
+  <div class="theme-bar">
+    <span>主题：</span>
+    <button class="theme-btn dark active" onclick="setTheme('dark')" title="深邃黑"></button>
+    <button class="theme-btn light"       onclick="setTheme('light')" title="典雅白"></button>
+    <button class="theme-btn warm"        onclick="setTheme('warm')" title="暖米白"></button>
+    <button class="theme-btn cool"        onclick="setTheme('cool')" title="冷灰白"></button>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>金控集团 · 国企智能办公 AI 架构</h1>
+      </div>
+      <p class="subtitle">五项重点工作 —— 统一知识库 · 统一指标库 · Skills Hub · E-Work 桌面 · 金控数字化平台</p>
+    </div>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1200 960">
+        <defs>
+          <!-- Arrowheads -->
+          <marker id="arrow-slate" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+          <marker id="arrow-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee"/></marker>
+          <marker id="arrow-violet" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa"/></marker>
+          <marker id="arrow-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#fb7185"/></marker>
+          <marker id="arrow-emerald" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#34d399"/></marker>
+          <marker id="arrow-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#f59e0b"/></marker>
+          <!-- Highlight glow filter -->
+          <filter id="glow-amber">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="glow-cyan">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)"/>
+
+        <!-- ============================================================
+             LAYER 0: 治理层（顶部条）
+             ============================================================ -->
+        <rect x="30" y="12" width="1140" height="28" rx="6" fill="rgba(136, 19, 55, 0.12)" stroke="#fb7185" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="600" y="31" fill="#fb7185" font-size="9" font-weight="600" text-anchor="middle">治理约束层：党委前置研究 · 三重一大研判辅助 · 纪检监察嵌入 · 保密审查 · 信创合规 · 审计日志全量留存</text>
+
+        <!-- ============================================================
+             LAYER 1: 双入口
+             ============================================================ -->
+        <rect x="100" y="58" width="380" height="52" rx="8" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="290" y="78" fill="white" font-size="12" font-weight="600" text-anchor="middle">企业微信（私有化部署 · 非密网）</text>
+        <text x="290" y="96" fill="#94a3b8" font-size="8" text-anchor="middle">全员消息入口 · 制度问答 · 公文起草 · 数据简报</text>
+
+        <!-- E-Work ★ 重点突出 -->
+        <rect x="720" y="58" width="380" height="52" rx="8" fill="rgba(245, 158, 11, 0.12)" stroke="#f59e0b" stroke-width="2" filter="url(#glow-amber)"/>
+        <rect x="720" y="58" width="380" height="52" rx="8" fill="rgba(245, 158, 11, 0.08)" stroke="#f59e0b" stroke-width="2"/>
+        <text x="910" y="78" fill="#f59e0b" font-size="12" font-weight="700" text-anchor="middle">★ E-Work 桌面客户端</text>
+        <text x="910" y="96" fill="#fbbf24" font-size="8" text-anchor="middle">独立应用 · 涉密网查询 · 系统集成 · 离线可用</text>
+
+        <line x1="290" y1="110" x2="290" y2="135" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow-slate)"/>
+        <line x1="910" y1="110" x2="910" y2="135" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow-amber)"/>
+
+        <!-- ============================================================
+             LAYER 2: NanoBot Agent 核心
+             ============================================================ -->
+        <rect x="80" y="138" width="1040" height="100" rx="10" fill="rgba(6, 78, 59, 0.08)" stroke="#34d399" stroke-width="2"/>
+        <text x="600" y="162" fill="#34d399" font-size="11" font-weight="700" text-anchor="middle">NanoBot Agent · 核心运行时（企微 Adapter · 会话管理 · 技能调度 · Cron · 工具编排）</text>
+
+        <!-- 身份注入层 -->
+        <rect x="120" y="175" width="370" height="48" rx="6" fill="rgba(136, 19, 55, 0.2)" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="305" y="194" fill="white" font-size="9" font-weight="600" text-anchor="middle">身份注入层（新增）</text>
+        <text x="305" y="212" fill="#94a3b8" font-size="7" text-anchor="middle">企微 UserID → 部门 · 职级(干部/员工) · 涉密等级 · 党内职务</text>
+
+        <!-- 审计日志 -->
+        <rect x="710" y="175" width="370" height="48" rx="6" fill="rgba(136, 19, 55, 0.2)" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="895" y="194" fill="white" font-size="9" font-weight="600" text-anchor="middle">审计日志层（新增）</text>
+        <text x="895" y="212" fill="#94a3b8" font-size="7" text-anchor="middle">全量记录 who/when/what/data_sources/clearance → 不可篡改存储</text>
+
+        <!-- 身份令牌透传标注 -->
+        <line x1="490" y1="199" x2="710" y2="199" stroke="#fb7185" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-rose)"/>
+        <text x="600" y="193" fill="#fb7185" font-size="7" text-anchor="middle">身份令牌注入所有 MCP 调用</text>
+
+        <!-- ============================================================
+             BRANCH ARROWS FROM HERMES (wider spacing for larger layout)
+             ============================================================ -->
+        <line x1="340" y1="238" x2="340" y2="275" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+        <text x="300" y="262" fill="#22d3ee" font-size="8">技能加载</text>
+
+        <line x1="860" y1="238" x2="860" y2="275" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-violet)"/>
+        <text x="820" y="262" fill="#a78bfa" font-size="8">数据获取</text>
+
+        <!-- ============================================================
+             LAYER 3-LEFT: ★ Skills Hub（重点突出）
+             ============================================================ -->
+        <rect x="30" y="278" width="600" height="235" rx="10" fill="rgba(245, 158, 11, 0.04)" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8,4" filter="url(#glow-amber)"/>
+        <text x="50" y="300" fill="#f59e0b" font-size="11" font-weight="700">★ 统一 Skills Hub（第四基础设施 · 管能力）</text>
+
+        <!-- Profile 三层技能 -->
+        <rect x="50" y="312" width="170" height="140" rx="6" fill="rgba(8, 51, 68, 0.3)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="135" y="336" fill="white" font-size="10" font-weight="600" text-anchor="middle">全员技能</text>
+        <text x="135" y="356" fill="#94a3b8" font-size="8" text-anchor="middle">· 制度问答</text>
+        <text x="135" y="372" fill="#94a3b8" font-size="8" text-anchor="middle">· 公文起草</text>
+        <text x="135" y="388" fill="#94a3b8" font-size="8" text-anchor="middle">· 文档转换与提取</text>
+        <text x="135" y="404" fill="#94a3b8" font-size="8" text-anchor="middle">· 模板填充</text>
+        <text x="135" y="420" fill="#94a3b8" font-size="8" text-anchor="middle">· 会议纪要</text>
+        <text x="135" y="440" fill="#22d3ee" font-size="7" text-anchor="middle">全部员工</text>
+
+        <rect x="230" y="312" width="190" height="140" rx="6" fill="rgba(8, 51, 68, 0.3)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="325" y="336" fill="white" font-size="10" font-weight="600" text-anchor="middle">部门 / 专业技能</text>
+        <text x="325" y="356" fill="#94a3b8" font-size="8" text-anchor="middle">· 合规对齐（法务）</text>
+        <text x="325" y="372" fill="#94a3b8" font-size="8" text-anchor="middle">· 薪酬分析（HR）</text>
+        <text x="325" y="388" fill="#94a3b8" font-size="8" text-anchor="middle">· 合同审查（法务）</text>
+        <text x="325" y="404" fill="#94a3b8" font-size="8" text-anchor="middle">· 预算分析（财务）</text>
+        <text x="325" y="420" fill="#94a3b8" font-size="8" text-anchor="middle">· 纪检线索（纪委）</text>
+        <text x="325" y="440" fill="#22d3ee" font-size="7" text-anchor="middle">授权部门</text>
+
+        <rect x="430" y="312" width="180" height="140" rx="6" fill="rgba(8, 51, 68, 0.3)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="520" y="336" fill="white" font-size="10" font-weight="600" text-anchor="middle">高管 / 党委技能</text>
+        <text x="520" y="356" fill="#94a3b8" font-size="8" text-anchor="middle">· 场景推理</text>
+        <text x="520" y="372" fill="#94a3b8" font-size="8" text-anchor="middle">· 影响分析</text>
+        <text x="520" y="388" fill="#94a3b8" font-size="8" text-anchor="middle">· 风险看板</text>
+        <text x="520" y="404" fill="#94a3b8" font-size="8" text-anchor="middle">· 三重一大研判</text>
+        <text x="520" y="420" fill="#94a3b8" font-size="8" text-anchor="middle">· 议题材料准备</text>
+        <text x="520" y="440" fill="#22d3ee" font-size="7" text-anchor="middle">领导班子 · 党委委员</text>
+
+        <!-- Skills Hub 底部说明条 -->
+        <rect x="50" y="462" width="560" height="36" rx="5" fill="rgba(251, 146, 60, 0.1)" stroke="#fb923c" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="330" y="484" fill="#fb923c" font-size="8" font-weight="600" text-anchor="middle">技能注册为 REST 端点 → OA / HR / 财务系统直接调用 NanoBot API</text>
+
+        <!-- ============================================================
+             LAYER 3-RIGHT: MCP → SSO → 知识库 / 指标库
+             ============================================================ -->
+        <rect x="660" y="278" width="510" height="110" rx="10" fill="rgba(76, 29, 149, 0.06)" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="8,4"/>
+        <text x="680" y="300" fill="#a78bfa" font-size="10" font-weight="600">MCP 集成层（数据通道）</text>
+
+        <rect x="680" y="312" width="230" height="60" rx="6" fill="rgba(76, 29, 149, 0.22)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="795" y="336" fill="white" font-size="10" font-weight="600" text-anchor="middle">MCP-知识库</text>
+        <text x="795" y="352" fill="#94a3b8" font-size="8" text-anchor="middle">search · get_doc · list_sources</text>
+        <text x="795" y="366" fill="#64748b" font-size="7" text-anchor="middle">get_metadata · get_versions</text>
+
+        <rect x="920" y="312" width="230" height="60" rx="6" fill="rgba(76, 29, 149, 0.22)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="1035" y="336" fill="white" font-size="10" font-weight="600" text-anchor="middle">MCP-指标库</text>
+        <text x="1035" y="352" fill="#94a3b8" font-size="8" text-anchor="middle">query · list_dimensions</text>
+        <text x="1035" y="366" fill="#64748b" font-size="7" text-anchor="middle">get_timeseries · list_periods</text>
+
+        <!-- 身份透传线 -->
+        <line x1="795" y1="372" x2="795" y2="395" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="1035" y1="372" x2="1035" y2="395" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="915" y="390" fill="#fb7185" font-size="7" text-anchor="middle">caller_identity 透传</text>
+
+        <!-- SSO -->
+        <rect x="660" y="400" width="510" height="42" rx="6" fill="rgba(136, 19, 55, 0.2)" stroke="#fb7185" stroke-width="1.5"/>
+        <text x="915" y="418" fill="white" font-size="10" font-weight="600" text-anchor="middle">企业统一身份认证 / SSO 权限网关</text>
+        <text x="915" y="434" fill="#94a3b8" font-size="8" text-anchor="middle">校验身份 → 数据权限过滤 → 审计日志</text>
+
+        <line x1="795" y1="395" x2="915" y2="398" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="1035" y1="395" x2="915" y2="398" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <line x1="860" y1="442" x2="860" y2="462" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-violet)"/>
+
+        <!-- ★ 统一知识库（重点突出） -->
+        <rect x="680" y="466" width="230" height="70" rx="8" fill="rgba(245, 158, 11, 0.08)" stroke="#f59e0b" stroke-width="2" filter="url(#glow-amber)"/>
+        <text x="795" y="488" fill="#f59e0b" font-size="12" font-weight="700" text-anchor="middle">★ 统一知识库</text>
+        <text x="795" y="506" fill="#94a3b8" font-size="8" text-anchor="middle">制度 · 法规 · 决议 · 合同 · 会议纪要</text>
+        <text x="795" y="522" fill="#64748b" font-size="7" text-anchor="middle">权威层级 · 时效标记 · 密级标注</text>
+        <text x="795" y="534" fill="#f59e0b" font-size="7" text-anchor="middle">按 identity 过滤</text>
+
+        <!-- ★ 统一指标库（重点突出） -->
+        <rect x="940" y="466" width="230" height="70" rx="8" fill="rgba(245, 158, 11, 0.08)" stroke="#f59e0b" stroke-width="2" filter="url(#glow-amber)"/>
+        <text x="1055" y="488" fill="#f59e0b" font-size="12" font-weight="700" text-anchor="middle">★ 统一指标库</text>
+        <text x="1055" y="506" fill="#94a3b8" font-size="8" text-anchor="middle">人力效能 · 财务 · 运营 · 风控</text>
+        <text x="1055" y="522" fill="#64748b" font-size="7" text-anchor="middle">编制数据 · 预算执行 · KPI</text>
+        <text x="1055" y="534" fill="#f59e0b" font-size="7" text-anchor="middle">按职级/部门过滤</text>
+
+        <!-- ============================================================
+             Skills Hub → API 回连到 NanoBot 的路径
+             ============================================================ -->
+        <path d="M 330 498 L 330 524 Q 330 536 348 536 L 460 536 Q 476 536 476 524 L 476 240 Q 476 230 490 230" fill="none" stroke="#fb923c" stroke-width="1.2" stroke-dasharray="5,4"/>
+        <text x="420" y="530" fill="#fb923c" font-size="7">技能注册为 REST 端点，回连 NanoBot API</text>
+
+        <!-- ============================================================
+             LAYER 4: 业务系统嵌入
+             ============================================================ -->
+        <rect x="30" y="570" width="1140" height="135" rx="10" fill="rgba(34, 211, 238, 0.03)" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="8,4"/>
+        <text x="50" y="592" fill="#22d3ee" font-size="10" font-weight="600">业务系统嵌入（AI 能力消费方）—— 通过 NanoBot API 调用技能，无需改造业务系统</text>
+
+        <!-- OA -->
+        <rect x="50" y="605" width="200" height="48" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="150" y="626" fill="white" font-size="10" font-weight="600" text-anchor="middle">OA 系统</text>
+        <text x="150" y="644" fill="#94a3b8" font-size="8" text-anchor="middle">公文起草 · 审批辅助</text>
+
+        <!-- HR -->
+        <rect x="265" y="605" width="200" height="48" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="365" y="626" fill="white" font-size="10" font-weight="600" text-anchor="middle">HR 系统</text>
+        <text x="365" y="644" fill="#94a3b8" font-size="8" text-anchor="middle">制度问答 · 合规对齐</text>
+
+        <!-- 财务/风控 -->
+        <rect x="480" y="605" width="200" height="48" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="580" y="626" fill="white" font-size="10" font-weight="600" text-anchor="middle">财务 / 风控系统</text>
+        <text x="580" y="644" fill="#94a3b8" font-size="8" text-anchor="middle">合同审查 · 数据简报</text>
+
+        <!-- ★ 金控数字化平台（重点突出） -->
+        <rect x="695" y="605" width="450" height="85" rx="8" fill="rgba(245, 158, 11, 0.1)" stroke="#f59e0b" stroke-width="2.5" filter="url(#glow-amber)"/>
+        <text x="920" y="630" fill="#f59e0b" font-size="13" font-weight="700" text-anchor="middle">★ 金控数字化平台</text>
+        <text x="920" y="650" fill="#94a3b8" font-size="8" text-anchor="middle">AI 智能门户 · 统一工作台 · 数据看板</text>
+        <text x="920" y="666" fill="#94a3b8" font-size="8" text-anchor="middle">各子公司业务系统统一接入 · AI 能力聚合展示</text>
+        <text x="920" y="682" fill="#f59e0b" font-size="7" text-anchor="middle">所有 AI 技能的统一 Web 消费入口</text>
+
+        <!-- 业务系统 → NanoBot 的 API 调用箭头 -->
+        <line x1="150" y1="605" x2="150" y2="588" stroke="#22d3ee" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-cyan)"/>
+        <line x1="365" y1="605" x2="365" y2="588" stroke="#22d3ee" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-cyan)"/>
+        <line x1="580" y1="605" x2="580" y2="588" stroke="#22d3ee" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-cyan)"/>
+        <line x1="850" y1="605" x2="850" y2="588" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-amber)"/>
+        <line x1="990" y1="605" x2="990" y2="588" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-amber)"/>
+
+        <!-- API 调用路径说明 -->
+        <path d="M 150 580 L 150 560 Q 150 550 165 550 L 580 550 Q 595 550 595 540 L 990 540 Q 1005 540 1005 530 L 1005 252 Q 1005 242 1015 242" fill="none" stroke="#22d3ee" stroke-width="0.8" stroke-dasharray="5,5" opacity="0.25"/>
+        <text x="600" y="546" fill="#475569" font-size="7">API 调用：业务系统 → NanoBot API Server → 技能调度 → 返回结果</text>
+
+        <!-- ============================================================
+             LAYER 5: 底层基础设施标注
+             ============================================================ -->
+        <rect x="30" y="720" width="1140" height="36" rx="6" fill="rgba(15, 23, 42, 0.4)" stroke="#1e293b" stroke-width="1"/>
+        <text x="600" y="740" fill="#475569" font-size="8" text-anchor="middle">基础设施：信创服务器（麒麟/统信） · 国产数据库（达梦/人大金仓） · 本地推理服务（vLLM + 国产 GPU） · 涉密网 / 内部非密网物理隔离</text>
+
+        <!-- ============================================================
+             LEGEND
+             ============================================================ -->
+        <rect x="30" y="768" width="1140" height="105" rx="8" fill="rgba(15, 23, 42, 0.5)" stroke="#1e293b" stroke-width="1"/>
+        <text x="600" y="790" fill="white" font-size="10" font-weight="600" text-anchor="middle">图例</text>
+
+        <rect x="55" y="805" width="155" height="36" rx="4" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1"/>
+        <text x="132" y="821" fill="#94a3b8" font-size="9" text-anchor="middle">已有企业系统</text>
+        <text x="132" y="835" fill="#64748b" font-size="7" text-anchor="middle">企微 · OA · HR · 财务</text>
+
+        <rect x="225" y="805" width="155" height="36" rx="4" fill="rgba(6, 78, 59, 0.15)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="302" y="821" fill="#34d399" font-size="9" text-anchor="middle">NanoBot Agent</text>
+        <text x="302" y="835" fill="#64748b" font-size="7" text-anchor="middle">核心运行时 · 内置能力</text>
+
+        <rect x="395" y="805" width="155" height="36" rx="4" fill="rgba(245, 158, 11, 0.12)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="472" y="821" fill="#f59e0b" font-size="9" font-weight="600" text-anchor="middle">★ 五项重点</text>
+        <text x="472" y="835" fill="#64748b" font-size="7" text-anchor="middle">知识库 · 指标库 · Hub · E-Work · 金控平台</text>
+
+        <rect x="565" y="805" width="155" height="36" rx="4" fill="rgba(76, 29, 149, 0.15)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="642" y="821" fill="#a78bfa" font-size="9" text-anchor="middle">MCP / 数据层</text>
+        <text x="642" y="835" fill="#64748b" font-size="7" text-anchor="middle">知识库 · 指标库</text>
+
+        <rect x="735" y="805" width="155" height="36" rx="4" fill="rgba(136, 19, 55, 0.15)" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="812" y="821" fill="#fb7185" font-size="9" text-anchor="middle">唯一新增组件</text>
+        <text x="812" y="835" fill="#64748b" font-size="7" text-anchor="middle">身份注入 · 审计日志</text>
+
+        <rect x="905" y="805" width="100" height="36" rx="4" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1"/>
+        <text x="955" y="821" fill="#94a3b8" font-size="9" text-anchor="middle">治理约束</text>
+        <text x="955" y="835" fill="#64748b" font-size="7" text-anchor="middle">不改造 · 只适配</text>
+
+        <!-- 线型说明 -->
+        <line x1="55" y1="858" x2="95" y2="858" stroke="#22d3ee" stroke-width="1.2" stroke-dasharray="4,3"/>
+        <text x="103" y="861" fill="#94a3b8" font-size="8">API 调用 / 技能嵌入</text>
+        <line x1="250" y1="858" x2="290" y2="858" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="298" y="861" fill="#94a3b8" font-size="8">身份令牌透传</text>
+        <line x1="430" y1="858" x2="470" y2="858" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="478" y="861" fill="#f59e0b" font-size="8" font-weight="600">★ 重点突出（金色描边+发光）</text>
+      </svg>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="cards">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot highlight"></div>
+          <h3>统一知识库</h3>
+        </div>
+        <ul>
+          <li>• 制度 · 法规 · 决议 · 合同 · 会议纪要</li>
+          <li>• 权威层级（上位法 > 集团 > 子公司）</li>
+          <li>• 时效标记（现行 / 废止 / 过渡期）</li>
+          <li>• 密级标注（非密 · 内部 · 秘密 · 机密）</li>
+          <li>• 按 identity 过滤可见文档</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot highlight"></div>
+          <h3>统一指标库</h3>
+        </div>
+        <ul>
+          <li>• 人力效能 · 财务 · 运营 · 风控指标</li>
+          <li>• 多维度查询（按部门/时间/指标）</li>
+          <li>• 编制数据（按职级过滤）</li>
+          <li>• 同比 · 环比 · 预算偏离度</li>
+          <li>• 对接 Cron 自动生成简报</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot highlight"></div>
+          <h3>Skills Hub</h3>
+        </div>
+        <ul>
+          <li>• 三层 14 项技能（文本/RAG/推理）</li>
+          <li>• 全员 · 部门 · 高管分级分发</li>
+          <li>• 技能注册为 REST 端点</li>
+          <li>• 审批流 + 版本管理 + 依赖声明</li>
+          <li>• "编译而后能计算" 方法论载体</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot highlight"></div>
+          <h3>E-Work + 金控平台</h3>
+        </div>
+        <ul>
+          <li>• E-Work：桌面客户端，独立应用入口</li>
+          <li>• 涉密网查询 · 离线可用 · 系统集成</li>
+          <li>• 金控数字化平台：Web 统一工作台</li>
+          <li>• 各子公司 AI 能力聚合展示</li>
+          <li>• 企微 + E-Work + 金控平台 三入口</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="footer">
+      金控集团智能办公 AI 架构 v1.0 · 基于 NanoBot Agent · "不改动基础设施，不绕过治理流程"
+    </p>
+  </div>
+
+  <script>
+    function setTheme(n){document.documentElement.setAttribute('data-theme',n);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.theme-btn.${n}`).classList.add('active');}
+  </script>
+</body>
+</html>

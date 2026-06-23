@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>金控集团 · 审计条线 AI 应用规划</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #020617; --bg-card: rgba(15, 23, 42, 0.5); --border: #1e293b;
+      --text: #ffffff; --text-secondary: #94a3b8; --text-muted: #475569;
+    }
+    [data-theme="light"] {
+      --bg: #f8fafc; --bg-card: rgba(255, 255, 255, 0.85);
+      --border: #e2e8f0; --text: #1e293b; --text-secondary: #64748b; --text-muted: #94a3b8;
+    }
+    [data-theme="warm"] {
+      --bg: #fef7ed; --bg-card: rgba(255, 251, 245, 0.9);
+      --border: #fde68a; --text: #3b2f1e; --text-secondary: #78716c; --text-muted: #a8a29e;
+    }
+    [data-theme="cool"] {
+      --bg: #f0f4f8; --bg-card: rgba(248, 250, 252, 0.9);
+      --border: #cbd5e1; --text: #1a2a3a; --text-secondary: #64748b; --text-muted: #94a3b8;
+    }
+    @media print {
+      :root, [data-theme] {
+        --bg: #ffffff; --bg-card: rgba(255, 255, 255, 0.95);
+        --border: #d4d4d8; --text: #18181b; --text-secondary: #52525b; --text-muted: #a1a1aa;
+      }
+      body { padding: 0; } .theme-bar { display: none !important; }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', 'Microsoft YaHei', monospace;
+      background: var(--bg); min-height: 100vh; padding: 2rem; color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .theme-bar { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .theme-bar span { font-size: 0.75rem; color: var(--text-secondary); margin-right: 0.25rem; }
+    .theme-btn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: border-color 0.2s, transform 0.2s; padding: 0; }
+    .theme-btn:hover { transform: scale(1.15); }
+    .theme-btn.active { border-color: var(--text); }
+    .theme-btn.dark  { background: #020617; }
+    .theme-btn.light { background: #f8fafc; border: 2px solid #cbd5e1; }
+    .theme-btn.warm  { background: #fef7ed; border: 2px solid #fde68a; }
+    .theme-btn.cool  { background: #f0f4f8; border: 2px solid #cbd5e1; }
+    .header { margin-bottom: 2rem; }
+    .header-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+    .pulse-dot { width: 12px; height: 12px; background: #f59e0b; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    h1 { font-size: 1.35rem; font-weight: 700; }
+    .subtitle { color: var(--text-secondary); font-size: 0.8rem; margin-left: 1.75rem; }
+
+    /* Architecture Mapping */
+    .arch-map {
+      background: var(--bg-card); border-radius: 1rem; border: 1px solid var(--border);
+      padding: 1.5rem; margin-bottom: 2rem;
+    }
+    .arch-map h2 { font-size: 1rem; margin-bottom: 1rem; color: #f59e0b; }
+    .layer { display: flex; align-items: flex-start; margin-bottom: 0.75rem; gap: 1rem; }
+    .layer-label {
+      min-width: 140px; font-size: 0.75rem; font-weight: 600; padding: 0.4rem 0.75rem;
+      border-radius: 0.5rem; text-align: center;
+    }
+    .layer-label.gov  { background: rgba(136,19,55,0.2); border: 1px solid #fb7185; color: #fb7185; }
+    .layer-label.entry { background: rgba(30,41,59,0.5); border: 1px solid #94a3b8; color: #94a3b8; }
+    .layer-label.svc  { background: rgba(6,78,59,0.15); border: 1px solid #34d399; color: #34d399; }
+    .layer-label.data { background: rgba(76,29,149,0.15); border: 1px solid #a78bfa; color: #a78bfa; }
+    .layer-label.model{ background: rgba(59,130,246,0.15); border: 1px solid #3b82f6; color: #3b82f6; }
+    .layer-body { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.6; flex: 1; }
+    .layer-body strong { color: var(--text); }
+
+    /* Scenarios */
+    .scenarios { margin-bottom: 2rem; }
+    .scenarios h2 { font-size: 1rem; margin-bottom: 1rem; color: #f59e0b; }
+    .scenario-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .scenario-card {
+      background: var(--bg-card); border-radius: 0.75rem; border: 1px solid var(--border);
+      padding: 1.25rem; transition: border-color 0.3s;
+    }
+    .scenario-card:hover { border-color: #f59e0b; }
+    .scenario-num { font-size: 0.7rem; color: #f59e0b; margin-bottom: 0.5rem; font-weight: 600; }
+    .scenario-card h3 { font-size: 0.875rem; margin-bottom: 0.625rem; }
+    .scenario-card .flow { font-size: 0.7rem; color: var(--text-secondary); line-height: 1.7; }
+    .scenario-card .flow span { color: #22d3ee; }
+    .scenario-card .deps {
+      margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border);
+      font-size: 0.65rem; color: var(--text-muted);
+    }
+    .scenario-card .deps strong { color: var(--text-secondary); }
+    .diff-badge { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 0.25rem; font-size: 0.6rem; font-weight: 600; margin-left: 0.5rem; vertical-align: middle; }
+    .diff-low  { background: rgba(6,78,59,0.15); color: #34d399; }
+    .diff-mid  { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .diff-high { background: rgba(136,19,55,0.2); color: #fb7185; }
+
+    /* Skill Inventory */
+    .skill-table {
+      background: var(--bg-card); border-radius: 0.75rem; border: 1px solid var(--border);
+      padding: 1.25rem; margin-bottom: 2rem;
+    }
+    .skill-table h2 { font-size: 1rem; margin-bottom: 1rem; color: #f59e0b; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+    th { text-align: left; padding: 0.5rem 0.75rem; color: var(--text-muted); font-weight: 500; border-bottom: 1px solid var(--border); }
+    td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+    td:first-child { color: var(--text); font-weight: 500; }
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 0.3rem; font-size: 0.65rem; font-weight: 500; }
+    .badge-new { background: rgba(136,19,55,0.2); color: #fb7185; }
+    .badge-exist { background: rgba(6,78,59,0.15); color: #34d399; }
+    .badge-extend { background: rgba(245,158,11,0.15); color: #f59e0b; }
+
+    /* Priorities */
+    .priority { margin-bottom: 2rem; }
+    .priority h2 { font-size: 1rem; margin-bottom: 1rem; color: #f59e0b; }
+    .phase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .phase-card {
+      background: var(--bg-card); border-radius: 0.75rem; border: 1px solid var(--border);
+      padding: 1.25rem;
+    }
+    .phase-label {
+      font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 0.3rem;
+      display: inline-block; margin-bottom: 0.75rem;
+    }
+    .phase-label.p0 { background: rgba(136,19,55,0.2); color: #fb7185; }
+    .phase-label.p1 { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .phase-label.p2 { background: rgba(59,130,246,0.15); color: #3b82f6; }
+    .phase-card h3 { font-size: 0.8rem; margin-bottom: 0.5rem; }
+    .phase-card ul { list-style: none; font-size: 0.7rem; color: var(--text-secondary); }
+    .phase-card li { margin-bottom: 0.3rem; }
+
+    /* Risk */
+    .risk-section { margin-bottom: 2rem; }
+    .risk-section h2 { font-size: 1rem; margin-bottom: 1rem; color: #f59e0b; }
+    .risk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .risk-card {
+      background: var(--bg-card); border-radius: 0.75rem; border: 1px solid var(--border);
+      padding: 1.25rem; transition: border-color 0.3s;
+    }
+    .risk-card:hover { border-color: #fb7185; }
+    .risk-card h3 { font-size: 0.8rem; margin-bottom: 0.5rem; }
+    .risk-card .risk-level { font-size: 0.6rem; font-weight: 600; }
+    .risk-card .risk-level.high { color: #fb7185; }
+    .risk-card .risk-level.mid  { color: #f59e0b; }
+    .risk-card ul { list-style: none; font-size: 0.7rem; color: var(--text-secondary); }
+    .risk-card li { margin-bottom: 0.3rem; line-height: 1.5; }
+
+    .footer { text-align: center; margin-top: 1rem; color: var(--text-muted); font-size: 0.7rem; }
+  </style>
+</head>
+<body>
+  <div class="theme-bar">
+    <span>主题：</span>
+    <button class="theme-btn dark"        onclick="setTheme('dark')" title="深邃黑"></button>
+    <button class="theme-btn light active" onclick="setTheme('light')" title="典雅白"></button>
+    <button class="theme-btn warm"        onclick="setTheme('warm')" title="暖米白"></button>
+    <button class="theme-btn cool"        onclick="setTheme('cool')" title="冷灰白"></button>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>金控集团 · 审计条线 AI 应用规划</h1>
+      </div>
+      <p class="subtitle">基于企业 AI 架构，面向审计条线的应用模式与场景设计</p>
+    </div>
+
+    <!-- ====== 1: 审计映射 ====== -->
+    <div class="arch-map">
+      <h2>一、审计条线如何嵌入企业 AI 架构</h2>
+
+      <div class="layer">
+        <div class="layer-label gov">治理约束层</div>
+        <div class="layer-body">
+          <strong>审计日志全量留存</strong>——所有审计 AI 交互记录不可篡改；<strong>审计独立性约束</strong>——AI 研判意见不替代审计职业判断，结论由审计组做出
+        </div>
+      </div>
+
+      <div class="layer">
+        <div class="layer-label entry">入口层</div>
+        <div class="layer-body">
+          审计人员通过 <strong>企业微信</strong>（日常查询）或 <strong>E-Work 桌面</strong>（深度分析）发起审计作业。审计部门作为独立 Profile，加载专属技能集
+        </div>
+      </div>
+
+      <div class="layer">
+        <div class="layer-label svc">NanoBot · Skills</div>
+        <div class="layer-body">
+          审计 Profile 加载：<strong>合规对齐、场景推理、影响分析、文档比对、信息提取、跨文档检索</strong>等技能。通过 NanoBot API 嵌入审计管理系统
+        </div>
+      </div>
+
+      <div class="layer">
+        <div class="layer-label data">数据层</div>
+        <div class="layer-body">
+          <strong>知识库</strong>：全部制度原文、历史审计报告、整改台账、外部监管法规 |
+          <strong>指标库</strong>：财务指标、运营指标、预算执行率、异常偏离度（审计需要全量数据只读权限）
+        </div>
+      </div>
+
+      <div class="layer">
+        <div class="layer-label model">算力路由层</div>
+        <div class="layer-body">
+          审计场景偏好 <strong>强推理模型</strong>——合规比对、异常模式识别需要深度推理，路由到 DeepSeek-R1 或同等推理模型
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== 2: 应用场景 ====== -->
+    <div class="scenarios">
+      <h2>二、七大审计应用场景</h2>
+      <div class="scenario-grid">
+
+        <div class="scenario-card">
+          <div class="scenario-num">场景 1</div>
+          <h3>制度合规逐条比对<span class="diff-badge diff-low">低</span></h3>
+          <div class="flow">
+            审计组选定被审计单位 → 加载该单位执行的制度清单 → <span>信息提取 Skill</span> 解析条文结构 → <span>合规对齐 Skill</span> 逐条比对内部制度 vs 外部法规 → 输出 <span>覆盖矩阵</span>（✅已覆盖 / ⚠️部分覆盖 / ❌未覆盖）→ 未覆盖项自动生成审计疑点
+          </div>
+          <div class="deps"><strong>依赖：</strong>知识库（制度+法规） · 合规对齐 Skill（已有） · 信息提取 Skill</div>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-num">场景 2</div>
+          <h3>经营指标异常检测<span class="diff-badge diff-high">高</span></h3>
+          <div class="flow">
+            审计组圈定审计范围（部门/子公司/时段）→ <span>异常检测 Skill</span> 从指标库拉取财务+运营数据 → 与历史均值、预算值、同业值 <span>三维比对</span> → 标注偏离度 > 阈值的数据点 → 对每个异常点 <span>检索同期制度变更、组织调整、市场事件</span> → 输出异常清单（含偏离度 + 可能归因假设，标注置信度供审计人员判断）
+          </div>
+          <div class="deps"><strong>依赖：</strong>指标库（全量） · 异常检测 Skill（需新建） · DeepSeek-R1</div>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-num">场景 3</div>
+          <h3>经济责任审计辅助<span class="diff-badge diff-high">高</span></h3>
+          <div class="flow">
+            输入被审计干部信息 → 提取其任期内 <span>全部决策事项</span>（从会议纪要、合同、审批流）→ 逐条检查：决策程序是否合规？资金是否超权限？→ 生成 <span>任期内重大决策清单</span>（含合规判定+依据）
+          </div>
+          <div class="deps"><strong>依赖：</strong>知识库（会议纪要+合同+制度） · 场景推理 Skill · 信息提取 Skill · 干部管理数据</div>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-num">场景 4</div>
+          <h3>制度修订影响审计<span class="diff-badge diff-mid">中</span></h3>
+          <div class="flow">
+            新制度发布或旧制度修订 → <span>影响分析 Skill</span> 自动遍历依赖链 → 找出所有引用旧条款的 <span>下游制度和流程</span> → 逐条比对修订前后的差异 → 输出：哪些流程需要更新、哪些历史决策需要重新审视
+          </div>
+          <div class="deps"><strong>依赖：</strong>知识库（制度全文+修订记录） · 影响分析 Skill（已有） · 文档比对 Skill</div>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-num">场景 5</div>
+          <h3>历史审计报告智能检索<span class="diff-badge diff-low">低</span></h3>
+          <div class="flow">
+            审计组开展新项目 → <span>跨文档检索 Skill</span> 查询历史审计报告 → 提取同类项目的问题清单、整改情况、审计建议 → 生成 <span>历史问题参考摘要</span> → 提示"本次审计应重点关注以下历史重复问题"
+          </div>
+          <div class="deps"><strong>依赖：</strong>知识库（历史审计报告+整改台账） · 跨文档检索 Skill（已有）</div>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-num">场景 6</div>
+          <h3>整改跟踪与闭环验证<span class="diff-badge diff-mid">中</span></h3>
+          <div class="flow">
+            审计组录入整改事项 → <span>Cron 定时</span> 跟踪整改进展 → 到期前自动提醒 → 整改完成后 <span>自动比对</span>整改报告 vs 原审计问题 → 标注是否真正闭环、是否存在"纸面整改"风险
+          </div>
+          <div class="deps"><strong>依赖：</strong>整改台账 · Cron 定时 · 文档比对 Skill · 合规对齐 Skill</div>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-num">场景 7</div>
+          <h3>审计方案智能生成<span class="diff-badge diff-low">低</span></h3>
+          <div class="flow">
+            输入被审计单位名称 + 审计类型 → <span>跨文档检索 Skill</span> 查询同类项目历史问题高发领域 → <span>信息提取 Skill</span> 提取当期制度变更热点 → <span>综合研判</span>推荐本次审计重点领域和抽样策略 → 生成 <span>审计方案框架</span>（含审计依据、重点范围、建议抽样方法、法规引用）
+          </div>
+          <div class="deps"><strong>依赖：</strong>知识库（历史报告+制度变更记录） · 跨文档检索 Skill（已有） · 信息提取 Skill（已有）</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== 3: 审计技能清单 ====== -->
+    <div class="skill-table">
+      <h2>三、审计条线技能清单</h2>
+      <table>
+        <tr>
+          <th>技能</th><th>层级</th><th>状态</th><th>审计用途</th>
+        </tr>
+        <tr>
+          <td>合规对齐</td><td>第三层·推理</td><td><span class="badge badge-exist">已有</span></td>
+          <td>逐条比对制度 vs 法规，输出覆盖矩阵 → 场景 1、6</td>
+        </tr>
+        <tr>
+          <td>影响分析</td><td>第三层·推理</td><td><span class="badge badge-exist">已有</span></td>
+          <td>制度修订后遍历依赖链，标出受影响的下游 → 场景 4</td>
+        </tr>
+        <tr>
+          <td>场景推理</td><td>第三层·推理</td><td><span class="badge badge-exist">已有</span></td>
+          <td>经济责任审计中的跨制度域综合推理 → 场景 3</td>
+        </tr>
+        <tr>
+          <td>文档比对</td><td>第一层·文本</td><td><span class="badge badge-exist">已有</span></td>
+          <td>新旧制度差异、整改前后对比 → 场景 4、6</td>
+        </tr>
+        <tr>
+          <td>信息提取</td><td>第二层·RAG</td><td><span class="badge badge-exist">已有</span></td>
+          <td>从会议纪要/合同中提取决策事项和关键字段 → 场景 3、7</td>
+        </tr>
+        <tr>
+          <td>跨文档检索</td><td>第二层·RAG</td><td><span class="badge badge-exist">已有</span></td>
+          <td>跨多份审计报告检索同类问题 → 场景 5、7</td>
+        </tr>
+        <tr>
+          <td>异常检测</td><td>第三层·推理</td><td><span class="badge badge-new">需新建</span></td>
+          <td>指标三维比对（历史/预算/同业），标注偏离 → 场景 2</td>
+        </tr>
+        <tr>
+          <td>制度编译（审计版）</td><td>第三层·推理</td><td><span class="badge badge-extend">需扩展</span></td>
+          <td>在已有制度编译基础上增加"审计关注点"标签 → 场景 1（增强）</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ====== 4: 建设路线 ====== -->
+    <div class="priority">
+      <h2>四、建设路线建议</h2>
+      <div class="phase-grid">
+        <div class="phase-card">
+          <span class="phase-label p0">P0 · 配置即用</span>
+          <h3>基于现有技能跑通审计链路</h3>
+          <ul>
+            <li>• 制度合规逐条比对（场景 1）</li>
+            <li>• 审计方案智能生成（场景 7）</li>
+            <li>• 历史审计报告检索（场景 5）</li>
+            <li>• 无新增开发，配置 Profile 即可</li>
+          </ul>
+          <p style="margin-top:0.75rem;font-size:0.65rem;color:#f59e0b;">✓ 验证：场景 1 覆盖矩阵 ✅/⚠️/❌ 判定准确率 > 85%</p>
+        </div>
+        <div class="phase-card">
+          <span class="phase-label p1">P1 · 二期建设</span>
+          <h3>新建异常检测 + 扩展编译</h3>
+          <ul>
+            <li>• 异常检测 Skill 开发（场景 2）</li>
+            <li>• 制度编译增加审计标签</li>
+            <li>• 经济责任审计辅助（场景 3）</li>
+            <li>• 依赖：指标库对接 + 干部数据</li>
+          </ul>
+          <p style="margin-top:0.75rem;font-size:0.65rem;color:#f59e0b;">✓ 验证：异常检测标出的疑点被审计组确认率 > 60%</p>
+        </div>
+        <div class="phase-card">
+          <span class="phase-label p2">P2 · 三期建设</span>
+          <h3>闭环化 + 嵌入审计系统</h3>
+          <ul>
+            <li>• 整改跟踪闭环（场景 6）</li>
+            <li>• 制度修订影响审计（场景 4）</li>
+            <li>• NanoBot API 嵌入审计管理系统</li>
+            <li>• 审计工作底稿半自动生成</li>
+          </ul>
+          <p style="margin-top:0.75rem;font-size:0.65rem;color:#f59e0b;">✓ 验证：整改到期前提示及时率 > 95% · 闭环判定准确率 > 85%</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== 5: 风险与挑战 ====== -->
+    <div class="risk-section">
+      <h2>五、风险与挑战</h2>
+      <div class="risk-grid">
+
+        <div class="risk-card">
+          <h3>架构通路 <span class="risk-level high">🔴</span></h3>
+          <ul>
+            <li>知识库检索质量——漏检一份制度可能误判合规，权威层级标记和时效过滤需先行达标</li>
+            <li>MCP Server 可用性——跨数据源并行检索时 MCP 中断会导致审计工作流整体停摆</li>
+            <li>异常检测 Skill 需从零新建，合规对齐在审计场景下的边界 case 尚未验证</li>
+          </ul>
+        </div>
+
+        <div class="risk-card">
+          <h3>算力支撑 <span class="risk-level high">🔴</span></h3>
+          <ul>
+            <li>合规比对和异常归因需 DeepSeek-R1 级推理，token 消耗远超普通问答</li>
+            <li>全量制度编译和影响分析的首次计算开销大，可能占用推理资源数小时</li>
+            <li>需将低难度查询（场景 5、7）与高难度推理（场景 2、3）分流到不同模型</li>
+          </ul>
+        </div>
+
+        <div class="risk-card">
+          <h3>数据就绪度 <span class="risk-level mid">🟡</span></h3>
+          <ul>
+            <li>场景 5、7 依赖历史审计报告和整改台账入库，缺则直接不可用</li>
+            <li>异常检测需全量财务+运营指标，指标库覆盖不全则产生检测盲区</li>
+            <li>经济责任审计需干部任期、审批权限数据，需协调人事系统对接</li>
+          </ul>
+        </div>
+
+        <div class="risk-card">
+          <h3>审计独立性 <span class="risk-level mid">🟡</span></h3>
+          <ul>
+            <li>AI 研判必须强制标注"供参考"，审计结论仍由审计组做出</li>
+            <li>审计查询行为可追溯——所有 AI 交互全量留存日志，不可篡改</li>
+            <li>初期建议仅做辅助检索，不做结论性输出，待审计组建立信任后逐步升级</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <p class="footer">
+      金控集团审计条线 AI 应用规划 v1.1 · 基于企业 AI 架构 · 七场景 · 八技能 · 三阶段
+    </p>
+  </div>
+
+  <script>
+    function setTheme(n){document.documentElement.setAttribute('data-theme',n);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.theme-btn.${n}`).classList.add('active');}
+  </script>
+</body>
+</html>

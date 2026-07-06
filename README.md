@@ -5,10 +5,16 @@
 ## 文档索引
 
 - [AI 驱动软件研发机制 · 四区架构](AI-SE.html) — 外网 AI 创造 + 审查 → 安全摆渡 → 内网适配 → 自动部署
-- [金控集团 · 国企智能办公 AI 架构](AI-Architecture.html) — 面向金融控股集团的智能化办公架构方案
+- [金控集团 · 国企智能办公 AI 架构](AI-Architecture.html) — 面向金融控股集团的智能化办公架构方案（含企业指标数据能力发布平台）
 - [金控集团 · 审计条线 AI 应用规划](ai-audit.html) — 面向金融控股集团审计条线的 AI 应用规划
 
 ## 更新日志
+
+### 2026-07-06
+- **架构更新：** MCP-指标库从 3 原子工具扩展为四类能力组（Query / Analysis / Metadata / Governance）
+- **新增：** 企业指标数据能力发布平台方案 — Hadoop + Trino + Google MCP Toolbox
+- **治理约束层补充：** 增加"外部 Agent 须经网关鉴权"
+- **架构图更新：** 统一指标库底部标注技术栈（Trino → Hadoop · Google MCP Toolbox）
 
 ### 2026-06-23
 - **新增文档：** 金控集团 · 审计条线 AI 应用规划 ([ai-audit.html](ai-audit.html))

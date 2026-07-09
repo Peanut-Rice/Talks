@@ -10,6 +10,11 @@
 
 ## 更新日志
 
+### 2026-07-09
+- **新增文档：** AI Engineering · Prompt → Context → Harness → Loop ([AI-Engineering.html](AI-Engineering.html)) — 大模型应用四次升维与 Token 成本膨胀分析
+- **新增文档：** 大模型在审计条线的应用 · 交流材料 ([AI-Audit-PPT.html](AI-Audit-PPT.html)) — 大模型用于审计领域的 PPT 风格幻灯片
+
+
 ### 2026-07-06
 - **架构更新：** MCP-指标库从 3 原子工具扩展为四类能力组（Query / Analysis / Metadata / Governance）
 - **新增：** 企业指标数据能力发布平台方案 — Hadoop + Trino + Google MCP Toolbox

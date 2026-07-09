@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大模型在审计条线的应用 · 金控集团</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0a1f3d;--ink-rgb:10,31,61;--paper:#f1f3f5;--paper-rgb:241,243,245;--paper-tint:#e4e8ec;--ink-tint:#152a4a;--mono:"IBM Plex Mono",ui-monospace,monospace;--serif-en:"Playfair Display","Source Serif 4",Georgia,serif;--serif-body-en:"Source Serif 4",Georgia,serif;--serif-zh:"Noto Serif SC",source-han-serif-sc,serif;--sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased}
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}body.light-bg canvas#bg-dark{opacity:0}
+  body.low-power canvas.bg{display:none!important}
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:5.5vh 5.5vw 9vh 5.5vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink);background:var(--paper)}.slide.dark{color:var(--paper);background:var(--ink)}
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;opacity:.65}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.5}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;opacity:.55;margin-bottom:2.2vh}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:10vw;line-height:.96;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:4.8vw;line-height:1.08;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:2.8vw;line-height:1.25;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.1vw;line-height:1.3}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.7vw;line-height:1.45;opacity:.85}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.15vw);line-height:1.7;opacity:.8}
+  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.16em;text-transform:uppercase;opacity:.55}
+  .callout{padding:2.5vh 2vw;border-left:3px solid;font-family:var(--serif-zh);font-size:max(14px,1.1vw);line-height:1.5;opacity:.88}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.04)}.slide.dark .callout{background:rgba(var(--paper-rgb),.05)}
+  .callout .cite{display:block;margin-top:1.2vh;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.55}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:3vw;flex:1;align-content:center}
+  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:3.5vh 5vw;flex:1;align-content:center}
+  .grid-2-6-6{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
+  .pillar{display:flex;flex-direction:column;gap:1.5vh}
+  .pillar .ic{font-family:var(--serif-en);font-style:italic;font-size:2.2vw;opacity:.4;font-weight:400}
+  .pillar .t{font-family:var(--serif-zh);font-weight:700;font-size:2.1vw;line-height:1.15}
+  .pillar .d{font-family:var(--sans-zh);font-weight:400;font-size:max(13px,1vw);opacity:.72;line-height:1.55}
+  .stat-card{display:flex;flex-direction:column;gap:.6vh;align-items:flex-start;padding-top:1.4vh;border-top:1px solid rgba(127,127,127,.25)}
+  .stat-card .stat-label{font-family:var(--mono);font-size:max(9px,.72vw);letter-spacing:.22em;text-transform:uppercase;opacity:.5}
+  .stat-card .stat-nb{font-family:var(--serif-en);font-weight:800;font-size:5.2vw;line-height:.88;letter-spacing:-.03em;font-feature-settings:"tnum";margin-top:.3vh}
+  .stat-card .stat-note{font-family:var(--sans-zh);font-size:max(12px,.95vw);line-height:1.45;opacity:.68;margin-top:.4vh}
+  .tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:4px 10px;border:1px solid;opacity:.75}
+  .tag-rd{color:#e11d48;border-color:#e11d48}.tag-am{color:#ca8a04;border-color:#ca8a04}.tag-gn{color:#059669;border-color:#059669}
+  .rule{width:100%;height:1px;background:currentColor;opacity:.2;margin:2.5vh 0}
+  .center{text-align:center}
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.low-power *{animation:none!important;transition:none!important}
+  body.low-power [data-anim]{opacity:1!important;transform:none!important}
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s;border:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  @media(max-width:900px){
+    .h-hero{font-size:14vw}.h-xl{font-size:8vw}.h-sub{font-size:5vw}.h-md{font-size:4.5vw}
+    .lead{font-size:3.2vw}.body-zh{font-size:max(14px,3vw)}.pillar .t{font-size:4.2vw}.pillar .d{font-size:max(13px,2.8vw)}
+    .grid-2,.grid-2-6-6,.grid-3,.grid-4{grid-template-columns:1fr}
+    .stat-card .stat-nb{font-size:8vw}
+    .slide{padding:4vh 5vw 12vh 5vw}
+    #nav{gap:14px;padding:10px 18px;bottom:3vh}
+    #nav .dot{width:10px;height:10px}
+    #nav .dot.active{width:28px}
+    #hint{bottom:3.8vh;right:4vw;font-size:9px}
+    blockquote{font-size:6vw!important}
+  }
+</style>
+</head>
+<body>
+
+<script>
+(function(){const KEY='guizang-ppt-low-power';const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const stored=localStorage.getItem(KEY);window.__lowPowerMode=stored==='1'||(stored===null&&reduced);function updateHint(){const hint=document.getElementById('hint');if(hint)hint.textContent=`← → 翻页 · B ${window.__lowPowerMode?'动态':'静态'} · ESC 索引`}window.__setLowPowerMode=function(on,opts){window.__lowPowerMode=!!on;document.body.classList.toggle('low-power',window.__lowPowerMode);if(opts&&opts.persist!==false)localStorage.setItem(KEY,window.__lowPowerMode?'1':'0');if(window.__lowPowerMode&&document.getAnimations)document.getAnimations().forEach(a=>a.cancel());updateHint();dispatchEvent(new CustomEvent('ppt-low-power-change',{detail:{on:window.__lowPowerMode}}));if(window.__playSlide)window.__playSlide(window.__currentSlideIndex||0)};document.body.classList.toggle('low-power',window.__lowPowerMode);addEventListener('DOMContentLoaded',updateHint,{once:true})})();
+</script>
+
+<canvas id="bg-dark" class="bg"></canvas><canvas id="bg-light" class="bg"></canvas>
+<div id="hint">← → 翻页 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- S1: COVER -->
+<section class="slide hero dark">
+  <div class="chrome"><div>金控集团 · 内部交流</div><div>2026</div></div>
+  <div class="frame" style="display:grid;gap:3.5vh;align-content:center;min-height:78vh">
+    <div class="kicker" data-anim>审计条线 · AI 应用</div>
+    <h1 class="h-hero" data-anim>大模型<br>在审计条线的应用</h1>
+    <p class="lead" style="max-width:55vw" data-anim>查制度、找异常、比合规、写方案。<br>让 AI 成为审计组的第二个大脑。</p>
+    <div class="meta-row" data-anim><span>不替代审计判断</span><span>·</span><span>不绕过治理流程</span></div>
+  </div>
+  <div class="foot"><div>信息科技部 · 内部交流材料</div><div>— 2026 —</div></div>
+</section>
+
+<!-- S2: 整体架构 -->
+<section class="slide light">
+  <div class="chrome"><div>整体应用架构</div><div>01 / 12</div></div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>ARCHITECTURE</div>
+    <h2 class="h-xl" data-anim>以 Skills 为核心资产的 AI 应用架构</h2>
+    <p class="lead" style="margin-bottom:4vh" data-anim>知识库和指标库提供原料，Skills 承载判断力，AI 做的是"编译而后能计算"。</p>
+
+    <!-- Architecture illustration -->
+    <div data-anim style="display:grid;grid-template-columns:1fr 1fr;gap:3vw;margin-top:3vh">
+      <!-- Left: Three layers -->
+      <div style="display:flex;flex-direction:column;gap:2vh;font-size:max(13px,1vw)">
+        <div style="padding:1.6vh 1.5vw;border-left:3px solid #2563eb;background:rgba(37,99,235,.04)">
+          <strong>入口层</strong> · 企业微信 · E-Work 桌面 · 金控数字化平台
+        </div>
+        <div style="padding:1.6vh 1.5vw;border-left:3px solid #ca8a04;background:rgba(202,138,4,.06)">
+          <strong style="color:#ca8a04">★ Skills 服务平台（核心资产）</strong><br>
+          技能调度 · 身份注入 · 审计日志 · API 暴露
+        </div>
+        <div style="padding:1.6vh 1.5vw;border-left:3px solid #7c3aed;background:rgba(124,58,237,.04)">
+          <strong>数据层</strong> · 统一知识库（制度·报告·法规）· 统一指标库（财务·运营·风控）
+        </div>
+        <div style="padding:1.6vh 1.5vw;border-left:3px solid #0891b2;background:rgba(8,145,178,.04)">
+          <strong>算力层</strong> · AI 算力路由 · 统一调度大模型资源
+        </div>
+      </div>
+      <!-- Right: Skills detail -->
+      <div style="display:flex;flex-direction:column;gap:1.5vh;font-size:max(12px,.9vw)">
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.5">审计条线加载的 Skills</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.6vh .8vw">
+          <span class="tag tag-gn">合规对齐</span><span class="tag tag-gn">文档比对</span><span class="tag tag-gn">信息提取</span>
+          <span class="tag tag-gn">跨文档检索</span><span class="tag tag-gn">场景推理</span><span class="tag tag-gn">影响分析</span>
+          <span class="tag tag-am">制度编译（审计版）</span><span class="tag tag-rd">异常检测（新建）</span>
+        </div>
+        <div class="callout" style="margin-top:1.5vh">
+          每一项 Skill 本质上是一套可复用的决策方法论——让 AI 输出从"泛化建议"收敛为"精准判断"。
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>三库一平台一网关 · Skills 为核心</div><div>01 / 12</div></div>
+</section>
+
+<!-- S3: 三大价值 -->
+<section class="slide dark">
+  <div class="chrome"><div>核心价值</div><div>02 / 12</div></div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>AI 为审计带来什么</div>
+    <h2 class="h-xl" data-anim>三个"可"</h2>
+    <div class="grid-3" style="margin-top:5vh">
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Capability 01</div>
+        <div class="stat-nb" style="font-size:4.6vw">制度<span style="font-family:var(--serif-zh);font-size:1em;opacity:.7">可编译</span></div>
+        <div class="stat-note">把散落在几十份文件中的隐性规则，提取为可查询、可比对的结构化属性</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Capability 02</div>
+        <div class="stat-nb" style="font-size:4.6vw">合规<span style="font-family:var(--serif-zh);font-size:1em;opacity:.7">可计算</span></div>
+        <div class="stat-note">外部法规 vs 内部制度，逐条结构匹配——不再是"看着像"，而是"对得上"</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Capability 03</div>
+        <div class="stat-nb" style="font-size:4.6vw">决策<span style="font-family:var(--serif-zh);font-size:1em;opacity:.7">可追溯</span></div>
+        <div class="stat-note">每个结论附带制度名称和条款号，党委能审、纪委能查、审计能验</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>三个"可"—— AI 在国企落地的底层逻辑</div><div>02 / 12</div></div>
+</section>
+
+<!-- S4: 场景1 制度合规比对 -->
+<section class="slide light">
+  <div class="chrome"><div>场景 1 · 立即可用</div><div>03 / 12</div></div>
+  <div class="frame" style="display:flex;flex-direction:column;gap:3vh;padding-top:4vh">
+    <div><div class="kicker" data-anim>SCENE 01 · <span class="tag tag-gn">已有能力</span></div>
+    <h2 class="h-xl" data-anim>制度合规逐条比对</h2></div>
+    <p class="lead" data-anim>选定被审计单位后，AI 自动检索该单位应执行的制度清单，逐条比对内部制度与外部法规，判定每条义务的覆盖状态。</p>
+    <div class="rule" data-anim></div>
+    <div class="grid-2-6-6" data-anim>
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <p class="body-zh">① 信息提取 Skill 检索制度清单（集团制度 + 行业法规 + 子公司细则），剔除废止条款<br>② 合规对齐 Skill 逐条提取义务条款，结构匹配内外条款<br>③ 输出覆盖矩阵（✅/⚠️/❌），未覆盖项生成审计疑点<br>④ 检索同类案例，生成整改建议</p>
+      </div>
+      <div class="callout">
+        计划财务部 2024 年度：23 条外部义务 × 41 条内部条款 → 19 条已覆盖、3 条部分覆盖、1 条未覆盖（关联交易独立董事审议）→ 输出整改建议
+        <div class="cite">— 模拟数据</div>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：知识库 · 合规对齐 Skill（已有）· 信息提取 Skill（已有）</div>
+  </div>
+  <div class="foot"><div>场景 1 · 制度合规比对</div><div>03 / 12</div></div>
+</section>
+
+<!-- S5: 场景2 异常检测 -->
+<section class="slide dark">
+  <div class="chrome"><div>场景 2 · 需新建能力</div><div>04 / 12</div></div>
+  <div class="frame" style="display:flex;flex-direction:column;gap:3vh;padding-top:4vh">
+    <div><div class="kicker" data-anim>SCENE 02 · <span class="tag tag-rd">需新建</span></div>
+    <h2 class="h-xl" data-anim>经营指标异常检测</h2></div>
+    <p class="lead" data-anim>圈定审计范围后，AI 拉取财务+运营数据，三维比对（历史趋势/预算达成/同业对比），异常点自动检索归因。</p>
+    <div class="rule" data-anim></div>
+    <div class="grid-2-6-6" data-anim>
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <p class="body-zh">① 异常检测 Skill（需新建）从指标库拉取全量数据并清洗<br>② 三维比对：自身历史 ±2σ / 预算达成 / 同业横比<br>③ 异常点检索关联事件（制度变更、组织调整、重大合同）<br>④ 输出异常清单（偏离度 + 归因 + 置信度 + 核实方向）</p>
+      </div>
+      <div class="callout">
+        某子公司 2024：人均产出 ↓26%（核心团队离职，置信度 85%）· 应收账款周转天数高于同业 35 天（合同纠纷，置信度 90%）· 费用率超预算 23% 等 5 项异常
+        <div class="cite">— 模拟数据</div>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：指标库 · 异常检测 Skill（需新建）· 跨文档检索 · DeepSeek-R1</div>
+  </div>
+  <div class="foot"><div>场景 2 · 经营指标异常检测</div><div>04 / 12</div></div>
+</section>
+
+<!-- S6: 场景3 经济责任审计 -->
+<section class="slide light">
+  <div class="chrome"><div>场景 3 · 需多数据源</div><div>05 / 12</div></div>
+  <div class="frame" style="display:flex;flex-direction:column;gap:3vh;padding-top:4vh">
+    <div><div class="kicker" data-anim>SCENE 03 · <span class="tag tag-rd">需多数据源</span></div>
+    <h2 class="h-xl" data-anim>经济责任审计辅助</h2></div>
+    <p class="lead" data-anim>输入干部姓名和任期，AI 从会议纪要、合同、审批流中提取全部决策事项，逐条判合规，生成决策清单。</p>
+    <div class="rule" data-anim></div>
+    <div class="grid-2-6-6" data-anim>
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <p class="body-zh">① 信息提取 Skill 调取干部任职数据与审批权限<br>② 跨文档检索 Skill 抽取任期内全部决策文档<br>③ 场景推理 Skill 逐条判合规（三重一大/回避/权限）<br>④ 生成重大决策清单 + 合规判定表 + 简报框架</p>
+      </div>
+      <div class="callout">
+        某子公司总经理任期：47 次决策会议、128 份签批合同 → 逐条检查三重一大程序与审批权限 → 标注 3 项存疑决策需补充材料
+        <div class="cite">— 模拟数据</div>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：会议纪要+合同+制度 · 场景推理 · 信息提取 · 跨文档检索 · 人事数据</div>
+  </div>
+  <div class="foot"><div>场景 3 · 经济责任审计辅助</div><div>05 / 12</div></div>
+</section>
+
+<!-- S7: 场景4 制度修订影响 -->
+<section class="slide dark">
+  <div class="chrome"><div>场景 4 · 需依赖链数据</div><div>06 / 12</div></div>
+  <div class="frame" style="display:flex;flex-direction:column;gap:3vh;padding-top:4vh">
+    <div><div class="kicker" data-anim>SCENE 04 · <span class="tag tag-am">需依赖链数据</span></div>
+    <h2 class="h-xl" data-anim>制度修订影响审计</h2></div>
+    <p class="lead" data-anim>新制度发布后，AI 自动检出修订差异，遍历依赖链找出受影响的下游制度和流程，回溯基于旧制度做出的历史决策。</p>
+    <div class="rule" data-anim></div>
+    <div class="grid-2-6-6" data-anim>
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <p class="body-zh">① 文档比对 Skill 检出修订版与上一版差异<br>② 影响分析 Skill 遍历依赖链，找出受影响的下游<br>③ 逐条比对下游条款，标注冲突/断链/需更新<br>④ 检索基于旧制度的审批与决议，标注需重新审视项</p>
+      </div>
+      <div class="callout">
+        《预算管理办法》第 7 条修订 → 4 份下游制度受影响、2 份操作手册需更新、3 笔历史审批在新制度下需重新审视
+        <div class="cite">— 模拟数据</div>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：制度全文+修订记录 · 影响分析 Skill · 文档比对 Skill · 依赖链数据</div>
+  </div>
+  <div class="foot"><div>场景 4 · 制度修订影响审计</div><div>06 / 12</div></div>
+</section>
+
+<!-- S8: 场景5 历史报告检索 -->
+<section class="slide light">
+  <div class="chrome"><div>场景 5 · 立即可用</div><div>07 / 12</div></div>
+  <div class="frame" style="display:flex;flex-direction:column;gap:3vh;padding-top:4vh">
+    <div><div class="kicker" data-anim>SCENE 05 · <span class="tag tag-gn">已有能力</span></div>
+    <h2 class="h-xl" data-anim>历史审计报告智能检索</h2></div>
+    <p class="lead" data-anim>开展新项目前，AI 检索所有历史审计报告，按问题类型聚类，标注整改状态，提示本次审计应重点关注的领域。</p>
+    <div class="rule" data-anim></div>
+    <div class="grid-2-6-6" data-anim>
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <p class="body-zh">① 跨文档检索 Skill 检索所有历史审计报告<br>② 按问题类型聚类统计，识别高频薄弱环节<br>③ 关联整改台账，标注整改状态与纸面整改嫌疑<br>④ 生成审计参考摘要与重点关注建议</p>
+      </div>
+      <div class="callout">
+        某子公司采购业务：过去 3 年 5 份审计报告 → "采购流程合规性"出现 4 次、2 次整改未闭环 → 提示"重点关注围标串标风险"
+        <div class="cite">— 模拟数据</div>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：知识库（历史报告+整改台账）· 跨文档检索 Skill（已有）</div>
+  </div>
+  <div class="foot"><div>场景 5 · 历史审计报告智能检索</div><div>07 / 12</div></div>
+</section>
+
+<!-- S9: 场景6 整改跟踪 -->
+<section class="slide dark">
+  <div class="chrome"><div>场景 6 · 需系统对接</div><div>08 / 12</div></div>
+  <div class="frame" style="display:flex;flex-direction:column;gap:3vh;padding-top:4vh">
+    <div><div class="kicker" data-anim>SCENE 06 · <span class="tag tag-am">需系统对接</span></div>
+    <h2 class="h-xl" data-anim>整改跟踪与闭环验证</h2></div>
+    <p class="lead" data-anim>审计组录入整改事项后，AI 自动跟踪整改进展，到期提醒，整改完成后自动比对整改报告与原始审计问题，判定闭环状态。</p>
+    <div class="rule" data-anim></div>
+    <div class="grid-2-6-6" data-anim>
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <p class="body-zh">① Cron 定时三级提醒（截止前 15 天 / 3 天 / 超期告警）<br>② 文档比对 Skill 对比整改报告 vs 原审计问题<br>③ 合规对齐 Skill 检查整改后是否与新制度一致<br>④ 判定闭环状态：已闭环 / 部分闭环 / 纸面整改 / 超期未改</p>
+      </div>
+      <div class="callout">
+        "制度修订"整改项实际只改了标题未改条文 → AI 判定为"纸面整改" → 自动触发二次整改流程，推送至审计组和被审计部门
+        <div class="cite">— 模拟数据</div>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：整改台账 · Cron 定时 · 文档比对 Skill · 合规对齐 Skill</div>
+  </div>
+  <div class="foot"><div>场景 6 · 整改跟踪与闭环验证</div><div>08 / 12</div></div>
+</section>
+
+<!-- S10: 场景7 方案生成 -->
+<section class="slide light">
+  <div class="chrome"><div>场景 7 · 立即可用</div><div>09 / 12</div></div>
+  <div class="frame" style="display:flex;flex-direction:column;gap:3vh;padding-top:4vh">
+    <div><div class="kicker" data-anim>SCENE 07 · <span class="tag tag-gn">已有能力</span></div>
+    <h2 class="h-xl" data-anim>审计方案智能生成</h2></div>
+    <p class="lead" data-anim>输入被审计单位和审计类型，AI 综合历史问题、制度变更、单位特点，自动推荐审计重点和抽样策略，生成方案框架。</p>
+    <div class="rule" data-anim></div>
+    <div class="grid-2-6-6" data-anim>
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <p class="body-zh">① 跨文档检索 Skill 提取历史问题高发领域并聚类统计<br>② 信息提取 Skill 检索审计期间制度变更热点<br>③ 场景推理 Skill 交叉分析（历史 × 变更 × 单位特征）<br>④ 生成方案框架（依据 + 目标 + 范围 + 抽样 + 资料清单）</p>
+      </div>
+      <div class="callout">
+        某子公司经责审计：分析 8 份历史报告 + 3 项制度变更 → 推荐重点审计三重一大决策程序、关联交易合规性、干部选任程序 → 附审计依据与抽样方法
+        <div class="cite">— 模拟数据</div>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：知识库 · 跨文档检索 Skill · 信息提取 Skill · 场景推理 Skill</div>
+  </div>
+  <div class="foot"><div>场景 7 · 审计方案智能生成</div><div>09 / 12</div></div>
+</section>
+
+<!-- S11: 能力规划 -->
+<section class="slide dark">
+  <div class="chrome"><div>建设路线</div><div>10 / 12</div></div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>三阶段推进</div>
+    <h2 class="h-xl" data-anim>从配置即用到闭环嵌入</h2>
+    <div class="grid-3" style="margin-top:5vh;gap:4vw">
+      <div data-anim style="display:flex;flex-direction:column;gap:2vh;padding:3vh 2vw;border-top:3px solid #e11d48">
+        <div class="kicker" style="color:#e11d48;opacity:1">P0 · 配置即用</div>
+        <div class="h-md" style="font-size:1.9vw">跑通三条链路</div>
+        <ul style="font-size:max(13px,1vw);line-height:1.7;padding-left:1.2em;opacity:.8;display:flex;flex-direction:column;gap:.8vh">
+          <li>场景 1 · 制度合规比对</li><li>场景 5 · 历史报告检索</li><li>场景 7 · 方案智能生成</li>
+        </ul>
+        <div style="font-family:var(--mono);font-size:10px;color:#ca8a04;margin-top:.5vh">✓ 覆盖矩阵准确率 > 85%</div>
+      </div>
+      <div data-anim style="display:flex;flex-direction:column;gap:2vh;padding:3vh 2vw;border-top:3px solid #ca8a04">
+        <div class="kicker" style="color:#ca8a04;opacity:1">P1 · 二期建设</div>
+        <div class="h-md" style="font-size:1.9vw">新建专项能力</div>
+        <ul style="font-size:max(13px,1vw);line-height:1.7;padding-left:1.2em;opacity:.8;display:flex;flex-direction:column;gap:.8vh">
+          <li>场景 2 · 异常检测开发</li><li>场景 3 · 经济责任审计</li><li>制度编译增加审计标签</li>
+        </ul>
+        <div style="font-family:var(--mono);font-size:10px;color:#ca8a04;margin-top:.5vh">✓ 异常疑点确认率 > 60%</div>
+      </div>
+      <div data-anim style="display:flex;flex-direction:column;gap:2vh;padding:3vh 2vw;border-top:3px solid #2563eb">
+        <div class="kicker" style="color:#2563eb;opacity:1">P2 · 三期建设</div>
+        <div class="h-md" style="font-size:1.9vw">闭环化嵌入</div>
+        <ul style="font-size:max(13px,1vw);line-height:1.7;padding-left:1.2em;opacity:.8;display:flex;flex-direction:column;gap:.8vh">
+          <li>场景 6 · 整改跟踪闭环</li><li>场景 4 · 制度修订影响</li><li>API 嵌入审计管理系统</li>
+        </ul>
+        <div style="font-family:var(--mono);font-size:10px;color:#ca8a04;margin-top:.5vh">✓ 提醒及时率 > 95%</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>每阶段有明确可验证的交付标准</div><div>10 / 12</div></div>
+</section>
+
+<!-- S12: 大引用 -->
+<section class="slide hero dark" data-animate="quote">
+  <div class="chrome"><div>核心理念</div><div>11 / 12</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:78vh">
+    <div class="kicker" data-anim>POSITION</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:5.5vw;line-height:1.2;max-width:72vw">
+      <span data-anim="line" style="display:block">AI 做的是</span>
+      <span data-anim="line" style="display:block">信息检索 + 制度比对 + 异常标注。</span>
+    </blockquote>
+    <p class="lead" style="max-width:50vw;opacity:.6" data-anim>最终判断，审计组做出。最终报告，审计组签署。</p>
+    <div class="meta-row" data-anim><span>— 审计条线 AI 应用原则</span></div>
+  </div>
+  <div class="foot"><div>不替代职业判断 · 不绕过治理流程</div><div>— · —</div></div>
+</section>
+
+<!-- S13: CLOSING -->
+<section class="slide hero light">
+  <div class="chrome"><div>交流 · 讨论</div><div>12 / 12</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:78vh">
+    <div class="kicker" data-anim>THANK YOU</div>
+    <h1 class="h-hero" style="font-size:8vw" data-anim>谢谢<br>请多指教</h1>
+    <p class="lead" style="max-width:50vw" data-anim>欢迎各位老师就实际业务需求提出意见——哪些场景最急、哪些数据最缺、哪些流程最痛。</p>
+    <div class="meta-row" data-anim><span>2026</span></div>
+  </div>
+  <div class="foot"><div>审计条线 AI 应用 · 交流材料</div><div>— · —</div></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+// WebGL
+const VS=`attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+const FS_DARK=`precision highp float;uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}void main(){vec2 uv=gl_FragCoord.xy/u_resolution.xy;vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;float md=length(p-m);float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;vec2 p0=p;for(float i=1.0;i<4.0;i++){p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;}float r=length(p);float ang=atan(p.y,p.x);vec3 a=vec3(0.12,0.12,0.13);vec3 b=vec3(0.03,0.04,0.05);vec3 c=vec3(1.0,1.0,1.0);vec3 d=vec3(0.1,0.2,0.4);vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;col+=vec3(disp*0.015,disp*0.01,disp*0.02);float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);col+=hi*0.08;vec3 base=vec3(0.05,0.05,0.06);col=mix(base,col,0.85);gl_FragColor=vec4(col,1.0);}`;
+const FS_LIGHT=`precision highp float;uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float noise(vec2 p){vec2 i=floor(p),f=fract(p);float a=hash(i),b=hash(i+vec2(1,0));float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));vec2 u=f*f*(3.0-2.0*f);return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;}float fbm(vec2 p){float v=0.0,a=0.5;mat2 m=mat2(0.80,0.60,-0.60,0.80);for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}return v;}void main(){vec2 uv=gl_FragCoord.xy/u_resolution.xy;vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;vec2 md=p-m;float dl=length(md);p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));float f=fbm(p*2.2+r*1.5);vec3 silverDark=vec3(0.86,0.85,0.84);vec3 paper=vec3(0.955,0.945,0.925);vec3 col=mix(silverDark,paper,f);float ph=r.x*2.2+u_time*0.35;col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;float hl=smoothstep(0.48,0.92,f);col+=hl*0.06;gl_FragColor=vec4(col,1.0);}`;
+const mouse={x:0.5,y:0.5};addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+function bootGL(id,fs){const c=document.getElementById(id);const gl=c.getContext('webgl',{alpha:false,antialias:true});if(!gl)return()=>false;const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};const prog=gl.createProgram();gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);gl.useProgram(prog);const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);const pos=gl.getAttribLocation(prog,'position');gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);const lRes=gl.getUniformLocation(prog,'u_resolution'),lT=gl.getUniformLocation(prog,'u_time'),lM=gl.getUniformLocation(prog,'u_mouse');const rsz=()=>{const d=Math.min(devicePixelRatio||1,2);c.width=innerWidth*d;c.height=innerHeight*d;gl.viewport(0,0,c.width,c.height)};addEventListener('resize',rsz);rsz();return t=>{gl.uniform2f(lRes,c.width,c.height);gl.uniform1f(lT,t);gl.uniform2f(lM,mouse.x,1-mouse.y);gl.drawArrays(gl.TRIANGLES,0,6);return true}}
+let dD=null,dL=null,raf=0,t0=Date.now();
+function start(){if(window.__lowPowerMode||raf)return;if(!dD)dD=bootGL('bg-dark',FS_DARK);if(!dL)dL=bootGL('bg-light',FS_LIGHT);t0=Date.now();function loop(){if(window.__lowPowerMode){raf=0;return}const t=(Date.now()-t0)/1000;dD(t);dL(t);raf=requestAnimationFrame(loop)}raf=requestAnimationFrame(loop)}
+function stop(){if(raf)cancelAnimationFrame(raf);raf=0}
+start();addEventListener('ppt-low-power-change',e=>{e.detail.on?stop():start()});
+
+// Navigation
+const deck=document.getElementById('deck'),slides=deck.querySelectorAll('.slide'),nav=document.getElementById('nav');let idx=0,total=slides.length,lock=false;deck.style.width=(total*100)+'vw';
+slides.forEach((s,i)=>{const b=document.createElement('button');b.className='dot';b.dataset.i=i;b.onclick=()=>go(i);nav.appendChild(b)});
+function go(n){if(lock)return;idx=Math.max(0,Math.min(total-1,n));window.__currentSlideIndex=idx;deck.style.transform=`translateX(${-idx*100}vw)`;nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));const el=slides[idx];const th=(el.classList.contains('light')?'light':'dark');document.body.classList.toggle('light-bg',th==='light');if(window.__playSlide)setTimeout(()=>window.__playSlide(idx),450);lock=true;setTimeout(()=>lock=false,700)}
+addEventListener('keydown',e=>{if(e.key==='Escape')return;if(e.key&&e.key.toLowerCase()==='b'){e.preventDefault();window.__setLowPowerMode(!window.__lowPowerMode);return}if(e.key==='ArrowRight'||e.key===' '||e.key==='ArrowDown'){go(idx+1)}if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(idx-1);if(e.key==='Home')go(0);if(e.key==='End')go(total-1)});
+let wa=0,wt=null;addEventListener('wheel',e=>{wa+=e.deltaY+e.deltaX;if(Math.abs(wa)>50){go(idx+(wa>0?1:-1));wa=0}clearTimeout(wt);wt=setTimeout(()=>wa=0,150)},{passive:true});
+let tx=0,ty=0;addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});addEventListener('touchend',e=>{const dx=(e.changedTouches[0].clientX-tx),dy=(e.changedTouches[0].clientY-ty);if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))go(idx+(dx<0?1:-1))},{passive:true});
+go(0);
+</script>
+
+<script type="module">
+let motion;try{motion=await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm')}catch(e){console.warn('[motion] disabled');document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'})}
+if(motion){const{animate,stagger}=motion;document.body.classList.add('motion-ready');const EASE=[.22,1,.36,1];const allSlides=[...document.querySelectorAll('.slide')];let lastIdx=-1;
+function reset(s){s.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='';el.style.transform=''})}
+function reveal(s){reset(s);document.getAnimations?.().forEach(a=>a.cancel());s.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'})}
+function play(i){const s=allSlides[i];if(!s)return;lastIdx=i;const r=s.dataset.animate||(s.classList.contains('hero')?'hero':'cascade');if(window.__lowPowerMode){reveal(s);return}reset(s);const all=[...s.querySelectorAll('[data-anim]')];if(!all.length)return;
+if(r==='quote'){const lines=all.filter(el=>el.dataset.anim==='line');const others=all.filter(el=>el.dataset.anim!=='line');if(others.length)animate(others,{opacity:[0,1],y:[8,0]},{duration:.6,delay:stagger(.12,{start:.2}),easing:EASE});if(lines.length)animate(lines,{opacity:[.35,1],y:[10,0]},{duration:.8,delay:stagger(.55,{start:.5}),easing:EASE});return}
+if(r==='hero'){animate(all,{opacity:[0,1],y:[14,0]},{duration:.9,delay:stagger(.16,{start:.2}),easing:EASE});return}
+animate(all,{opacity:[0,1],y:[16,0]},{duration:.75,delay:stagger(.1,{start:.15}),easing:EASE})}
+window.__playSlide=play;play(0)}
+</script>
+</body>
+</html>

@@ -1,181 +1,113 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Engineering — Prompt → Context → Harness → Loop</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #020617;
-      --bg-card: rgba(15, 23, 42, 0.6);
-      --bg-card-solid: #0f172a;
-      --border: #1e293b;
-      --text: #ffffff;
-      --text-secondary: #94a3b8;
-      --text-muted: #475569;
-      --accent: #22d3ee;
-      --gold: #f59e0b;
-      --card-hover: rgba(30, 41, 59, 0.6);
-    }
-    [data-theme="light"] {
-      --bg: #f8fafc;
-      --bg-card: rgba(255, 255, 255, 0.85);
-      --bg-card-solid: #ffffff;
-      --border: #e2e8f0;
-      --text: #1e293b;
-      --text-secondary: #64748b;
-      --text-muted: #94a3b8;
-      --accent: #0891b2;
-      --gold: #d97706;
-      --card-hover: rgba(241, 245, 249, 0.8);
-    }
-    [data-theme="warm"] {
-      --bg: #fef7ed;
-      --bg-card: rgba(255, 251, 245, 0.9);
-      --bg-card-solid: #fffbf5;
-      --border: #fde68a;
-      --text: #3b2f1e;
-      --text-secondary: #78716c;
-      --text-muted: #a8a29e;
-      --accent: #f59e0b;
-      --gold: #f59e0b;
-      --card-hover: rgba(253, 230, 138, 0.3);
-    }
-    [data-theme="cool"] {
-      --bg: #f0f4f8;
-      --bg-card: rgba(248, 250, 252, 0.9);
-      --bg-card-solid: #f8fafc;
-      --border: #cbd5e1;
-      --text: #1a2a3a;
-      --text-secondary: #64748b;
-      --text-muted: #94a3b8;
-      --accent: #6366f1;
-      --gold: #b45309;
-      --card-hover: rgba(203, 213, 225, 0.4);
-    }
-    @media print {
-      :root, [data-theme] {
-        --bg: #ffffff;
-        --bg-card: rgba(255, 255, 255, 0.95);
-        --bg-card-solid: #ffffff;
-        --border: #d4d4d8;
-        --text: #18181b;
-        --text-secondary: #52525b;
-        --text-muted: #a1a1aa;
-        --accent: #000000;
-        --gold: #b45309;
-      }
-      body { padding: 0; }
-      .theme-bar { display: none !important; }
-      .bg-grid, .bg-orb { display: none; }
-    }
+    /* ========================================================================
+       RESET & BASE
+       ======================================================================== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 16px; scroll-behavior: smooth; }
 
     body {
-      font-family: 'JetBrains Mono', 'Microsoft YaHei', monospace;
-      background: var(--bg);
+      font-family: 'Noto Sans SC', 'DM Sans', -apple-system, sans-serif;
+      background: #f4f2ef;
+      color: #1a1f2e;
       min-height: 100vh;
-      padding: 2rem;
-      color: var(--text);
-      transition: background 0.3s, color 0.3s;
-      position: relative;
       overflow-x: hidden;
     }
 
-    /* ── Animated background grid ── */
-    .bg-grid {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      background-image:
-        linear-gradient(rgba(30, 41, 59, 0.3) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(30, 41, 59, 0.3) 1px, transparent 1px);
-      background-size: 60px 60px;
-      mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 70%);
+    /* ========================================================================
+       DESIGN TOKENS
+       ======================================================================== */
+    :root {
+      --bg-page: #f4f2ef;
+      --bg-card: #ffffff;
+      --bg-tag: #f0f4f6;
+      --text-primary: #1a1f2e;
+      --text-secondary: #4a5568;
+      --text-muted: #7a8699;
+      --accent: #2d9d73;
+      --accent-alt: #4a85a8;
+      --blue: #3b7fc4;
+      --cyan: #2d9d8e;
+      --purple: #7c6db8;
+      --amber: #c6802e;
+      --border: #e2e6ea;
+      --border-amber: rgba(198, 128, 46, 0.25);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
     }
 
-    /* ── Floating orbs ── */
-    .bg-orb {
-      position: fixed;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 0;
-      filter: blur(80px);
-      opacity: 0.12;
-    }
-    .bg-orb.o1 { width: 500px; height: 500px; background: #22d3ee; top: -100px; left: -150px; animation: float1 20s ease-in-out infinite; }
-    .bg-orb.o2 { width: 400px; height: 400px; background: #a78bfa; top: 40%; right: -120px; animation: float2 25s ease-in-out infinite; }
-    .bg-orb.o3 { width: 350px; height: 350px; background: #f59e0b; bottom: 10%; left: 30%; animation: float3 22s ease-in-out infinite; }
-
-    @keyframes float1 {
-      0%, 100% { transform: translate(0, 0); }
-      33% { transform: translate(80px, 40px); }
-      66% { transform: translate(-30px, -20px); }
-    }
-    @keyframes float2 {
-      0%, 100% { transform: translate(0, 0); }
-      33% { transform: translate(-50px, -60px); }
-      66% { transform: translate(40px, 30px); }
-    }
-    @keyframes float3 {
-      0%, 100% { transform: translate(0, 0); }
-      33% { transform: translate(60px, -30px); }
-      66% { transform: translate(-40px, 20px); }
+    @media print {
+      body { background: #fff; }
+      .top-bar { display: none; }
     }
 
-    .container { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
-
-    /* ── Theme bar ── */
-    .theme-bar {
-      display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem;
-      margin-bottom: 1.5rem; position: relative; z-index: 1;
+    /* ========================================================================
+       TOP ACCENT BAR
+       ======================================================================== */
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent-alt) 55%, transparent 100%);
     }
-    .theme-bar span { font-size: 0.75rem; color: var(--text-secondary); margin-right: 0.25rem; }
-    .theme-btn {
-      width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent;
-      cursor: pointer; transition: border-color 0.2s, transform 0.2s; padding: 0;
-    }
-    .theme-btn:hover { transform: scale(1.15); }
-    .theme-btn.active { border-color: var(--text); }
-    .theme-btn.dark  { background: #020617; }
-    .theme-btn.light { background: #f8fafc; border: 2px solid #cbd5e1; }
-    .theme-btn.warm  { background: #fef7ed; border: 2px solid #fde68a; }
-    .theme-btn.cool  { background: #f0f4f8; border: 2px solid #cbd5e1; }
 
-    /* ── Header ── */
-    .header { margin-bottom: 1.5rem; position: relative; z-index: 1; }
-    .header-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem; }
+    /* ========================================================================
+       PAGE CONTAINER
+       ======================================================================== */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 72px 48px 48px 48px;
+    }
+
+    /* ========================================================================
+       HEADER
+       ======================================================================== */
+    .header { margin-bottom: 28px; }
+    .header-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
     .pulse-dot {
       width: 12px; height: 12px; background: var(--accent); border-radius: 50%;
       animation: pulse 2s infinite; flex-shrink: 0;
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    h1 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.025em; }
-    .subtitle { color: var(--text-secondary); font-size: 0.8rem; margin-left: 1.75rem; }
+    h1 {
+      font-family: 'DM Sans', 'Noto Sans SC', sans-serif;
+      font-size: 1.55rem; font-weight: 700; letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+    .subtitle {
+      font-size: 0.85rem; color: var(--text-secondary);
+      margin-left: 28px; line-height: 1.6;
+    }
 
-    /* ── Hero Image ── */
+    /* ========================================================================
+       HERO IMAGE
+       ======================================================================== */
     .hero-image {
-      position: relative; z-index: 1;
-      border-radius: 1rem;
+      border-radius: var(--radius);
       border: 1px solid var(--border);
       overflow: hidden;
-      margin-bottom: 2rem;
+      margin-bottom: 36px;
       background: var(--bg-card);
-      box-shadow: 0 0 60px rgba(34, 211, 238, 0.06);
-      transition: background 0.3s, border-color 0.3s;
+      box-shadow: var(--shadow-lg);
     }
-    .hero-image img {
-      width: 100%; display: block;
-    }
+    .hero-image img { width: 100%; display: block; }
 
-    /* ── Section Title ── */
+    /* ========================================================================
+       SECTION TITLE
+       ======================================================================== */
     .section-title {
-      position: relative; z-index: 1;
-      display: flex; align-items: center; gap: 0.75rem;
-      margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 24px;
     }
     .section-title .line {
       flex: 1; height: 1px;
@@ -185,505 +117,531 @@
       background: linear-gradient(270deg, var(--border), transparent);
     }
     .section-title span {
-      font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);
-      white-space: nowrap; letter-spacing: 0.05em;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap; letter-spacing: 0.06em;
     }
 
-    /* ── Era Banners ── */
+    /* ========================================================================
+       ERA BANNERS
+       ======================================================================== */
     .era-row {
-      position: relative; z-index: 1;
-      display: flex; gap: 0; margin-bottom: 0.5rem;
+      display: flex; gap: 0; margin-bottom: 8px;
     }
     .era-banner {
       flex: 1; text-align: center;
-      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em;
-      padding: 0.35rem 0; border-radius: 0.4rem;
-      text-transform: uppercase;
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em;
+      padding: 10px 0; border-radius: var(--radius-sm);
     }
     .era-banner.y2025 {
-      background: rgba(34, 211, 238, 0.08);
-      color: #22d3ee;
-      border: 1px solid rgba(34, 211, 238, 0.2);
-      margin-right: 24px; /* half of evo-arrow width to center over two cards */
+      background: rgba(45, 157, 142, 0.08);
+      color: var(--cyan);
+      border: 1px solid rgba(45, 157, 142, 0.2);
+      margin-right: 24px;
     }
     .era-banner.y2026 {
-      background: rgba(245, 158, 11, 0.08);
-      color: #f59e0b;
-      border: 1px solid rgba(245, 158, 11, 0.2);
+      background: rgba(198, 128, 46, 0.08);
+      color: var(--amber);
+      border: 1px solid rgba(198, 128, 46, 0.2);
       margin-left: 24px;
     }
     .era-banner .era-year {
-      font-size: 0.75rem; font-weight: 800; margin-right: 0.4em;
+      font-size: 0.8rem; font-weight: 700; margin-right: 4px;
     }
 
-    /* ── Evolution Flow ── */
+    /* ========================================================================
+       EVOLUTION FLOW — 4 stages
+       ======================================================================== */
     .evolution-flow {
-      position: relative; z-index: 1;
       display: flex; align-items: stretch; gap: 0;
-      margin-bottom: 2rem;
+      margin-bottom: 36px;
     }
 
     .evo-stage {
       flex: 1;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      padding: 1.5rem 1.25rem;
+      padding: 24px 20px;
       position: relative;
-      transition: background 0.3s, border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      transition: transform 0.25s, box-shadow 0.25s;
       cursor: default;
+      box-shadow: var(--shadow-sm);
     }
     .evo-stage:hover {
-      background: var(--card-hover);
       transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
       z-index: 2;
     }
-    .evo-stage.era-left:first-child { border-radius: 0.75rem 0 0 0.75rem; }
+    .evo-stage.era-left:first-child { border-radius: var(--radius) 0 0 var(--radius); }
     .evo-stage.era-left:last-child  { border-radius: 0; }
     .evo-stage.era-right:first-child { border-radius: 0; }
-    .evo-stage.era-right:last-child  { border-radius: 0 0.75rem 0.75rem 0; }
+    .evo-stage.era-right:last-child  { border-radius: 0 var(--radius) var(--radius) 0; }
 
-    /* Paradigm-shift arrow between eras */
+    /* Divider between eras */
     .evo-divider {
       width: 48px; display: flex; align-items: center; justify-content: center;
       flex-shrink: 0; position: relative; z-index: 1;
     }
     .evo-divider-inner {
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-    }
-    .evo-divider-inner .divider-line {
-      width: 100%; height: 1px;
-      background: linear-gradient(90deg, #22d3ee, #a78bfa, #f59e0b);
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
     }
     .evo-divider-inner .divider-badge {
+      font-family: 'JetBrains Mono', monospace;
       font-size: 0.5rem; font-weight: 700; letter-spacing: 0.06em;
-      color: #f59e0b; white-space: nowrap;
-      background: rgba(245, 158, 11, 0.08);
-      padding: 0.15rem 0.4rem; border-radius: 0.25rem;
+      color: var(--amber); white-space: nowrap;
+      background: rgba(198, 128, 46, 0.08);
+      padding: 3px 8px; border-radius: 4px;
     }
 
-    /* Regular arrows between same-era stages */
+    /* Arrows between same-era stages */
     .evo-arrow {
-      width: 48px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      position: relative;
-      z-index: 1;
+      width: 48px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative; z-index: 1;
     }
     .evo-arrow svg { width: 100%; height: 24px; }
 
     .evo-label {
-      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
-      text-transform: uppercase; margin-bottom: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 10px;
     }
-    .evo-label.prompt  { color: #3b82f6; }
-    .evo-label.context { color: #22d3ee; }
-    .evo-label.harness { color: #a78bfa; }
-    .evo-label.loop    { color: #f59e0b; }
+    .evo-label.prompt  { color: var(--blue); }
+    .evo-label.context { color: var(--cyan); }
+    .evo-label.harness { color: var(--purple); }
+    .evo-label.loop    { color: var(--amber); }
 
-    .evo-icon {
-      font-size: 2rem; margin-bottom: 0.5rem; line-height: 1;
-    }
+    .evo-icon { font-size: 2rem; margin-bottom: 8px; line-height: 1; }
 
     .evo-title {
-      font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; line-height: 1.3;
+      font-family: 'DM Sans', 'Noto Sans SC', sans-serif;
+      font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; line-height: 1.3;
+      color: var(--text-primary);
     }
-
     .evo-desc {
-      font-size: 0.7rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 0.75rem;
+      font-size: 0.72rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;
     }
-
     .evo-token {
-      display: inline-flex; align-items: center; gap: 0.35rem;
-      font-size: 0.65rem; font-weight: 600; padding: 0.3rem 0.65rem;
-      border-radius: 2rem;
-      white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; font-weight: 600; padding: 4px 10px;
+      border-radius: 20px; white-space: nowrap;
     }
-    .evo-token.low    { background: rgba(59, 130, 246, 0.12); color: #60a5fa; }
-    .evo-token.medium { background: rgba(34, 211, 238, 0.12); color: #22d3ee; }
-    .evo-token.high   { background: rgba(167, 139, 250, 0.12); color: #a78bfa; }
-    .evo-token.max    { background: rgba(245, 158, 11, 0.12); color: #fbbf24; }
+    .evo-token.low    { background: rgba(59, 127, 196, 0.08); color: var(--blue); }
+    .evo-token.medium { background: rgba(45, 157, 142, 0.08); color: var(--cyan); }
+    .evo-token.high   { background: rgba(124, 109, 184, 0.08); color: var(--purple); }
+    .evo-token.max    { background: rgba(198, 128, 46, 0.08); color: var(--amber); }
 
-    /* ── Detail Cards ── */
+    /* ========================================================================
+       DETAIL CARDS
+       ======================================================================== */
     .detail-cards {
-      position: relative; z-index: 1;
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
-      margin-bottom: 2rem;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      margin-bottom: 36px;
     }
-
     .detail-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 1.25rem;
-      transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
-      position: relative;
-      overflow: hidden;
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative; overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s, box-shadow 0.25s;
     }
     .detail-card:hover {
-      background: var(--card-hover);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
     }
 
     /* Left accent line */
     .detail-card::before {
       content: '';
       position: absolute;
-      left: 0; top: 16px; bottom: 16px;
+      left: 0; top: 20px; bottom: 20px;
       width: 3px; border-radius: 0 3px 3px 0;
     }
-    .detail-card.d1::before { background: #3b82f6; }
-    .detail-card.d2::before { background: #a78bfa; }
-    .detail-card.d3::before { background: #f59e0b; }
+    .detail-card.d1::before { background: var(--blue); }
+    .detail-card.d2::before { background: var(--purple); }
+    .detail-card.d3::before { background: var(--amber); }
 
     .detail-card .dc-step {
+      font-family: 'JetBrains Mono', monospace;
       font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; margin-bottom: 0.5rem;
+      text-transform: uppercase; margin-bottom: 10px;
     }
-    .detail-card.d1 .dc-step { color: #60a5fa; }
-    .detail-card.d2 .dc-step { color: #a78bfa; }
-    .detail-card.d3 .dc-step { color: #fbbf24; }
+    .detail-card.d1 .dc-step { color: var(--blue); }
+    .detail-card.d2 .dc-step { color: var(--purple); }
+    .detail-card.d3 .dc-step { color: var(--amber); }
 
     .detail-card h3 {
-      font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.3;
+      font-family: 'DM Sans', 'Noto Sans SC', sans-serif;
+      font-size: 0.88rem; font-weight: 700; margin-bottom: 10px;
+      line-height: 1.35; color: var(--text-primary);
     }
-
     .detail-card .dc-body {
-      font-size: 0.7rem; color: var(--text-secondary); line-height: 1.65;
+      font-size: 0.75rem; color: var(--text-secondary); line-height: 1.7;
     }
-
     .detail-card .dc-highlight {
-      display: inline-block; margin-top: 0.6rem;
-      font-size: 0.65rem; font-weight: 600; padding: 0.25rem 0.55rem;
-      border-radius: 0.35rem;
+      display: inline-block; margin-top: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; font-weight: 600; padding: 4px 10px;
+      border-radius: 6px;
     }
-    .detail-card.d1 .dc-highlight { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
-    .detail-card.d2 .dc-highlight { background: rgba(167, 139, 250, 0.1); color: #a78bfa; }
-    .detail-card.d3 .dc-highlight { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+    .detail-card.d1 .dc-highlight { background: rgba(59, 127, 196, 0.07); color: var(--blue); }
+    .detail-card.d2 .dc-highlight { background: rgba(124, 109, 184, 0.07); color: var(--purple); }
+    .detail-card.d3 .dc-highlight { background: rgba(198, 128, 46, 0.07); color: var(--amber); }
 
-    /* ── Token Explosion Visualization ── */
+    /* ========================================================================
+       TOKEN VIZ
+       ======================================================================== */
     .token-viz {
-      position: relative; z-index: 1;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      transition: background 0.3s, border-color 0.3s;
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 36px;
+      box-shadow: var(--shadow-sm);
     }
     .token-viz h3 {
-      font-size: 0.85rem; font-weight: 700; margin-bottom: 1.25rem;
-      display: flex; align-items: center; gap: 0.5rem;
+      font-family: 'DM Sans', 'Noto Sans SC', sans-serif;
+      font-size: 0.88rem; font-weight: 700; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 8px;
+      color: var(--text-primary);
     }
-    .token-viz h3 .dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    .token-viz h3 .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--amber);
+    }
 
-    .token-bars { display: flex; flex-direction: column; gap: 0.75rem; }
-    .token-bar-row { display: flex; align-items: center; gap: 1rem; }
+    .token-bars { display: flex; flex-direction: column; gap: 12px; }
+    .token-bar-row { display: flex; align-items: center; gap: 16px; }
     .token-bar-label {
-      width: 100px; font-size: 0.7rem; font-weight: 600; text-align: right; flex-shrink: 0;
+      width: 90px; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; font-weight: 600; text-align: right; flex-shrink: 0;
     }
     .token-bar-track {
-      flex: 1; height: 28px; background: rgba(30, 41, 59, 0.5); border-radius: 0.35rem;
+      flex: 1; height: 28px; background: #eef1f4; border-radius: 6px;
       overflow: hidden; position: relative;
     }
     .token-bar-fill {
-      height: 100%; border-radius: 0.35rem;
-      display: flex; align-items: center; padding-left: 0.75rem;
+      height: 100%; border-radius: 6px;
+      display: flex; align-items: center; padding-left: 12px;
+      font-family: 'JetBrains Mono', monospace;
       font-size: 0.65rem; font-weight: 600; white-space: nowrap;
       transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .token-bar-fill.prompt  { background: linear-gradient(90deg, rgba(59, 130, 246, 0.5), rgba(59, 130, 246, 0.8)); color: #bfdbfe; }
-    .token-bar-fill.context { background: linear-gradient(90deg, rgba(34, 211, 238, 0.5), rgba(34, 211, 238, 0.8)); color: #cffafe; }
-    .token-bar-fill.harness { background: linear-gradient(90deg, rgba(167, 139, 250, 0.5), rgba(167, 139, 250, 0.8)); color: #ede9fe; }
-    .token-bar-fill.loop    { background: linear-gradient(90deg, rgba(245, 158, 11, 0.5), rgba(245, 158, 11, 0.9)); color: #fef3c7; }
-    .token-bar-value { font-size: 0.65rem; font-weight: 700; width: 80px; flex-shrink: 0; }
-
-    /* ── Conclusion Card ── */
-    .conclusion {
-      position: relative; z-index: 1;
-      background: var(--bg-card);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      border-radius: 0.75rem;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      transition: background 0.3s, border-color 0.3s;
-      box-shadow: 0 0 40px rgba(245, 158, 11, 0.06);
+    .token-bar-fill.prompt  { background: linear-gradient(90deg, #7aacdc, #3b7fc4); color: #fff; }
+    .token-bar-fill.context { background: linear-gradient(90deg, #6db8a8, #2d9d8e); color: #fff; }
+    .token-bar-fill.harness { background: linear-gradient(90deg, #a89ad4, #7c6db8); color: #fff; }
+    .token-bar-fill.loop    { background: linear-gradient(90deg, #e0b970, #c6802e); color: #fff; }
+    .token-bar-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem; font-weight: 700; width: 72px; flex-shrink: 0;
     }
-    .conclusion:hover { border-color: rgba(245, 158, 11, 0.5); }
+
+    /* ========================================================================
+       CONCLUSION
+       ======================================================================== */
+    .conclusion {
+      background: var(--bg-card);
+      border: 1px solid var(--border-amber);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.3s;
+    }
+    .conclusion:hover { border-color: rgba(198, 128, 46, 0.45); }
 
     .conclusion-header {
-      display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
     }
     .conclusion-header .icon {
-      width: 28px; height: 28px; border-radius: 0.4rem;
-      background: rgba(245, 158, 11, 0.15);
+      width: 30px; height: 30px; border-radius: 8px;
+      background: rgba(198, 128, 46, 0.1);
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.9rem;
+      font-size: 1rem;
     }
     .conclusion-header h3 {
-      font-size: 0.85rem; font-weight: 700; color: var(--gold);
+      font-family: 'DM Sans', 'Noto Sans SC', sans-serif;
+      font-size: 0.9rem; font-weight: 700; color: var(--amber);
     }
-
     .conclusion p {
-      font-size: 0.75rem; color: var(--text-secondary); line-height: 1.75;
+      font-size: 0.8rem; color: var(--text-secondary); line-height: 1.85;
     }
-    .conclusion p strong { color: var(--text); }
+    .conclusion p strong { color: var(--text-primary); font-weight: 600; }
 
-    /* ── Footer ── */
+    /* ========================================================================
+       FOOTER
+       ======================================================================== */
     .footer {
-      position: relative; z-index: 1;
-      text-align: center; margin-top: 1.5rem;
-      color: var(--text-muted); font-size: 0.65rem;
+      text-align: center; padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem; letter-spacing: 0.04em;
     }
 
-    /* ── Responsive ── */
+    /* ========================================================================
+       REVEAL ANIMATIONS
+       ======================================================================== */
+    .reveal {
+      opacity: 0; transform: translateY(22px);
+      animation: revealUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .reveal-d1 { animation-delay: 0.06s; }
+    .reveal-d2 { animation-delay: 0.16s; }
+    .reveal-d3 { animation-delay: 0.26s; }
+    .reveal-d4 { animation-delay: 0.36s; }
+    .reveal-d5 { animation-delay: 0.46s; }
+    .reveal-d6 { animation-delay: 0.56s; }
+    .reveal-d7 { animation-delay: 0.66s; }
+
+    @keyframes revealUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { animation: none !important; opacity: 1 !important; transform: none !important; }
+    }
+
+    /* ========================================================================
+       RESPONSIVE
+       ======================================================================== */
     @media (max-width: 900px) {
-      .era-row { flex-direction: column; gap: 0.35rem; }
+      .page { padding: 60px 20px 36px 20px; }
+
+      .era-row { flex-direction: column; gap: 8px; }
       .era-banner.y2025, .era-banner.y2026 { margin: 0; }
-      .evolution-flow { flex-direction: column; }
-      .evo-stage { border-radius: 0.75rem !important; margin-bottom: 0rem; }
-      .evo-stage.era-left:first-child, .evo-stage.era-left:last-child,
-      .evo-stage.era-right:first-child, .evo-stage.era-right:last-child { border-radius: 0.75rem !important; }
+
+      .evolution-flow { flex-direction: column; gap: 0; }
+      .evo-stage { border-radius: var(--radius) !important; margin-bottom: 0; }
       .evo-arrow, .evo-divider { width: 100%; height: 32px; }
-      .evo-arrow svg, .evo-divider svg { transform: rotate(90deg); width: 32px; }
-      .evo-divider { justify-content: flex-start; padding-left: 1rem; }
-      .evo-divider-inner { flex-direction: row; gap: 0.5rem; }
-      .evo-divider-inner .divider-line { display: none; }
+      .evo-arrow svg { transform: rotate(90deg); width: 32px; }
+      .evo-divider { justify-content: flex-start; padding-left: 16px; }
+      .evo-divider-inner { flex-direction: row; gap: 10px; }
+
       .detail-cards { grid-template-columns: 1fr; }
-      .token-bar-label { width: 70px; font-size: 0.6rem; }
-      .token-bar-value { width: 60px; font-size: 0.6rem; }
+
+      .token-bar-label { width: 64px; font-size: 0.6rem; }
+      .token-bar-value { width: 56px; font-size: 0.6rem; }
+
+      h1 { font-size: 1.3rem; }
     }
 
-    @media (min-width: 901px) and (max-width: 1100px) {
-      .token-bar-label { width: 80px; font-size: 0.63rem; }
+    @media (max-width: 480px) {
+      .page { padding: 52px 14px 28px 14px; }
+      h1 { font-size: 1.15rem; }
+      .subtitle { font-size: 0.75rem; margin-left: 20px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ── Background Effects ── -->
-  <div class="bg-grid"></div>
-  <div class="bg-orb o1"></div>
-  <div class="bg-orb o2"></div>
-  <div class="bg-orb o3"></div>
+<!-- Top accent bar -->
+<div class="top-bar"></div>
 
-  <div class="container">
+<!-- ========================================================================
+     PAGE CONTENT
+     ======================================================================== -->
+<main class="page">
 
-    <!-- ── Theme Switcher ── -->
-    <div class="theme-bar">
-      <span>主题</span>
-      <button class="theme-btn dark"  data-theme="dark"  title="深邃黑"></button>
-      <button class="theme-btn light active" data-theme="light" title="典雅白"></button>
-      <button class="theme-btn warm"  data-theme="warm"  title="暖米白"></button>
-      <button class="theme-btn cool"  data-theme="cool"  title="冷灰白"></button>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-row reveal reveal-d1">
+      <div class="pulse-dot"></div>
+      <h1>AI Engineering · 智能工程的四次升维</h1>
+    </div>
+    <p class="subtitle reveal reveal-d2">2025 编排式工作流（Prompt → Context）&nbsp;→&nbsp; 2026 Agent Runtime（Harness → Loop）—— 大模型应用的深化路径</p>
+  </div>
+
+  <!-- Hero Image -->
+  <div class="hero-image reveal reveal-d3">
+    <img src="Images/prompt2loop.jpg" alt="Prompt → Context → Harness → Loop Engineering">
+  </div>
+
+  <!-- Section Title -->
+  <div class="section-title reveal reveal-d4">
+    <div class="line"></div>
+    <span>▸ 进化路径</span>
+    <div class="line"></div>
+  </div>
+
+  <!-- Era Labels -->
+  <div class="era-row reveal reveal-d4">
+    <div class="era-banner y2025"><span class="era-year">2025</span>编排式工作流 · Orchestration</div>
+    <div class="era-banner y2026"><span class="era-year">2026</span>Agent Runtime · 自主运行时</div>
+  </div>
+
+  <!-- Four-Stage Evolution Flow -->
+  <div class="evolution-flow">
+
+    <div class="evo-stage era-left reveal reveal-d5">
+      <div class="evo-label prompt">01 · Prompt</div>
+      <div class="evo-icon">💬</div>
+      <div class="evo-title">提示工程</div>
+      <div class="evo-desc">单条提示，一问一答。模型能力的最浅层释放，几百 token 即可完成一次交互。</div>
+      <span class="evo-token low">~10² tokens</span>
     </div>
 
-    <!-- ── Header ── -->
-    <div class="header">
-      <div class="header-row">
-        <div class="pulse-dot"></div>
-        <h1>AI Engineering · 智能工程的四次升维</h1>
-      </div>
-      <p class="subtitle">2025 编排式工作流（Prompt → Context）&nbsp;→&nbsp; 2026 Agent Runtime（Harness → Loop）—— 大模型应用的深化路径</p>
+    <div class="evo-arrow">
+      <svg viewBox="0 0 48 24"><defs><marker id="arr-cyan" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2d9d8e"/></marker></defs><line x1="0" y1="12" x2="40" y2="12" stroke="#2d9d8e" stroke-width="1.5" marker-end="url(#arr-cyan)"/></svg>
     </div>
 
-    <!-- ── Hero Image ── -->
-    <div class="hero-image">
-      <img src="Images/prompt2loop.jpg" alt="Prompt → Context → Harness → Loop Engineering">
+    <div class="evo-stage era-left reveal reveal-d5">
+      <div class="evo-label context">02 · Context</div>
+      <div class="evo-icon">📚</div>
+      <div class="evo-title">上下文工程</div>
+      <div class="evo-desc">拼接文档、历史与长文本，窗口从 4K 猛增至 128K 乃至 1M，单次消耗跃升几个数量级。</div>
+      <span class="evo-token medium">~10⁴ tokens</span>
     </div>
 
-    <!-- ── Section Title ── -->
-    <div class="section-title">
-      <div class="line"></div>
-      <span>▸ 进化路径</span>
-      <div class="line"></div>
-    </div>
-
-    <!-- ── Era Labels ── -->
-    <div class="era-row">
-      <div class="era-banner y2025"><span class="era-year">2025</span>编排式工作流 · Orchestration</div>
-      <div class="era-banner y2026"><span class="era-year">2026</span>Agent Runtime · 自主运行时</div>
-    </div>
-
-    <!-- ── Four-Stage Evolution Flow ── -->
-    <div class="evolution-flow">
-
-      <div class="evo-stage era-left">
-        <div class="evo-label prompt">01 · Prompt</div>
-        <div class="evo-icon">💬</div>
-        <div class="evo-title">提示工程</div>
-        <div class="evo-desc">单条提示，一问一答。模型能力的最浅层释放，几百 token 即可完成一次交互。</div>
-        <span class="evo-token low">~10² tokens</span>
-      </div>
-
-      <div class="evo-arrow">
-        <svg viewBox="0 0 48 24"><defs><marker id="arr-cyan" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#22d3ee"/></marker></defs><line x1="0" y1="12" x2="40" y2="12" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arr-cyan)"/></svg>
-      </div>
-
-      <div class="evo-stage era-left">
-        <div class="evo-label context">02 · Context</div>
-        <div class="evo-icon">📚</div>
-        <div class="evo-title">上下文工程</div>
-        <div class="evo-desc">拼接文档、历史与长文本，窗口从 4K 猛增至 128K 乃至 1M，单次消耗跃升几个数量级。</div>
-        <span class="evo-token medium">~10⁴ tokens</span>
-      </div>
-
-      <!-- ── Paradigm Shift Divider ── -->
-      <div class="evo-divider">
-        <div class="evo-divider-inner">
-          <svg viewBox="0 0 48 24" style="width:100%;height:16px"><line x1="0" y1="12" x2="48" y2="12" stroke="#a78bfa" stroke-width="1.2" stroke-dasharray="4,3"/></svg>
-          <span class="divider-badge">范式跃迁</span>
-          <svg viewBox="0 0 48 24" style="width:100%;height:16px"><line x1="0" y1="12" x2="48" y2="12" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arr-amber2)"/><defs><marker id="arr-amber2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#f59e0b"/></marker></defs></svg>
-        </div>
-      </div>
-
-      <div class="evo-stage era-right">
-        <div class="evo-label harness">03 · Harness</div>
-        <div class="evo-icon">🔧</div>
-        <div class="evo-title">工具编排</div>
-        <div class="evo-desc">任务外包给工具，但每次调用都将工具描述、参数与结果重新注入上下文，"推理→调用→返回→再推理"循环往复。</div>
-        <span class="evo-token high">~10⁵ tokens</span>
-      </div>
-
-      <div class="evo-arrow">
-        <svg viewBox="0 0 48 24"><defs><marker id="arr-amber" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#f59e0b"/></marker></defs><line x1="0" y1="12" x2="40" y2="12" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arr-amber)"/></svg>
-      </div>
-
-      <div class="evo-stage era-right">
-        <div class="evo-label loop">04 · Loop</div>
-        <div class="evo-icon">🔄</div>
-        <div class="evo-title">自主循环</div>
-        <div class="evo-desc">模型进入自主循环，每步重审历史。嵌套探索与多智能体协作，token 按"决策树分支 × 反思深度"指数膨胀。</div>
-        <span class="evo-token max">~10⁶+ tokens</span>
-      </div>
-
-    </div>
-
-    <!-- ── Section Title ── -->
-    <div class="section-title">
-      <div class="line"></div>
-      <span>▸ 每一次范式递进，都是对模型潜能的"升维释放"</span>
-      <div class="line"></div>
-    </div>
-
-    <!-- ── Three Detail Cards ── -->
-    <div class="detail-cards">
-
-      <div class="detail-card d1">
-        <div class="dc-step">2025 · Prompt → Context</div>
-        <h3>编排式工作流<br>从一问一答到上下文装配</h3>
-        <div class="dc-body">
-          单条提示也许只需几百 token，但上下文工程会拼接文档、历史与长文本，窗口从 4K 猛增至 128K 乃至 1M，单次消耗直接跃升几个数量级。
-        </div>
-        <span class="dc-highlight">4K → 128K → 1M tokens</span>
-      </div>
-
-      <div class="detail-card d2">
-        <div class="dc-step">2026 · Context → Harness</div>
-        <h3>Agent Runtime 起步<br>从静态上下文到工具交互链</h3>
-        <div class="dc-body">
-          看似将任务外包给工具，实际每次调用都要将工具描述、参数与返回结果重新注入上下文，一个简单任务就会产生"推理 → 调用 → 返回 → 再推理"的多次交互，整个对话历史被反复传递，token 消耗成倍甚至平方级增长。
-        </div>
-        <span class="dc-highlight">对话历史反复传递 · 平方级增长</span>
-      </div>
-
-      <div class="detail-card d3">
-        <div class="dc-step">2026 · Harness → Loop</div>
-        <h3>Agent Runtime 深化<br>从工具调用到自主决策循环</h3>
-        <div class="dc-body">
-          模型进入自主循环，每一步都重审历史。随着嵌套探索与多智能体协作，token 需求按"决策树分支 × 反思深度"指数膨胀，通往更高自主性的代价是指数级增长的 token 消耗。
-        </div>
-        <span class="dc-highlight">决策树分支 × 反思深度</span>
-      </div>
-
-    </div>
-
-    <!-- ── Token Explosion Visualization ── -->
-    <div class="token-viz">
-      <h3><span class="dot"></span> Token 消耗数量级对比（单次任务估算）</h3>
-      <div class="token-bars">
-        <div class="token-bar-row">
-          <div class="token-bar-label" style="color:#60a5fa">Prompt</div>
-          <div class="token-bar-track">
-            <div class="token-bar-fill prompt" style="width:3%">~10²</div>
-          </div>
-          <div class="token-bar-value" style="color:#60a5fa">百级</div>
-        </div>
-        <div class="token-bar-row">
-          <div class="token-bar-label" style="color:#22d3ee">Context</div>
-          <div class="token-bar-track">
-            <div class="token-bar-fill context" style="width:15%">~10⁴</div>
-          </div>
-          <div class="token-bar-value" style="color:#22d3ee">万级</div>
-        </div>
-        <div class="token-bar-row">
-          <div class="token-bar-label" style="color:#a78bfa">Harness</div>
-          <div class="token-bar-track">
-            <div class="token-bar-fill harness" style="width:45%">~10⁵</div>
-          </div>
-          <div class="token-bar-value" style="color:#a78bfa">十万级</div>
-        </div>
-        <div class="token-bar-row">
-          <div class="token-bar-label" style="color:#fbbf24">Loop</div>
-          <div class="token-bar-track">
-            <div class="token-bar-fill loop" style="width:100%">~10⁶+</div>
-          </div>
-          <div class="token-bar-value" style="color:#fbbf24">百万+级</div>
-        </div>
+    <!-- Paradigm Shift Divider -->
+    <div class="evo-divider">
+      <div class="evo-divider-inner">
+        <svg viewBox="0 0 48 24" style="width:100%;height:16px"><line x1="0" y1="12" x2="48" y2="12" stroke="#7c6db8" stroke-width="1.2" stroke-dasharray="4,3"/></svg>
+        <span class="divider-badge">范式跃迁</span>
+        <svg viewBox="0 0 48 24" style="width:100%;height:16px"><line x1="0" y1="12" x2="48" y2="12" stroke="#c6802e" stroke-width="1.5" marker-end="url(#arr-amber2)"/><defs><marker id="arr-amber2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#c6802e"/></marker></defs></svg>
       </div>
     </div>
 
-    <!-- ── Conclusion ── -->
-    <div class="conclusion">
-      <div class="conclusion-header">
-        <div class="icon">⚡</div>
-        <h3>Token — 未来的算力基础设施</h3>
-      </div>
-      <p>
-        本质上，这是一场<strong>智能增益与成本膨胀的博弈</strong>。更高的自主性与任务泛化能力背后，是指数级增长的 token 需求，这是架构上的必然。<br><br>
-        Token 将成为未来的算力基础设施——<strong>像电力一样不可或缺</strong>，同时<strong>像货币一样被定价、交易，乃至成为投机标的</strong>。在 Prompt → Context → Harness → Loop 的每一步升维中，我们获得的每一分智能，都以 token 为代价。这场博弈的终局，不在于阻止膨胀，而在于让每一枚 token 都物有所值。
-      </p>
+    <div class="evo-stage era-right reveal reveal-d5">
+      <div class="evo-label harness">03 · Harness</div>
+      <div class="evo-icon">🔧</div>
+      <div class="evo-title">工具编排</div>
+      <div class="evo-desc">任务外包给工具，但每次调用都将工具描述、参数与结果重新注入上下文，"推理→调用→返回→再推理"循环往复。</div>
+      <span class="evo-token high">~10⁵ tokens</span>
     </div>
 
-    <!-- ── Footer ── -->
-    <div class="footer">
-      AI Engineering · Prompt → Context → Harness → Loop Engineering · 2026
+    <div class="evo-arrow">
+      <svg viewBox="0 0 48 24"><defs><marker id="arr-amber" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#c6802e"/></marker></defs><line x1="0" y1="12" x2="40" y2="12" stroke="#c6802e" stroke-width="1.5" marker-end="url(#arr-amber)"/></svg>
+    </div>
+
+    <div class="evo-stage era-right reveal reveal-d5">
+      <div class="evo-label loop">04 · Loop</div>
+      <div class="evo-icon">🔄</div>
+      <div class="evo-title">自主循环</div>
+      <div class="evo-desc">模型进入自主循环，每步重审历史。嵌套探索与多智能体协作，token 按"决策树分支 × 反思深度"指数膨胀。</div>
+      <span class="evo-token max">~10⁶+ tokens</span>
     </div>
 
   </div>
 
-  <script>
-    // ── Theme Switcher ──
-    const btns = document.querySelectorAll('.theme-btn');
-    btns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.documentElement.setAttribute('data-theme', btn.dataset.theme);
-        btns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
+  <!-- Section Title -->
+  <div class="section-title reveal reveal-d6">
+    <div class="line"></div>
+    <span>▸ 每一次范式递进，都是对模型潜能的"升维释放"</span>
+    <div class="line"></div>
+  </div>
 
-    // ── Animate token bars on scroll into view ──
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const fills = entry.target.querySelectorAll('.token-bar-fill');
-          fills.forEach(fill => {
-            const targetWidth = fill.style.width;
-            fill.style.width = '0%';
+  <!-- Three Detail Cards -->
+  <div class="detail-cards">
+
+    <div class="detail-card d1 reveal reveal-d6">
+      <div class="dc-step">2025 · Prompt → Context</div>
+      <h3>编排式工作流<br>从一问一答到上下文装配</h3>
+      <div class="dc-body">
+        单条提示也许只需几百 token，但上下文工程会拼接文档、历史与长文本，窗口从 4K 猛增至 128K 乃至 1M，单次消耗直接跃升几个数量级。
+      </div>
+      <span class="dc-highlight">4K → 128K → 1M tokens</span>
+    </div>
+
+    <div class="detail-card d2 reveal reveal-d6">
+      <div class="dc-step">2026 · Context → Harness</div>
+      <h3>Agent Runtime 起步<br>从静态上下文到工具交互链</h3>
+      <div class="dc-body">
+        看似将任务外包给工具，实际每次调用都要将工具描述、参数与返回结果重新注入上下文，一个简单任务就会产生"推理 → 调用 → 返回 → 再推理"的多次交互，整个对话历史被反复传递，token 消耗成倍甚至平方级增长。
+      </div>
+      <span class="dc-highlight">对话历史反复传递 · 平方级增长</span>
+    </div>
+
+    <div class="detail-card d3 reveal reveal-d6">
+      <div class="dc-step">2026 · Harness → Loop</div>
+      <h3>Agent Runtime 深化<br>从工具调用到自主决策循环</h3>
+      <div class="dc-body">
+        模型进入自主循环，每一步都重审历史。随着嵌套探索与多智能体协作，token 需求按"决策树分支 × 反思深度"指数膨胀，通往更高自主性的代价是指数级增长的 token 消耗。
+      </div>
+      <span class="dc-highlight">决策树分支 × 反思深度</span>
+    </div>
+
+  </div>
+
+  <!-- Token Explosion Visualization -->
+  <div class="token-viz reveal reveal-d7" id="tokenViz">
+    <h3><span class="dot"></span> Token 消耗数量级对比（单次任务估算）</h3>
+    <div class="token-bars">
+      <div class="token-bar-row">
+        <div class="token-bar-label" style="color:var(--blue)">Prompt</div>
+        <div class="token-bar-track">
+          <div class="token-bar-fill prompt" data-width="3%">~10²</div>
+        </div>
+        <div class="token-bar-value" style="color:var(--blue)">百级</div>
+      </div>
+      <div class="token-bar-row">
+        <div class="token-bar-label" style="color:var(--cyan)">Context</div>
+        <div class="token-bar-track">
+          <div class="token-bar-fill context" data-width="15%">~10⁴</div>
+        </div>
+        <div class="token-bar-value" style="color:var(--cyan)">万级</div>
+      </div>
+      <div class="token-bar-row">
+        <div class="token-bar-label" style="color:var(--purple)">Harness</div>
+        <div class="token-bar-track">
+          <div class="token-bar-fill harness" data-width="45%">~10⁵</div>
+        </div>
+        <div class="token-bar-value" style="color:var(--purple)">十万级</div>
+      </div>
+      <div class="token-bar-row">
+        <div class="token-bar-label" style="color:var(--amber)">Loop</div>
+        <div class="token-bar-track">
+          <div class="token-bar-fill loop" data-width="100%">~10⁶+</div>
+        </div>
+        <div class="token-bar-value" style="color:var(--amber)">百万+级</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conclusion -->
+  <div class="conclusion reveal reveal-d7">
+    <div class="conclusion-header">
+      <div class="icon">⚡</div>
+      <h3>Token — 未来的算力基础设施</h3>
+    </div>
+    <p>
+      本质上，这是一场<strong>智能增益与成本膨胀的博弈</strong>。更高的自主性与任务泛化能力背后，是指数级增长的 token 需求，这是架构上的必然。<br><br>
+      Token 将成为未来的算力基础设施——<strong>像电力一样不可或缺</strong>，同时<strong>像货币一样被定价、交易，乃至成为投机标的</strong>。在 Prompt → Context → Harness → Loop 的每一步升维中，我们获得的每一分智能，都以 token 为代价。这场博弈的终局，不在于阻止膨胀，而在于让每一枚 token 都物有所值。
+    </p>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer reveal reveal-d7">
+    AI Engineering · Prompt → Context → Harness → Loop Engineering · 2026
+  </div>
+
+</main>
+
+<script>
+  // Animate token bars on scroll into view
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const fills = entry.target.querySelectorAll('.token-bar-fill');
+        fills.forEach(fill => {
+          const targetWidth = fill.dataset.width;
+          fill.style.width = '0%';
+          requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                fill.style.width = targetWidth;
-              });
+              fill.style.width = targetWidth;
             });
           });
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.3 });
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
 
-    const tokenViz = document.querySelector('.token-viz');
-    if (tokenViz) observer.observe(tokenViz);
-  </script>
+  const tokenViz = document.getElementById('tokenViz');
+  if (tokenViz) observer.observe(tokenViz);
+</script>
 
 </body>
 </html>

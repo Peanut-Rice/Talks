@@ -7,6 +7,8 @@
 - [AI 驱动软件研发机制 · 四区架构](AI-SE.html) — 外网 AI 创造 + 审查 → 安全摆渡 → 内网适配 → 自动部署
 - [金控集团 · 国企智能办公 AI 架构](AI-Architecture.html) — 面向金融控股集团的智能化办公架构方案（含企业指标数据能力发布平台）
 - [金控集团 · 审计条线 AI 应用规划](ai-audit.html) — 面向金融控股集团审计条线的 AI 应用规划
+- [大模型在审计条线的应用 · 交流材料](AI-Audit-PPT.html) — 大模型用于审计领域的 PPT 风格幻灯片（13 页翻页式）
+- [AI Engineering · Prompt → Context → Harness → Loop](AI-Engineering.html) — 大模型应用深化的四次升维：从 Prompt 到 Loop Engineering
 - [从 Workflow 到 Agent：企业AI应用的范式转移](workflow-to-agent.html) — Agent 时代，企业通过构建 Agent Runtime 将业务知识、工具能力和领域 Skill 封装为可复用能力
 
 ## 更新日志

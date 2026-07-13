@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>从 Workflow 到 Agent：企业AI应用的范式转移</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ========================================================================
+   RESET & BASE
+   ======================================================================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Noto Sans SC', 'DM Sans', -apple-system, sans-serif;
+  background: #f4f2ef;
+  color: #1a1f2e;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ========================================================================
+   DESIGN TOKENS — Light Slate Teal
+   ======================================================================== */
+:root {
+  --bg-page: #f4f2ef;
+  --bg-card: #ffffff;
+  --bg-tag: #f0f4f6;
+  --text-primary: #1a1f2e;
+  --text-secondary: #4a5568;
+  --text-muted: #7a8699;
+  --accent: #2d9d73;
+  --accent-alt: #4a85a8;
+  --accent-light: rgba(45, 157, 115, 0.08);
+  --border: #e2e6ea;
+  --border-image: #d5dce3;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.08);
+}
+
+/* ========================================================================
+   TOP ACCENT BAR
+   ======================================================================== */
+.top-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-alt) 55%, transparent 100%);
+}
+
+/* ========================================================================
+   PAGE CONTAINER
+   ======================================================================== */
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 80px 60px 48px 60px;
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+}
+
+/* ========================================================================
+   EYEBROW
+   ======================================================================== */
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 20px; height: 1px;
+  background: var(--accent);
+  opacity: 0.5;
+}
+
+/* ========================================================================
+   TITLE
+   ======================================================================== */
+.title {
+  font-family: 'DM Sans', 'Noto Sans SC', sans-serif;
+  font-weight: 700; font-size: 2.6rem;
+  line-height: 1.25;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  margin-bottom: 24px;
+}
+.title .hl {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-alt) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ========================================================================
+   STAT BADGES
+   ======================================================================== */
+.stat-row {
+  display: flex; gap: 12px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.stat-badge {
+  background: var(--bg-tag);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  text-align: center;
+  min-width: 80px;
+}
+.stat-badge .stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 17px; font-weight: 500;
+  color: var(--accent);
+  line-height: 1;
+}
+.stat-badge .stat-desc {
+  font-size: 11px; color: var(--text-muted);
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+.stat-badge.arrow-badge {
+  background: transparent;
+  border-color: transparent;
+}
+.stat-badge.arrow-badge .stat-label {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+/* ========================================================================
+   BODY TEXT
+   ======================================================================== */
+.body-text {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 0.95rem; font-weight: 350;
+  line-height: 1.95;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+}
+.body-text + .body-text {
+  margin-top: 14px;
+}
+.body-text .highlight-phrase {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.body-text .highlight-teal {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ========================================================================
+   IMAGE FRAME
+   ======================================================================== */
+.image-frame {
+  background: var(--bg-card);
+  border: 1px solid var(--border-image);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+.image-frame img {
+  display: block;
+  width: 100%; height: auto;
+  object-fit: contain;
+}
+
+/* ========================================================================
+   FOOTER
+   ======================================================================== */
+.footer-bar {
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.footer-tags {
+  display: flex; gap: 20px;
+  flex-wrap: wrap;
+}
+.footer-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.footer-tag.accent {
+  color: var(--accent);
+}
+.page-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+
+/* ========================================================================
+   REVEAL ANIMATIONS
+   ======================================================================== */
+.reveal {
+  opacity: 0; transform: translateY(20px);
+  animation: revealUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.reveal-d1 { animation-delay: 0.08s; }
+.reveal-d2 { animation-delay: 0.20s; }
+.reveal-d3 { animation-delay: 0.32s; }
+.reveal-d4 { animation-delay: 0.44s; }
+.reveal-d5 { animation-delay: 0.56s; }
+.reveal-d6 { animation-delay: 0.68s; }
+.reveal-d7 { animation-delay: 0.80s; }
+
+@keyframes revealUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
+
+/* ========================================================================
+   RESPONSIVE — Desktop: Landscape / Wide (default)
+   Side-by-side: image left, text right
+   ======================================================================== */
+.main-grid {
+  display: flex; align-items: center; gap: 64px;
+}
+.image-col {
+  flex: 0 0 48%;
+  max-width: 560px;
+}
+.text-col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ========================================================================
+   RESPONSIVE — Mobile / Narrow
+   Stacked: image top, text below
+   ======================================================================== */
+@media (max-width: 860px), (orientation: portrait) and (max-width: 1024px) {
+
+  .page {
+    padding: 60px 24px 40px 24px;
+    justify-content: flex-start;
+  }
+
+  .main-grid {
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  .image-col {
+    flex: unset;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+
+  .body-text {
+    font-size: 0.9rem;
+    line-height: 1.85;
+  }
+
+  .footer-bar {
+    margin-top: 32px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 480px) {
+  .page {
+    padding: 48px 16px 32px 16px;
+  }
+  .title {
+    font-size: 1.5rem;
+  }
+  .stat-row {
+    gap: 8px;
+  }
+  .stat-badge {
+    padding: 8px 12px;
+  }
+  .stat-badge .stat-label {
+    font-size: 15px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Top accent bar -->
+<div class="top-bar"></div>
+
+<!-- ========================================================================
+     PAGE CONTENT
+     ======================================================================== -->
+<main class="page">
+
+  <!-- Two-column grid -->
+  <div class="main-grid">
+
+    <!-- LEFT: Image -->
+    <div class="image-col reveal reveal-d1">
+      <div class="image-frame">
+        <img src="images/Workflow vs Agent.png" alt="Workflow vs Agent">
+      </div>
+    </div>
+
+    <!-- RIGHT: Content -->
+    <div class="text-col">
+      <div class="eyebrow reveal reveal-d2">Enterprise AI · Paradigm Shift</div>
+
+      <h1 class="title reveal reveal-d3">
+        从 <span class="hl">Workflow</span> 到 <span class="hl">Agent</span><br>企业AI应用的范式转移
+      </h1>
+
+      <!-- Key contrast badges -->
+      <div class="stat-row reveal reveal-d4">
+        <div class="stat-badge">
+          <div class="stat-label">Workflow</div>
+          <div class="stat-desc">编排 · 固定流程</div>
+        </div>
+        <div class="stat-badge arrow-badge">
+          <div class="stat-label">→</div>
+          <div class="stat-desc">范式转移</div>
+        </div>
+        <div class="stat-badge">
+          <div class="stat-label">Agent</div>
+          <div class="stat-desc">Runtime · 自主完成</div>
+        </div>
+      </div>
+
+      <!-- Body text -->
+      <p class="body-text reveal reveal-d5">
+        <span class="highlight-phrase">Workflow时代</span>，企业通过编排流程实现AI应用；<br>
+        <span class="highlight-phrase">Agent时代</span>，企业通过构建Agent Runtime，将业务知识、工具能力和领域Skill封装成可复用能力，快速生成解决业务问题的智能应用。
+      </p>
+      <p class="body-text reveal reveal-d6">
+        Agent的价值不在于替代Workflow，而在于<span class="highlight-phrase">突破固定流程的限制</span>，让AI从"执行流程"走向<span class="highlight-phrase">"完成任务"</span>。
+      </p>
+      <p class="body-text reveal reveal-d7" style="font-size:0.85rem; color:var(--text-muted);">
+        对于金融集团这种业务复杂、制度密集、数据丰富的组织，这种模式比单纯建设大量Dify类应用更有长期价值。我们正在构建的 <span class="highlight-teal">Enterprise Knowledge Runtime + Skill资产体系</span>，本质上就是在做这种企业级Agent基础设施。
+      </p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-bar reveal reveal-d7">
+    <div class="footer-tags">
+      <span class="footer-tag accent">Enterprise AI</span>
+      <span class="footer-tag">FinTech Group</span>
+      <span class="footer-tag">Agent Infrastructure</span>
+    </div>
+    <div class="page-num">01 / 01</div>
+  </div>
+
+</main>
+
+</body>
+</html>

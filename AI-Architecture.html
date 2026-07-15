@@ -58,8 +58,11 @@
     .subtitle { color: var(--text-secondary); font-size: 0.8rem; margin-left: 1.75rem; }
     .diagram-container {
       background: var(--bg-card); border-radius: 1rem; border: 1px solid var(--border);
-      padding: 1.5rem; overflow-x: auto; transition: background 0.3s, border-color 0.3s;
+      padding: 1.5rem; overflow: auto; cursor: grab;
+      transition: background 0.3s, border-color 0.3s;
     }
+    .diagram-container.dragging { cursor: grabbing; user-select: none; }
+    .diagram-container.dragging * { user-select: none; }
     .diagram-container svg { width: 100%; min-width: 1200px; display: block; filter: var(--svg-filter); transition: filter 0.4s; }
     .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.875rem; margin-top: 1rem; }
     .card { background: var(--bg-card); border-radius: 0.75rem; border: 1px solid var(--border); padding: 1rem; transition: background 0.3s, border-color 0.3s; }
@@ -430,6 +433,25 @@
 
   <script>
     function setTheme(n){document.documentElement.setAttribute('data-theme',n);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.theme-btn.${n}`).classList.add('active');}
+
+    // ── Drag-to-pan for diagram container ──
+    (function(){
+      var el = document.querySelector('.diagram-container');
+      var down = false, sx, sy, sl, st;
+      el.addEventListener('mousedown', function(e){
+        down = true; el.classList.add('dragging');
+        sx = e.pageX - el.offsetLeft; sy = e.pageY - el.offsetTop;
+        sl = el.scrollLeft; st = el.scrollTop;
+      });
+      el.addEventListener('mouseleave', function(){ down = false; el.classList.remove('dragging'); });
+      el.addEventListener('mouseup',   function(){ down = false; el.classList.remove('dragging'); });
+      el.addEventListener('mousemove', function(e){
+        if (!down) return;
+        e.preventDefault();
+        el.scrollLeft = sl - (e.pageX - el.offsetLeft - sx);
+        el.scrollTop  = st - (e.pageY - el.offsetTop  - sy);
+      });
+    })();
   </script>
 </body>
 </html>

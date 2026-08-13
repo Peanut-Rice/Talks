@@ -4,6 +4,7 @@
 
 ## 文档索引
 
+- [E-Work · 你的 AI 同事](e-work-intro.html) — 集团内网 AI 智能助手使用手册：三种工作方式、六项核心技能与 addoil 出错兜底机制
 - [AI 驱动软件研发机制 · 四区架构](AI-SE.html) — 外网 AI 创造 + 审查 → 安全摆渡 → 内网适配 → 自动部署
 - [金控集团 · 国企智能办公 AI 架构](AI-Architecture.html) — 面向金融控股集团的智能化办公架构方案（含企业指标数据能力发布平台）
 - [大模型在审计条线的应用 · 交流材料](AI-Audit-PPT.html) — 大模型用于审计领域的 PPT 风格幻灯片（13 页翻页式）
@@ -11,6 +12,9 @@
 - [从 Workflow 到 Agent：企业AI应用的范式转移](workflow-to-agent.html) — Agent 时代，企业通过构建 Agent Runtime 将业务知识、工具能力和领域 Skill 封装为可复用能力
 
 ## 更新日志
+
+### 2026-08-13
+- **新增文档：** E-Work · 你的 AI 同事 ([e-work-intro.html](e-work-intro.html)) — 集团内网 AI 智能助手使用手册。内容整合自 E-Work 项目三份源文件：SOUL.md（人格 + 协议底座）、quickstart（教学入口）、addoil（失败激活开关）
 
 ### 2026-07-27
 - **移除文档：** 金控集团 · 审计条线 AI 应用规划 ([ai-audit.html](ai-audit.html)) — 内容已整合至其他文档

@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI的下一步：从生成答案到生成理解工具</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f7fb;color:#172033;font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+header{max-width:1120px;margin:auto;padding:52px 24px 28px}
+h1{font-size:38px;line-height:1.2;margin:0 0 15px;letter-spacing:-1.2px}
+.lead{font-size:19px;line-height:1.8;color:#5d687b;max-width:900px}
+main{max-width:1120px;margin:auto;padding:0 24px 70px}
+.card{background:#fff;border:1px solid #e2e7ef;border-radius:20px;padding:28px;margin-bottom:18px;box-shadow:0 10px 30px rgba(20,35,60,.05)}
+.hero{padding:34px}
+.big{font-size:27px;line-height:1.55;font-weight:650;max-width:900px}
+.highlight{display:inline-block;background:#eef2ff;border-radius:9px;padding:2px 8px}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:26px}
+.flow .step{position:relative;text-align:center;padding:19px 12px;background:#f4f6fa;border-radius:14px}
+.flow .step:not(:last-child):after{content:"→";position:absolute;right:-15px;top:25px;color:#8792a5;font-size:20px;z-index:2}
+.step b{display:block;margin-bottom:7px}.step small{color:#697589;line-height:1.5}
+h2{font-size:24px;margin:0 0 13px}h3{font-size:17px;margin:0 0 9px}
+p{line-height:1.8;margin:9px 0}
+.quote{background:#f7f8fa;border-radius:12px;padding:18px;line-height:1.9}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{border:1px solid #e3e7ee;border-radius:14px;padding:19px}
+.panel.bad{background:#fafafa}.panel.good{background:#f8faff}
+.tag{display:inline-block;padding:5px 9px;border-radius:8px;background:#e9edf4;color:#536074;font-size:12px;margin-bottom:10px}
+.tag.goodtag{background:#e9efff}
+.reason{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.reason div{padding:14px;background:#f7f8fa;border-radius:12px}
+.reason b{display:block;margin-bottom:6px}.reason span{font-size:13px;color:#697589;line-height:1.5}
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tool{padding:20px;border-radius:14px;background:#f5f7fb;cursor:pointer;border:2px solid transparent}
+.tool:hover,.tool.active{border-color:#172033;background:#fff}
+.tool b{display:block;font-size:17px;margin-bottom:7px}.tool span{font-size:13px;color:#687488;line-height:1.55}
+.toolDetail{margin-top:14px;padding:20px;background:#f8f9fb;border-radius:14px;min-height:100px;line-height:1.8}
+.diagram{padding:20px;text-align:center;background:#f7f8fa;border-radius:14px}
+.nodes{display:flex;justify-content:center;align-items:center;gap:9px;flex-wrap:wrap;margin:15px 0}
+.node{padding:12px 16px;background:#fff;border:1px solid #dce2eb;border-radius:10px}.arrow{color:#7a879a}
+.sim{display:grid;grid-template-columns:260px 1fr;gap:20px}
+input[type=range]{width:100%}
+.result{padding:20px;background:#111827;color:#eef2f7;border-radius:14px;min-height:180px;line-height:1.9}
+textarea{width:100%;min-height:100px;border:1px solid #d7dde7;border-radius:12px;padding:14px;font:inherit;line-height:1.6}
+button{border:0;border-radius:10px;background:#172033;color:white;padding:11px 16px;cursor:pointer;margin-top:9px}
+.prompt{background:#eef2ff;border-radius:12px;padding:17px;line-height:1.7}
+.quote strong{color:#172033}
+@media(max-width:800px){
+.flow{grid-template-columns:1fr}.flow .step:not(:last-child):after{content:"↓";right:auto;top:auto;bottom:-17px;left:50%}
+.compare,.sim{grid-template-columns:1fr}.reason,.tools{grid-template-columns:1fr 1fr}h1{font-size:30px}
+}
+
+.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.metric{padding:18px;border:1px solid rgba(0,0,0,.09);border-radius:14px;background:#fff}
+.metric-label{font-size:13px;opacity:.65;margin-bottom:6px}
+.metric-value{font-size:28px;font-weight:800}
+.app-canvas{display:flex;flex-wrap:wrap;gap:10px;padding:20px;border-radius:16px;background:rgba(0,0,0,.035);min-height:90px}
+.app-card{padding:12px 16px;border-radius:12px;background:#fff;border:1px solid rgba(0,0,0,.09);font-weight:700}
+.cap-line{width:100%;margin-top:8px;padding-top:14px;border-top:1px dashed rgba(0,0,0,.18);font-size:14px;opacity:.75}
+.explain{margin-top:14px;padding:18px;border-radius:14px;background:#f6f7f9;line-height:1.7}
+.insight{margin-top:16px;padding:16px;border-left:4px solid currentColor;background:rgba(0,0,0,.035);line-height:1.7}
+@media(max-width:700px){.metric-grid{grid-template-columns:1fr}.controls label{display:block;margin-bottom:16px}}
+
+#fixed-question{font-size:clamp(22px,3vw,34px);font-weight:800;line-height:1.35;padding:18px 22px;border:1px solid rgba(0,0,0,.10);border-radius:16px;background:#fff;margin:12px 0 20px}
+</style>
+</head>
+<body>
+<header>
+<h1>AI的下一步：从生成答案到生成理解工具</h1>
+<div class="lead">当 AI 越来越擅长生产内容，内容本身会越来越便宜。新的瓶颈可能不再是“谁能得到答案”，而是“谁能更快理解答案、验证答案并做出判断”。</div>
+</header>
+
+<main>
+<section class="card hero">
+<div class="big">
+AI 能做的事情越来越多。<br>
+人需要亲自完成的事情越来越少。<br><br>
+所以人的工作会逐渐上移：<span class="highlight">从生产，走向理解、判断和监督。</span>
+</div>
+<div class="flow">
+<div class="step"><b>AI 能力提升</b><small>生成、分析、执行越来越便宜</small></div>
+<div class="step"><b>内容变便宜</b><small>报告、代码、图表都可以快速生成</small></div>
+<div class="step"><b>理解成为瓶颈</b><small>人仍然需要知道发生了什么</small></div>
+<div class="step"><b>AI 设计解释</b><small>不只给答案，还设计理解过程</small></div>
+<div class="step"><b>人负责判断</b><small>目标、取舍、责任仍由人承担</small></div>
+</div>
+</section>
+
+<section class="card">
+<h2>一个简单实验：同一个思想，可以怎样表达？</h2>
+<p>核心问题：<strong>为什么企业 AI 要从“应用建设”走向“能力建设”？</strong></p>
+<div class="compare">
+<div class="panel bad">
+<div class="tag">普通咨询式表达</div>
+<div class="quote">随着大模型技术快速演进，企业 AI 建设正逐渐从单点场景探索迈向体系化能力重塑。企业需要通过平台化、组件化和知识资产化，形成可复用、可组合、可持续演进的 AI 能力体系，从而避免应用孤岛，并构建长期竞争优势。</div>
+</div>
+<div class="panel good">
+<div class="tag goodtag">接近 ASD-STE100</div>
+<div class="quote">
+企业可以建设很多 AI 应用。<br>
+每个应用可以解决一个问题。<br><br>
+但是，一个应用通常只服务一个场景。<br>
+另一个应用不能直接使用它的能力。<br><br>
+因此，应用数量增加，不一定带来企业能力增加。<br><br>
+企业需要把知识、规则和流程沉淀成能力。<br>
+多个应用可以使用同一个能力。<br>
+企业也可以持续改进这个能力。
+</div>
+</div>
+</div>
+<div class="reason">
+<div><b>短句</b><span>减少工作记忆负担</span></div>
+<div><b>单一动作</b><span>降低句法解析成本</span></div>
+<div><b>统一术语</b><span>减少概念切换</span></div>
+<div><b>显式因果</b><span>减少推理成本</span></div>
+</div>
+</section>
+
+<section class="card">
+<h2>ASD-STE 真正有价值的地方</h2>
+<p>它不是简单地要求“把文章写得更简单”。它迫使 AI 把“应用为什么不够、能力为什么重要”拆成可以逐句验证的因果链。</p>
+<div class="prompt">
+<strong>因为：</strong>一个 AI 应用通常只解决一个具体场景。<br>
+<strong>所以：</strong>企业建设很多应用，不等于企业获得很多可复用能力。<br>
+<strong>因为：</strong>知识、规则和流程没有被沉淀。<br>
+<strong>所以：</strong>新的应用仍然需要重新建设。<br>
+<strong>因此：</strong>企业需要把知识、规则和流程变成可重复使用的能力。
+</div>
+<p>这样，AI 不只是告诉我们“应该能力建设”。<strong>它把这个判断背后的因果关系拆开，让人可以逐句检查。</strong></p>
+</section>
+
+<section class="card">
+<h2>从“解释”走向“理解工具”</h2>
+<p>不同问题需要不同的认知接口。点击下面四种方式。</p>
+<div class="tools">
+<div class="tool active" onclick="tool(0,this)"><b>ASD-STE</b><span>降低语言歧义</span></div>
+<div class="tool" onclick="tool(1,this)"><b>Diagram</b><span>展示结构和关系</span></div>
+<div class="tool" onclick="tool(2,this)"><b>Interactive Web</b><span>让人自己探索</span></div>
+<div class="tool" onclick="tool(3,this)"><b>Explainer Video</b><span>展示变化和过程</span></div>
+</div>
+<div class="toolDetail" id="toolDetail">适合复杂概念。让 AI 使用短句、统一术语和明确因果关系，把复杂内容变成容易逐句检查的表达。</div>
+</section>
+
+<section class="card">
+<h2>图示：从“应用”看到“能力”</h2>
+<div class="diagram">
+<div style="margin-bottom:8px"><strong>应用建设</strong></div>
+<div class="nodes">
+<div class="node">AI 审计助手</div><div class="node">AI 合规审核</div><div class="node">AI 财务分析</div>
+</div>
+<div style="font-size:22px;margin:8px">↓</div>
+<div style="margin-bottom:8px"><strong>共同沉淀的能力</strong></div>
+<div class="nodes">
+<div class="node">企业知识</div><div class="node">业务规则</div><div class="node">判断标准</div><div class="node">业务流程</div>
+</div>
+<div style="font-size:22px;margin:8px">↓</div>
+<div style="margin-bottom:8px"><strong>能力可以被多个应用重复使用</strong></div>
+<div class="nodes">
+<div class="node">应用 A</div><div class="node">应用 B</div><div class="node">应用 C</div>
+</div>
+</div>
+<p>关键变化不是“少建设应用”。而是<strong>让应用背后的知识、规则和流程成为可复用资产</strong>。</p>
+</section>
+
+<section class="card">
+<h2>交互：为什么“应用越多”不等于“能力越强”？</h2>
+<p>这个实验只观察两个变量：应用数量，以及这些应用对共同能力的复用程度。</p>
+
+<div class="sim">
+  <div>
+    <p><strong>AI 应用数量</strong></p>
+    <input id="systems" type="range" min="1" max="10" value="6" oninput="simulate()">
+    <p><span id="sysnum">6</span> 个应用</p>
+
+    <p><strong>共享同一套能力的应用数量</strong></p>
+    <input id="human" type="range" min="1" max="10" value="1" oninput="simulate()">
+    <p><span id="hnum">1</span> 个</p>
+  </div>
+
+  <div class="result" id="result"></div>
+</div>
+
+<div class="result" style="margin-top:16px">
+  <b>怎么看这个实验？</b><br>
+  当共享数量为 1 时，每个应用基本都在独立建设能力。应用增加，能力也接近按应用数量重复建设。<br><br>
+  当共享数量逐渐接近应用数量时，应用仍然很多，但它们开始复用同一套知识、规则和流程。此时，企业增加的不只是应用，还在形成可复用能力。
+</div>
+
+<div class="result" style="margin-top:16px">
+  <b>注意：</b>这里不是说“应用越少越好”。真正要观察的是：一个能力能不能被多个应用重复使用，并能不能持续改进。
+</div>
+</section>
+
+<section class="card">
+<h2>最后一步：不要再问“给我答案”</h2>
+<p>这里不再让你修改问题。我们固定使用前面的核心问题，直接生成一个“理解工具”。</p>
+
+<div id="fixed-question">
+为什么企业 AI 要从“应用建设”走向“能力建设”？
+</div>
+
+<button onclick="generate()">生成一个“理解工具”</button>
+<div class="result" id="generated">
+这里不会直接给你一篇长文章。它会先把问题拆成三个最小问题，再决定应该怎样帮助你理解。
+</div>
+</section>
+
+<section class="card">
+<h2>核心思想</h2>
+<div class="big">
+不要只问 AI：<br>
+<span class="highlight">“给我答案。”</span><br><br>
+开始问 AI：<br>
+<span class="highlight">“给我一个能让我搞懂这件事情的东西。”</span>
+</div>
+<p style="margin-top:22px">未来 AI 产生的不只是内容。它还可以产生大量一次性的、定制的、用完即丢的认知工具：网页、图、模拟器、动画、视频，甚至一个专门帮助你理解某个问题的小型软件。</p>
+</section>
+</main>
+
+<script>
+function tool(i,el){
+document.querySelectorAll(".tool").forEach(x=>x.classList.remove("active"));el.classList.add("active");
+const a=[
+"适合复杂概念。让 AI 使用短句、统一术语和明确因果关系，把复杂内容变成容易逐句检查的表达。",
+"适合流程、关系、因果和循环。让 AI 把“谁做什么、先后顺序、反馈关系”直接变成视觉结构。",
+"适合存在变量的问题。让 AI 把结论变成可以点击、调整和观察的实验，让用户自己验证因果关系。",
+"适合时间和变化。让 AI 不只写解释词，而是设计“先展示什么、再展示什么”的理解过程。"
+];document.getElementById("toolDetail").textContent=a[i];
+}
+function simulate(){
+let apps=+document.getElementById("systems").value;
+let shared=Math.min(+document.getElementById("human").value, apps);
+document.getElementById("sysnum").textContent=apps;
+document.getElementById("hnum").textContent=shared;
+
+let reusableCapabilities = 1 + (apps-shared);
+let reuseRate = Math.round(shared/apps*100);
+
+document.getElementById("result").innerHTML=
+"应用数量：<b>"+apps+" 个</b><br>"+
+"共享同一能力的应用：<b>"+shared+" 个</b><br>"+
+"可复用能力组：<b>"+reusableCapabilities+" 个</b><br>"+
+"能力复用率：<b>"+reuseRate+"%</b><br><br>"+
+(shared===1
+?"现在主要是在增加应用。不同应用仍然需要分别建设知识、规则和流程。"
+:shared===apps
+?"现在 "+apps+" 个应用共同复用一套能力。新增应用不需要重新建设同一套知识、规则和流程。"
+:"现在有 "+shared+" 个应用共享同一能力。企业开始把一部分建设工作从“做一个应用”转向“沉淀一个能力”。");
+}
+
+function generate(){
+const q="为什么企业 AI 要从“应用建设”走向“能力建设”？";
+document.getElementById("generated").innerHTML=
+"<b>问题：</b>"+q+"<br><br>"+
+"<b>① 它是什么？</b><br>企业 AI 的建设对象，不只是一个个 AI 应用，也包括可以被多个应用重复使用的知识、规则、流程和判断标准。<br><br>"+
+"<b>② 它解决什么问题？</b><br>因为每个应用都独立建设，会产生重复建设和能力孤岛。所以企业需要把应用中的共性能力沉淀下来。<br><br>"+
+"<b>③ 它怎样工作？</b><br>发现共性能力 → 沉淀知识、规则和流程 → 多个应用复用同一能力 → 持续改进能力 → 新应用继续复用。<br><br>"+
+"<b>关键变化：</b>建设对象从“一个个应用”扩大到“应用背后可以复用的能力”。";
+}
+</script>
+
+
+
+</body>
+</html>

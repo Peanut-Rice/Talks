@@ -4,7 +4,7 @@
 
 ## 文档索引
 
-- [让 AI 帮你理解 · 从文字到认知工具](ai_understanding_asd_ste100.html) — 认知实验：从普通文字、ASD-STE100 短句、Diagram 到 Interactive Web / Explainer Video 的五级理解路径
+- [让 AI 帮你理解 · 从文字到认知工具](ai_understanding_asd_ste100.html) — 学习笔记：回到"我自己怎么才算真的懂了"，五级理解路径（普通文字 → ASD-STE100 短句 → Diagram → Interactive Web → Explainer Video）
 - [E-Work · 你的 AI 同事](e-work-intro.html) — 集团内网 AI 智能助手使用手册：三种工作方式、六项核心技能与 addoil 出错兜底机制
 - [AI 驱动软件研发机制 · 四区架构](AI-SE.html) — 外网 AI 创造 + 审查 → 安全摆渡 → 内网适配 → 自动部署
 - [金控集团 · 国企智能办公 AI 架构](AI-Architecture.html) — 面向金融控股集团的智能化办公架构方案（含企业指标数据能力发布平台）
@@ -15,7 +15,7 @@
 ## 更新日志
 
 ### 2026-10-03
-- **新增文档：** 让 AI 帮你理解 · 从文字到认知工具 ([ai_understanding_asd_ste100.html](ai_understanding_asd_ste100.html)) — 固定浅色主题单页。用标签页对比五种表达方式（普通文字 / ASD-STE100 / Diagram / Interactive Web / Explainer Video）对歧义、结构可见性与理解成本的影响，并附一个"问题编译"模拟器：把输入概念拆成短句、单一动作与明确因果
+- **新增文档：** 让 AI 帮你理解 · 从文字到认知工具 ([ai_understanding_asd_ste100.html](ai_understanding_asd_ste100.html)) — 固定浅色主题单页，是这条学习线上第一次把镜头从"AI 能做什么"转向"我自己怎么才算真的懂了"。对比五种表达方式（普通文字 / ASD-STE100 / Diagram / Interactive Web / Explainer Video）对歧义、结构可见性与理解成本的影响，并附一个"问题编译"模拟器：把概念拆成短句、单一动作与明确因果，落点是"它是什么 / 解决什么问题 / 怎样工作"三问
 
 ### 2026-08-13
 - **新增文档：** E-Work · 你的 AI 同事 ([e-work-intro.html](e-work-intro.html)) — 集团内网 AI 智能助手使用手册。内容整合自 E-Work 项目三份源文件：SOUL.md（人格 + 协议底座）、quickstart（教学入口）、addoil（失败激活开关）

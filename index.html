@@ -153,38 +153,25 @@
 
     <!-- File List -->
     <div class="file-list" id="file-list">
-      <!-- ============================================
-          添加新文档：复制下面的 file-card 模板，填入信息
-          ============================================ -->
-
-      <!-- 模板示例（注释内，避免链接检查误判）：
-      <a href="文件名.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">显示名称 <span class="badge new">NEW</span></div>
-          <div class="file-desc">一句话描述文档内容</div>
-          <div class="file-meta">
-            <span>2026-06-16</span>
-            <span>作者</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
+      <!--
+        添加新文档：复制下面的结构，填入信息。
+        注意：用 &lt; &gt; 转义，不要写成真实标签 —— HTML 注释不能嵌套，
+        模板里若出现真实的 <a> 会被浏览器当作真节点（污染统计且留下死链）。
       -->
-
-      <!-- 条目：DESIGN-SYSTEM.md（规范类，不计入"文档"统计） -->
-      <a href="DESIGN-SYSTEM.md" class="file-card" data-kind="index">
-        <div class="file-icon md">MD</div>
-        <div class="file-info">
-          <div class="file-name">设计规范 · Design System <span class="badge index">规范</span></div>
-          <div class="file-desc">视觉规则的事实来源：中文走系统字体、拉丁与数字走等宽、配色家族、验证方法。改视觉前先读</div>
-          <div class="file-meta">
-            <span>2026-10-03</span>
-            <span>—</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
+      <pre class="card-template" hidden>
+&lt;a href="文件名.html" class="file-card"&gt;
+  &lt;div class="file-icon html"&gt;HTML&lt;/div&gt;
+  &lt;div class="file-info"&gt;
+    &lt;div class="file-name"&gt;显示名称 &lt;span class="badge new"&gt;NEW&lt;/span&gt;&lt;/div&gt;
+    &lt;div class="file-desc"&gt;一句话描述文档内容&lt;/div&gt;
+    &lt;div class="file-meta"&gt;
+      &lt;span&gt;2026-06-16&lt;/span&gt;
+      &lt;span&gt;作者&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;span class="file-arrow"&gt;→&lt;/span&gt;
+&lt;/a&gt;
+      </pre>
 
       <!-- 条目：ai_understanding_tool.html -->
       <a href="ai_understanding_tool.html" class="file-card">
@@ -322,15 +309,13 @@
       });
     });
 
-    // Stats: count docs (规范/索引类卡片不计入), pick latest date
+    // Stats: count docs, pick latest date
     (() => {
-      const all = [...document.querySelectorAll('.file-card')];
-      const docs = all.filter(c => c.dataset.kind !== 'index');
-      document.getElementById('doc-count').textContent = docs.length;
+      const cards = document.querySelectorAll('.file-card');
+      document.getElementById('doc-count').textContent = cards.length;
 
-      const dates = docs
-        .map(c => c.querySelector('.file-meta span:first-child'))
-        .map(s => s && s.textContent.trim())
+      const dates = [...document.querySelectorAll('.file-meta span:first-child')]
+        .map(s => s.textContent.trim())
         .filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d))
         .sort()
         .reverse();

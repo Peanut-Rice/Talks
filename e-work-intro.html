@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>E-Work · 你的 AI 同事</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    E-Work 使用手册 — 单文件 / 零外网依赖 / 系统字体栈
@@ -22,7 +25,8 @@
   --line:#e7e2d6;          /* 边框 */
   --hero-bg:#132a22;       /* Hero 深绿底 */
   --font:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Segoe UI",sans-serif;
-  --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  /* 排版升级：数字与拉丁用 JetBrains Mono，中文沿用系统 CJK 字体（零额外下载） */
+  --mono:"JetBrains Mono","SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
 }
 
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -107,7 +111,7 @@ h2{font-size:32px;font-weight:800;color:var(--brand-deep);margin-bottom:14px;let
 .btn-ghost{background:transparent;color:#f2efe7;border:1px solid rgba(242,239,231,.35);}
 .btn-ghost:hover{border-color:var(--gold-soft);color:var(--gold-soft);}
 .hero-stats{display:flex;gap:48px;margin-top:56px;flex-wrap:wrap;}
-.hero-stat .num{font-size:34px;font-weight:800;color:var(--gold-soft);}
+.hero-stat .num{font-size:34px;font-weight:800;color:var(--gold-soft);font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
 .hero-stat .lbl{font-size:13px;color:#9fb0a7;margin-top:2px;}
 
 /* === 是什么 === */
@@ -144,7 +148,7 @@ h2{font-size:32px;font-weight:800;color:var(--brand-deep);margin-bottom:14px;let
   content:"";position:absolute;top:0;left:0;right:0;height:4px;
   background:linear-gradient(90deg,var(--gold),var(--gold-soft));
 }
-.way-num{font-family:var(--mono);font-size:13px;color:var(--gold);font-weight:700;letter-spacing:1px;}
+.way-num{font-family:var(--mono);font-size:13px;color:var(--gold);font-weight:700;letter-spacing:1px;font-variant-numeric:tabular-nums;}
 .way h3{font-size:20px;font-weight:800;color:var(--brand-deep);margin:10px 0 8px;}
 .way p{font-size:14px;color:var(--ink-soft);margin-bottom:16px;}
 .way-ex{
@@ -167,7 +171,7 @@ h2{font-size:32px;font-weight:800;color:var(--brand-deep);margin-bottom:14px;let
   color:#fff;font-weight:800;font-size:15px;
 }
 .skill h3{font-size:17px;font-weight:800;color:var(--brand-deep);}
-.skill .trigger{font-size:12px;color:var(--ink-soft);font-family:var(--mono);}
+.skill .trigger{font-size:12px;color:var(--ink-soft);font-family:var(--font);}
 .skill .say{
   font-size:13.5px;color:var(--ink-soft);border-left:3px solid var(--gold-soft);
   padding-left:12px;margin-top:12px;
@@ -249,7 +253,7 @@ h2{font-size:32px;font-weight:800;color:var(--brand-deep);margin-bottom:14px;let
 .tip{
   background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;
 }
-.tip .n{font-family:var(--mono);color:var(--gold);font-weight:700;font-size:13px;}
+.tip .n{font-family:var(--mono);color:var(--gold);font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;}
 .tip h3{font-size:15px;font-weight:700;color:var(--brand-deep);margin:8px 0 6px;}
 .tip p{font-size:14px;color:var(--ink-soft);}
 .ending-cta{font-size:18px;color:var(--brand-deep);font-weight:700;margin-top:32px;}

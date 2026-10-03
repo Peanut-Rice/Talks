@@ -4,11 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI的下一步：从生成答案到生成理解工具</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* ==== 排版升级（回退方法：删除本 :root 块与上方两行 preconnect + 字体 link）==== */
+:root{
+  /* 中文用系统 CJK 字体（PingFang SC / Microsoft YaHei / Noto Sans SC 本地回退）—— 不下载中文网页字体 */
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans SC","Segoe UI",sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+}
 *{box-sizing:border-box}
-body{margin:0;background:#f5f7fb;color:#172033;font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+body{margin:0;background:#f5f7fb;color:#172033;font-family:var(--sans)}
 header{max-width:1120px;margin:auto;padding:52px 24px 28px}
-h1{font-size:38px;line-height:1.2;margin:0 0 15px;letter-spacing:-1.2px}
+h1{font-size:38px;line-height:1.2;margin:0 0 15px;letter-spacing:-1.2px;font-family:var(--sans)}
 .lead{font-size:19px;line-height:1.8;color:#5d687b;max-width:900px}
 main{max-width:1120px;margin:auto;padding:0 24px 70px}
 .card{background:#fff;border:1px solid #e2e7ef;border-radius:20px;padding:28px;margin-bottom:18px;box-shadow:0 10px 30px rgba(20,35,60,.05)}
@@ -19,13 +28,13 @@ main{max-width:1120px;margin:auto;padding:0 24px 70px}
 .flow .step{position:relative;text-align:center;padding:19px 12px;background:#f4f6fa;border-radius:14px}
 .flow .step:not(:last-child):after{content:"→";position:absolute;right:-15px;top:25px;color:#8792a5;font-size:20px;z-index:2}
 .step b{display:block;margin-bottom:7px}.step small{color:#697589;line-height:1.5}
-h2{font-size:24px;margin:0 0 13px}h3{font-size:17px;margin:0 0 9px}
+h2{font-size:24px;margin:0 0 13px;letter-spacing:-.02em;font-family:var(--sans)}h3{font-size:17px;margin:0 0 9px}
 p{line-height:1.8;margin:9px 0}
 .quote{background:#f7f8fa;border-radius:12px;padding:18px;line-height:1.9}
 .compare{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .panel{border:1px solid #e3e7ee;border-radius:14px;padding:19px}
 .panel.bad{background:#fafafa}.panel.good{background:#f8faff}
-.tag{display:inline-block;padding:5px 9px;border-radius:8px;background:#e9edf4;color:#536074;font-size:12px;margin-bottom:10px}
+.tag{display:inline-block;padding:5px 9px;border-radius:8px;background:#e9edf4;color:#536074;font-size:11px;margin-bottom:10px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase}
 .tag.goodtag{background:#e9efff}
 .reason{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
 .reason div{padding:14px;background:#f7f8fa;border-radius:12px}
@@ -40,9 +49,10 @@ p{line-height:1.8;margin:9px 0}
 .node{padding:12px 16px;background:#fff;border:1px solid #dce2eb;border-radius:10px}.arrow{color:#7a879a}
 .sim{display:grid;grid-template-columns:260px 1fr;gap:20px}
 input[type=range]{width:100%}
-.result{padding:20px;background:#111827;color:#eef2f7;border-radius:14px;min-height:180px;line-height:1.9}
+.result{padding:20px;background:#111827;color:#eef2f7;border-radius:14px;min-height:180px;line-height:1.9;font-variant-numeric:tabular-nums}
 textarea{width:100%;min-height:100px;border:1px solid #d7dde7;border-radius:12px;padding:14px;font:inherit;line-height:1.6}
-button{border:0;border-radius:10px;background:#172033;color:white;padding:11px 16px;cursor:pointer;margin-top:9px}
+button{border:0;border-radius:10px;background:#172033;color:white;padding:11px 16px;cursor:pointer;margin-top:9px;font:inherit;font-weight:600}
+input,textarea{font:inherit}
 .prompt{background:#eef2ff;border-radius:12px;padding:17px;line-height:1.7}
 .quote strong{color:#172033}
 @media(max-width:800px){
@@ -170,11 +180,11 @@ AI 能做的事情越来越多。<br>
   <div>
     <p><strong>AI 应用数量</strong></p>
     <input id="systems" type="range" min="1" max="10" value="6" oninput="simulate()">
-    <p><span id="sysnum">6</span> 个应用</p>
+    <p><span id="sysnum" style="font-family:var(--mono);font-weight:700">6</span> 个应用</p>
 
     <p><strong>共享同一套能力的应用数量</strong></p>
     <input id="human" type="range" min="1" max="10" value="1" oninput="simulate()">
-    <p><span id="hnum">1</span> 个</p>
+    <p><span id="hnum" style="font-family:var(--mono);font-weight:700">1</span> 个</p>
   </div>
 
   <div class="result" id="result"></div>

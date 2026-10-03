@@ -157,7 +157,7 @@
           添加新文档：复制下面的 file-card 模板，填入信息
           ============================================ -->
 
-      <!-- 模板示例：
+      <!-- 模板示例（注释内，避免链接检查误判）：
       <a href="文件名.html" class="file-card">
         <div class="file-icon html">HTML</div>
         <div class="file-info">
@@ -171,6 +171,20 @@
         <span class="file-arrow">→</span>
       </a>
       -->
+
+      <!-- 条目：DESIGN-SYSTEM.md（规范类，不计入"文档"统计） -->
+      <a href="DESIGN-SYSTEM.md" class="file-card" data-kind="index">
+        <div class="file-icon md">MD</div>
+        <div class="file-info">
+          <div class="file-name">设计规范 · Design System <span class="badge index">规范</span></div>
+          <div class="file-desc">视觉规则的事实来源：中文走系统字体、拉丁与数字走等宽、配色家族、验证方法。改视觉前先读</div>
+          <div class="file-meta">
+            <span>2026-10-03</span>
+            <span>—</span>
+          </div>
+        </div>
+        <span class="file-arrow">→</span>
+      </a>
 
       <!-- 条目：ai_understanding_tool.html -->
       <a href="ai_understanding_tool.html" class="file-card">
@@ -308,13 +322,15 @@
       });
     });
 
-    // Stats: count docs, pick latest date
+    // Stats: count docs (规范/索引类卡片不计入), pick latest date
     (() => {
-      const cards = document.querySelectorAll('.file-card');
-      document.getElementById('doc-count').textContent = cards.length;
+      const all = [...document.querySelectorAll('.file-card')];
+      const docs = all.filter(c => c.dataset.kind !== 'index');
+      document.getElementById('doc-count').textContent = docs.length;
 
-      const dates = [...document.querySelectorAll('.file-meta span:first-child')]
-        .map(s => s.textContent.trim())
+      const dates = docs
+        .map(c => c.querySelector('.file-meta span:first-child'))
+        .map(s => s && s.textContent.trim())
         .filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d))
         .sort()
         .reverse();

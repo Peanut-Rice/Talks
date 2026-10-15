@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>从 AI 应用到数字员工 · 初步思考 (beta)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   从 AI 应用到数字员工 — beta 版初步思考
+   单文件 / 中文走系统字体 / 配色复用族 Ⅲ（暖白墨绿金）
+   ============================================================ */
+:root{
+  --bg:#f7f5f0; --ink:#1c2a24; --ink-soft:#5a645e;
+  --brand:#1f4438; --brand-deep:#163229;
+  --gold:#b8860b; --gold-soft:#d4af5e;
+  --card:#ffffff; --line:#e7e2d6;
+  --danger:#8f2f23; --danger-soft:#c4564a;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Segoe UI",sans-serif;
+  --mono:"JetBrains Mono","SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  /* 含中文的微标签用这个：中文必须走无衬线，不能挂在 --mono 上（DESIGN-SYSTEM §1.2） */
+  --label:var(--sans);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--sans);color:var(--ink);background:var(--bg);
+  line-height:1.75;-webkit-font-smoothing:antialiased;
+}
+
+/* === 顶栏 === */
+.nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(247,245,240,.92);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.nav-inner{
+  max-width:940px;margin:0 auto;padding:0 24px;height:52px;
+  display:flex;align-items:center;gap:16px;
+}
+.nav-brand{
+  font-family:var(--sans);font-size:13px;font-weight:700;
+  color:var(--brand);flex-shrink:0;
+}
+.nav-beta{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;
+  background:rgba(184,134,11,.14);color:var(--gold);
+  border:1px solid rgba(212,175,94,.45);border-radius:999px;padding:2px 9px;
+}
+.nav-links{display:flex;gap:16px;list-style:none;margin-left:auto;overflow-x:auto;scrollbar-width:none;}
+.nav-links::-webkit-scrollbar{display:none;}
+/* 微标签：拉丁与数字走等宽，中文走无衬线。
+   JetBrains Mono 无 CJK 字形，中文若挂在该栈上会由浏览器回退渲染、字重与正文不一致
+   —— DESIGN-SYSTEM.md §1.2 明确禁止。含中文的微标签一律用 --label。 */
+.nav-links a{
+  font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.02em;
+  color:var(--ink-soft);text-decoration:none;white-space:nowrap;transition:color .2s;
+  font-variant-numeric:tabular-nums;
+}
+.nav-links a:hover,.nav-links a:focus-visible,.nav-links a.active{color:var(--gold);}
+a:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:3px;}
+
+/* === 通用 === */
+.wrap{max-width:940px;margin:0 auto;padding:0 24px;}
+section{padding:68px 0;border-bottom:1px solid var(--line);}
+section:last-of-type{border-bottom:none;}
+.tag{
+  display:inline-block;font-family:var(--label);font-size:11px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;
+  font-variant-numeric:tabular-nums;
+}
+h2{font-size:26px;font-weight:800;color:var(--brand-deep);letter-spacing:-.02em;line-height:1.35;margin-bottom:12px;}
+h3{letter-spacing:-.01em;}
+.lead{font-size:16px;color:var(--ink-soft);max-width:680px;}
+.lead strong{color:var(--brand-deep);}
+code{
+  font-family:var(--mono);font-size:.87em;background:#efece2;
+  border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--brand);
+}
+
+/* === Hero === */
+.hero{
+  background:
+    radial-gradient(1000px 420px at 85% -10%,rgba(184,134,11,.24),transparent 60%),
+    radial-gradient(800px 360px at 8% 110%,rgba(31,68,56,.58),transparent 55%),
+    #132a22;
+  color:#f2efe7;padding:104px 0 76px;position:relative;overflow:hidden;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(640px 360px at 70% 20%,#000,transparent);
+}
+.hero .wrap{position:relative;z-index:1;}
+.hero-kicker{
+  display:inline-block;font-family:var(--label);font-size:11px;letter-spacing:.14em;
+  font-weight:600;color:var(--gold-soft);border:1px solid rgba(212,175,94,.4);
+  border-radius:999px;padding:5px 15px;margin-bottom:24px;
+}
+.hero h1{font-size:44px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:18px;}
+.hero h1 em{font-style:normal;color:var(--gold-soft);}
+.hero .sub{font-size:18px;color:#c8d2cb;max-width:620px;margin-bottom:12px;}
+.hero .sub-2{font-size:14.5px;color:#9fb0a7;max-width:620px;line-height:1.7;}
+
+/* === 对照表 === */
+.cmp{margin-top:32px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card);}
+.cmp-row{display:grid;grid-template-columns:132px 1fr 1fr;border-bottom:1px solid var(--line);}
+.cmp-row:last-child{border-bottom:none;}
+.cmp-row.head{background:#efece2;}
+.cmp-row.head>div{font-weight:800;color:var(--brand-deep);font-size:13.5px;}
+.cmp-row>div{padding:14px 16px;font-size:13.5px;color:var(--ink-soft);border-right:1px solid var(--line);}
+.cmp-row>div:last-child{border-right:none;}
+.cmp-row .k{
+  font-family:var(--label);font-size:11.5px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--gold);background:#faf8f2;
+  display:flex;align-items:center;
+}
+.cmp-row .a{color:var(--brand-deep);font-weight:600;background:rgba(31,68,56,.035);}
+.cmp-row.head .a,.cmp-row.head .b{background:transparent;}
+
+/* === 存量盘点 === */
+.have-gap{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:32px;}
+.panel{border-radius:14px;padding:24px;border:1px solid var(--line);}
+.panel.have{background:var(--card);}
+.panel.gap{background:var(--brand-deep);color:#e8efe9;border-color:var(--brand-deep);}
+.panel h3{font-size:15px;font-weight:800;margin-bottom:14px;}
+.panel.have h3{color:var(--brand-deep);}
+.panel.gap h3{color:var(--gold-soft);}
+.panel ul{list-style:none;}
+.panel li{
+  font-size:13.5px;padding:8px 0 8px 18px;position:relative;line-height:1.6;
+  border-bottom:1px dashed var(--line);
+}
+.panel.gap li{border-bottom-color:rgba(255,255,255,.1);color:#c8d2cb;}
+.panel li:last-child{border-bottom:none;}
+.panel li::before{content:"";position:absolute;left:0;top:16px;width:6px;height:6px;border-radius:50%;}
+.panel.have li::before{background:var(--brand);opacity:.5;}
+.panel.gap li::before{background:var(--gold);}
+.panel li b{font-weight:700;color:var(--brand-deep);}
+.panel.gap li b{color:#f2efe7;}
+
+/* === 关口 === */
+.gates{margin-top:32px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card);}
+.gate{display:grid;grid-template-columns:56px 170px 1fr;border-bottom:1px solid var(--line);}
+.gate:last-child{border-bottom:none;}
+.gate-n{
+  font-family:var(--mono);font-size:18px;font-weight:700;color:var(--gold);
+  background:#faf8f2;border-right:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;
+}
+.gate-t{padding:18px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:3px;}
+.gate-t b{font-size:14.5px;font-weight:800;color:var(--brand-deep);}
+.gate-t span{font-family:var(--label);font-size:10px;color:var(--ink-soft);letter-spacing:.07em;text-transform:uppercase;}
+.gate-d{padding:18px 20px;}
+.gate-d p{font-size:13.5px;color:var(--ink-soft);margin-bottom:7px;}
+.gate-d p:last-child{margin-bottom:0;}
+.gate-test{font-size:12.5px;color:var(--brand-deep);border-left:3px solid var(--gold-soft);padding-left:11px;}
+.gate-test b{font-family:var(--label);font-size:10px;letter-spacing:.08em;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:2px;}
+
+/* === 岗位 === */
+.roles{margin-top:32px;display:flex;flex-direction:column;gap:14px;}
+.role{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+.role-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px;background:#faf8f2;border-bottom:1px solid var(--line);}
+.role-id{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;
+  background:var(--brand-deep);color:var(--gold-soft);padding:3px 9px;border-radius:6px;
+  font-variant-numeric:tabular-nums;
+}
+.role-name{font-size:15.5px;font-weight:800;color:var(--brand-deep);}
+.role-from{font-size:12.5px;color:var(--ink-soft);margin-left:auto;}
+.role-body{padding:18px 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.role-col h4{
+  font-family:var(--label);font-size:10.5px;letter-spacing:.1em;font-weight:700;
+  color:var(--gold);margin-bottom:6px;
+}
+.role-col p{font-size:13px;color:var(--ink-soft);line-height:1.65;}
+
+/* === 路线 === */
+.phases{margin-top:32px;display:flex;flex-direction:column;gap:16px;}
+.phase-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;border-left:4px solid var(--gold-soft);}
+.phase-when{
+  font-family:var(--label);font-size:11.5px;font-weight:700;letter-spacing:.05em;
+  color:var(--gold);margin-bottom:8px;font-variant-numeric:tabular-nums;
+}
+.phase-card h3{font-size:17px;font-weight:800;color:var(--brand-deep);margin-bottom:6px;}
+.phase-card .goal{font-size:13.5px;color:var(--ink-soft);margin-bottom:14px;}
+.phase-card .goal b{color:var(--brand-deep);}
+.phase-list{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.phase-list li{font-size:13px;color:var(--ink-soft);padding-left:20px;position:relative;line-height:1.6;}
+.phase-list li::before{content:"→";position:absolute;left:0;color:var(--gold-soft);font-weight:700;}
+.phase-list li b{color:var(--brand-deep);}
+
+/* === 公式 === */
+.eq{margin-top:30px;background:var(--brand-deep);border-radius:16px;padding:30px;color:#e8efe9;}
+.eq h3{font-family:var(--label);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:18px;font-weight:700;}
+/* 公式：等宽只作用于运算符与拉丁变量；中文说明走 --label，避免中文落在等宽栈上 */
+.eq-line{font-family:var(--label);font-size:14.5px;line-height:2.1;color:#f2efe7;word-break:break-word;}
+.eq-line .op{font-family:var(--mono);color:var(--gold-soft);font-weight:700;padding:0 6px;}
+.eq-line .var{color:var(--gold-soft);font-weight:600;}
+
+/* === 风险 === */
+.risks{margin-top:30px;display:flex;flex-direction:column;gap:12px;}
+.risk{
+  background:var(--card);border:1px solid var(--line);border-left:4px solid var(--danger-soft);
+  border-radius:12px;padding:20px 22px;
+}
+.risk h3{font-size:15px;font-weight:800;color:var(--danger);margin-bottom:7px;}
+.risk p{font-size:13.5px;color:var(--ink-soft);margin-bottom:7px;}
+.risk p:last-child{margin-bottom:0;}
+.risk .fix{font-size:13px;color:var(--brand-deep);border-left:3px solid var(--gold-soft);padding-left:11px;}
+.risk .fix b{font-family:var(--label);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-right:5px;font-weight:700;}
+
+/* === 决策 === */
+.decisions{margin-top:30px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card);}
+.dec-row{display:grid;grid-template-columns:1.1fr 1fr;border-bottom:1px solid var(--line);}
+.dec-row:last-child{border-bottom:none;}
+.dec-row.head{background:#efece2;}
+.dec-row.head>div{font-family:var(--label);font-size:11px;letter-spacing:.1em;color:var(--brand-deep);font-weight:700;}
+.dec-row>div{padding:15px 18px;font-size:13.5px;color:var(--ink-soft);border-right:1px solid var(--line);line-height:1.65;}
+.dec-row>div:last-child{border-right:none;background:rgba(31,68,56,.035);color:var(--brand-deep);font-weight:600;}
+.dec-row.head>div:last-child{background:transparent;font-weight:700;}
+
+/* === 提示条 === */
+.cut{
+  margin-top:28px;background:#fdfbf5;border:1px solid var(--line);
+  border-left:4px solid var(--gold);border-radius:12px;padding:22px 24px;
+}
+.cut h3{font-size:15px;font-weight:800;color:var(--brand-deep);margin-bottom:8px;}
+.cut p{font-size:13.5px;color:var(--ink-soft);margin-bottom:7px;}
+.cut p:last-child{margin-bottom:0;}
+.cut em{font-style:normal;color:var(--danger);font-weight:700;}
+
+/* === 页脚 === */
+footer{border-top:1px solid var(--line);padding:34px 0;text-align:center;color:var(--ink-soft);font-size:13px;}
+footer .brand{color:var(--brand);font-weight:700;}
+footer .fine{font-size:12px;color:#8d968f;margin-top:8px;line-height:1.7;}
+
+/* === reveal === */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s ease;}
+.reveal.visible{opacity:1;transform:none;}
+
+/* === 响应式 === */
+@media (max-width:820px){
+  .have-gap{grid-template-columns:1fr;}
+  .hero h1{font-size:34px;}
+  .cmp-row{grid-template-columns:104px 1fr 1fr;}
+  .role-body{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:600px){
+  .nav-links{display:none;}
+  .hero{padding:76px 0 56px;}
+  .hero h1{font-size:28px;}
+  section{padding:48px 0;}
+  h2{font-size:21px;}
+  .role-body{grid-template-columns:1fr;}
+  .cmp{overflow-x:auto;}
+  .cmp-row{grid-template-columns:86px 168px 168px;min-width:422px;}
+  .gate{grid-template-columns:42px 1fr;}
+  .gate-t{border-right:none;border-bottom:1px solid var(--line);}
+  .gate-d{grid-column:1 / -1;}
+  .dec-row{grid-template-columns:1fr;}
+  .dec-row>div{border-right:none;border-bottom:1px dashed var(--line);}
+  .dec-row>div:last-child{border-bottom:none;}
+  .dec-row.head{display:none;}
+  .eq{padding:22px 20px;}
+  .eq-line{font-size:12.5px;line-height:1.9;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+  .reveal{opacity:1;transform:none;}
+}
+@media print{
+  .nav{display:none!important;}
+  .hero{padding:32px 0;background:#fff;color:#000;}
+  .hero h1,.hero .sub,.hero .sub-2,.hero h1 em{color:#000;}
+  .hero::after{display:none;}
+  section{padding:24px 0;page-break-inside:avoid;}
+  .reveal{opacity:1;transform:none;}
+  body{font-size:12px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <span class="nav-brand">数字员工 · 初步思考</span>
+    <span class="nav-beta">BETA</span>
+    <ul class="nav-links">
+      <li><a href="#concept">01 分野</a></li>
+      <li><a href="#assets">02 存量</a></li>
+      <li><a href="#gates">03 关口</a></li>
+      <li><a href="#roles">04 岗位</a></li>
+      <li><a href="#roadmap">05 路线</a></li>
+      <li><a href="#value">06 核算</a></li>
+      <li><a href="#risk">07 风险</a></li>
+      <li><a href="#decision">08 待定</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-kicker">BETA · 初步思考 · 仅供内部讨论</div>
+    <h1>从 AI 应用到<em>数字员工</em></h1>
+    <p class="sub">现有架构解决的是「AI 能不能用」；数字员工要回答的是「AI 算不算数」。</p>
+    <p class="sub-2">
+      三库一平台一网关，是把 AI 做成企业资产；数字员工，是把 AI 做成可调度的人力单元。
+      差距不在算力，而在能不能给一个非人类主体开出岗位、权限、考核与问责。
+    </p>
+  </div>
+</header>
+
+<!-- 01 -->
+<section id="concept">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="tag">01 / 分野</span>
+      <h2>数字员工不是技术名词，是一套管理语法</h2>
+      <p class="lead">
+        从「AI 应用」到「数字员工」，中间隔的不是模型能力，而是<strong>主体资格的授予</strong>。
+        一个 AI 系统只有在组织里有了岗位、权限边界、负责人、成本账户和退出机制，
+        才会从「一项 IT 投入」变成「一个可以被管理的劳动力」。
+      </p>
+    </div>
+
+    <div class="cmp reveal">
+      <div class="cmp-row head"><div>维度</div><div class="b">AI 应用 / 能力平台</div><div class="a">数字员工</div></div>
+      <div class="cmp-row"><div class="k">资产</div><div class="b">技术资产</div><div class="a">组织资产</div></div>
+      <div class="cmp-row"><div class="k">单位</div><div class="b">一个技能 / 一次调用</div><div class="a">一个岗位 / 一类任务包</div></div>
+      <div class="cmp-row"><div class="k">责任</div><div class="b">技术部门</div><div class="a">业务负责人</div></div>
+      <div class="cmp-row"><div class="k">价值</div><div class="b">建成了、调用量</div><div class="a">产出可用性、成本、风险</div></div>
+      <div class="cmp-row"><div class="k">权限</div><div class="b">由提示词与工具决定</div><div class="a">由岗位授权决定</div></div>
+      <div class="cmp-row"><div class="k">失败</div><div class="b">不可用 → 修系统</div><div class="a">不合格 → 停岗 / 退役</div></div>
+    </div>
+
+    <div class="cut reveal">
+      <h3>两个要先排除的误解</h3>
+      <p><b>数字员工 ≠ 拟人化。</b>起名字、配头像、说话像人，跟「员工」没关系。分水岭是它能不能被问责。</p>
+      <p><b>数字员工 ≠ 降本裁员。</b>在国企语境里，「替代」是最危险的开场白。可行叙事是<em>补位</em>——接的是重复劳动和编制批不下来的增量工作。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section id="assets">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="tag">02 / 存量</span>
+      <h2>已有的，和真正缺的</h2>
+      <p class="lead">技术侧已具备上岗条件，缺口集中在组织层——<strong>这意味着下一阶段的重心不在写代码</strong>。</p>
+    </div>
+
+    <div class="have-gap reveal">
+      <div class="panel have">
+        <h3>技术侧 · 基本就位</h3>
+        <ul>
+          <li><b>岗位原型</b> — E-Work 已是「AI 同事」定位，六项技能 + 工作承诺</li>
+          <li><b>权限底座</b> — NanoBot 身份注入层（权限断言 → 注入 MCP）</li>
+          <li><b>可追溯</b> — 全量审计日志层（who / when / what）</li>
+          <li><b>记忆与隔离</b> — 会话上下文管理</li>
+          <li><b>知识与数据</b> — 统一知识库、统一指标库</li>
+          <li><b>入口与分发</b> — 三入口已通、Skills Hub 三级技能</li>
+          <li><b>成本与调度</b> — 模型网关五维能力，含用量审计</li>
+          <li><b>失败范式</b> — addoil：不瞎试、不烂尾、有证据、会复盘</li>
+        </ul>
+      </div>
+      <div class="panel gap">
+        <h3>组织侧 · 基本空缺</h3>
+        <ul>
+          <li><b>没有岗位</b> — Skills Hub 里是技能，无职责边界、无验收标准，<b>因此无法被考核</b></li>
+          <li><b>没有业务负责人</b> — 只有技术侧 owner</li>
+          <li><b>没有自主等级</b> — 分级没落到技能上</li>
+          <li><b>没有成本账户</b> — 用量审计是成本项，不是核算项</li>
+          <li><b>没有上岗流程</b> — 培训、试运行、验收、转正、退役全缺</li>
+          <li><b>没有绩效指标</b> — 只能度量调用次数</li>
+          <li><b>没有制度出口</b> — 缺一份数字员工专项制度</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cut reveal">
+      <h3>一句话结论</h3>
+      <p>
+        下一阶段的瓶颈<strong>不是算力、不是模型、不是场景</strong>，
+        而是组织愿不愿意给一个非人类主体发工号。
+      </p>
+      <p>补充参照：据行业标准与从业者口径，数字员工类项目普遍是「<b>三分建设、七分运营</b>」。</p>
+      <p>
+        <b>需要说明的是</b>：这张表里的「技术侧 / 组织侧」是<b>按现有文档清单作出的判断，不是度量结果</b>。
+        它的用途是确定下一步工作重心，不宜作为汇报中的量化结论。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section id="gates">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="tag">03 / 关口</span>
+      <h2>从助手到员工，要跨过七道关口</h2>
+      <p class="lead">
+        按<b>依赖顺序</b>排列，不是按风险高低——后面的关口都建在前面的关口上。
+        前五道决定能不能被<b>管理</b>，后两道决定能不能被<b>信任</b>。
+      </p>
+    </div>
+
+    <div class="gates reveal">
+      <div class="gate">
+        <div class="gate-n">01</div>
+        <div class="gate-t"><b>岗位化</b><span>Job Definition</span></div>
+        <div class="gate-d">
+          <p>技能解决「会什么」，岗位解决「负责什么」。岗位说明书要写清五件事：服务谁、交付什么、什么算达标、什么必须升级给人、谁签字负责。</p>
+          <p>没有岗位就没有产出边界——<b>连「它干得好不好」这个问题都无法提出</b>，后面的考核、问责、成本核算全部无从落地。</p>
+          <div class="gate-test"><b>最小验证</b>能说清「哪件事没做好要挨批」</div>
+        </div>
+      </div>
+      <div class="gate">
+        <div class="gate-n">02</div>
+        <div class="gate-t"><b>身份化</b><span>Identity</span></div>
+        <div class="gate-d">
+          <p>数字工号、独立服务账号、组织归属、状态（试用 / 在岗 / 停岗）。关键：<b>权限要按岗位授予，而不是按使用者</b>——否则换个入口调用就绕过了岗位边界。</p>
+          <div class="gate-test"><b>最小验证</b>能列出「离职时要回收哪些权限」</div>
+        </div>
+      </div>
+      <div class="gate">
+        <div class="gate-n">03</div>
+        <div class="gate-t"><b>授权分级</b><span>Autonomy</span></div>
+        <div class="gate-d">
+          <p><code>L0 只读</code> / <code>L1 生成建议，人工确认</code> / <code>L2 权限内执行，事后抽检</code> / <code>L3 自主决策——总部场景建议不开放</code>。每次调用都要带等级标签，写进审计日志。</p>
+          <div class="gate-test"><b>最小验证</b>日志里能查到「这次是 L1 还是 L2」</div>
+        </div>
+      </div>
+      <div class="gate">
+        <div class="gate-n">04</div>
+        <div class="gate-t"><b>成本核算</b><span>Cost</span></div>
+        <div class="gate-d">
+          <p>给每个数字员工开独立成本账户：token + 人工复核 + 治理 + 维护迭代。这一步让「人力 vs 数字员工」的比较第一次成为可能。</p>
+          <p>注意「等效人力」这个词的用法：同业已有公开的年报口径，但<b>折算系数基本未披露</b>（例如「1,556 万小时 ≈ 8,000 名全职员工」隐含约 1,945 小时/人年，高于法定年工时）。这类数字可用于趋势参照，<b>不宜作为目标值或对外承诺</b>。</p>
+          <div class="gate-test"><b>最小验证</b>能报出「单件产出全成本」，并与真实岗位对比</div>
+        </div>
+      </div>
+      <div class="gate">
+        <div class="gate-n">05</div>
+        <div class="gate-t"><b>上岗准入</b><span>Onboarding</span></div>
+        <div class="gate-d">
+          <p>像招人一样招：业务提需求 → 岗位定义 → 权限审批 → 试运行 → 业务验收 → 正式上岗。试运行期强制并行跑，人工签字负责，数字员工产出只比对不交付。</p>
+          <div class="gate-test"><b>最小验证</b>有一份业务负责人签字的验收单</div>
+        </div>
+      </div>
+      <div class="gate">
+        <div class="gate-n">06</div>
+        <div class="gate-t"><b>问责双签</b><span>Accountability</span></div>
+        <div class="gate-d">
+          <p>规则写死：<b>AI 产出由人负责，业务负责人是第一责任人</b>。每个数字员工配两个责任人——业务负责人（对产出质量与合规负责，有权停用）+ 技术负责人（对可用性、成本、迭代负责），进台账、有名有姓。</p>
+          <p>不能出现的情形：出了事技术说业务用错了、业务说模型不行。这条链路一旦成立，数字员工会变成组织里的<b>责任黑洞</b>。</p>
+          <div class="gate-test"><b>最小验证</b>30 秒内能说出它的业务负责人是谁</div>
+        </div>
+      </div>
+      <div class="gate">
+        <div class="gate-n">07</div>
+        <div class="gate-t"><b>运营与退役</b><span>Lifecycle</span></div>
+        <div class="gate-d">
+          <p>上岗只是开始。要有周期考核、不合格停岗整改、<b>停用与退役条件</b>、以及退役后的能力沉淀与权限回收（退役 ≠ 删除）。</p>
+          <p>这一关最容易被跳过——因为它不出现在任何一次立项汇报里，但它是「项目」和「劳动力」的分界线。全行业公开披露的退役案例目前基本为零。</p>
+          <div class="gate-test"><b>最小验证</b>能说清「什么情况下把它停掉」，以及停掉之后能力归谁</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 -->
+<section id="roles">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="tag">04 / 岗位</span>
+      <h2>三个可先落地的岗位</h2>
+      <p class="lead">选择标准：<strong>制度密度高、产出可验证、不触碰资金与决策</strong>。第一仗要赢，不打最难的仗。</p>
+    </div>
+
+    <div class="roles reveal">
+      <div class="role">
+        <div class="role-head">
+          <span class="role-id">DE-A01</span>
+          <span class="role-name">制度合规问答员</span>
+          <span class="role-from">对应现状：企业制度问答</span>
+        </div>
+        <div class="role-body">
+          <div class="role-col"><h4>交付什么</h4><p>按最新制度原文回答合规口径，标注条款出处、效力层级与生效日期，识别制度冲突。</p></div>
+          <div class="role-col"><h4>什么算达标</h4><p>引用可溯源；时效正确（不引已废止版本）；查不到时明确说「查不到」而不是编造。</p></div>
+          <div class="role-col"><h4>必须升级给人</h4><p>制度冲突、监管处罚认定、涉及具体金额判断、用户追问「能不能这样操作」。</p></div>
+        </div>
+      </div>
+
+      <div class="role">
+        <div class="role-head">
+          <span class="role-id">DE-A02</span>
+          <span class="role-name">审计底稿整理员</span>
+          <span class="role-from">对应现状：pdf-tools + data-analysis + business-writing</span>
+        </div>
+        <div class="role-body">
+          <div class="role-col"><h4>交付什么</h4><p>从审计报告与凭证材料提取问题清单，按子公司与风险等级分类，生成整改跟踪表。</p></div>
+          <div class="role-col"><h4>什么算达标</h4><p>问题条目零遗漏（抽样复核）；分类口径与审计部门既有标准一致；每条可回溯到原始页。</p></div>
+          <div class="role-col"><h4>必须升级给人</h4><p>风险等级定级、问题定性、涉及责任人表述、任何进入正式审计报告的文字。</p></div>
+        </div>
+      </div>
+
+      <div class="role">
+        <div class="role-head">
+          <span class="role-id">DE-A03</span>
+          <span class="role-name">经营指标简报员</span>
+          <span class="role-from">对应现状：MCP-指标库 + smart-weekly-report</span>
+        </div>
+        <div class="role-body">
+          <div class="role-col"><h4>交付什么</h4><p>按周期生成人力效能 / 财务 / 运营 / 风控指标简报，含同比环比、异动提示与图表。</p></div>
+          <div class="role-col"><h4>什么算达标</h4><p>口径与指标库定义一致；数值与源系统一致；异动阈值事先约定、不临时调整。</p></div>
+          <div class="role-col"><h4>必须升级给人</h4><p>异动原因的归因判断、对外披露口径、任何带结论性评价的表述。</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cut reveal">
+      <h3>一个容易漏掉的指标设计</h3>
+      <p>
+        「人工升级率」必须设<strong>下限</strong>，而不只是上限。
+        一个升级率接近零的问答类数字员工，通常不是因为它更聪明，而是因为<em>它在编造</em>。建议区间 10%–20%。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 05 -->
+<section id="roadmap">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="tag">05 / 路线</span>
+      <h2>三阶段，顺序不能颠倒</h2>
+      <p class="lead">第一阶段几乎不需要新增技术投入——如果一上来就上新技术，数字员工会退化成一个「AI 应用」。</p>
+    </div>
+
+    <div class="phases reveal">
+      <div class="phase-card">
+        <div class="phase-when">1–2 个月 · PHASE 01</div>
+        <h3>定义层 · 把岗位写出来</h3>
+        <p class="goal">目标：<b>不新增任何技术，用现有资产跑通一次完整的「数字员工上岗」</b>。产出物全是制度文件。</p>
+        <ul class="phase-list">
+          <li>发布《数字员工管理办法（试行）》：岗位定义、身份授予、自主分级、验收、问责、停用与退役</li>
+          <li>选定 <b>3 个首批岗位</b>，各出一份岗位说明书，指定业务 + 技术双负责人</li>
+          <li>把 Skills Hub 技能<b>重新编组到岗位上</b>（技能仍是共享资产，岗位是调用契约）</li>
+          <li>发数字工号，按岗位而不是按用户授一次权</li>
+          <li>审计日志补 <b>自主等级字段</b>（技术侧唯一改动，工作量很小）</li>
+        </ul>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-when">3–6 个月 · PHASE 02</div>
+        <h3>上岗层 · 跑通影子期</h3>
+        <p class="goal">目标：<b>让 3 个岗位在真实业务里跑满一个完整周期</b>，拿到第一批可信的采纳率与成本数据。</p>
+        <ul class="phase-list">
+          <li>NanoBot <b>岗位化改造</b>：同一技能在不同岗位下受不同权限约束</li>
+          <li>建<b>数字员工工作台</b>：任务派发、产出查看、一键升级人工、一键停用</li>
+          <li>建<b>单人成本账户</b>：四类成本月度归集</li>
+          <li>启动<b>影子运行</b>：与人工并行，人工签字负责，产出只比对不交付</li>
+          <li>按周期统计<b>任务级三率</b>：采纳率、返工率、升级率</li>
+        </ul>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-when">6–18 个月 · PHASE 03</div>
+        <h3>编制层 · 进入劳动力管理</h3>
+        <p class="goal">目标：<b>数字员工出现在年度人力与预算规划里</b>，和真人岗位用同一套语言讨论。</p>
+        <ul class="phase-list">
+          <li>建<b>数字员工编制表</b>，与人员编制并列，纳入年度规划与预算</li>
+          <li>建<b>绩效体系</b>：季度考核，不合格停岗整改，连续不合格退役</li>
+          <li>建<b>退役流程</b>：能力沉淀回 Skills Hub、权限回收、档案归档——<b>退役不等于删除</b></li>
+          <li>开<b>技能跨岗位复用</b>，对应「应用建设 → 能力建设」的命题</li>
+          <li>向<b>监管口径对齐</b>：算法备案、数据安全、个人信息保护、生成式 AI 服务管理</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 -->
+<section id="value">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="tag">06 / 核算</span>
+      <h2>用「等效人力」口径，不用「提效百分比」</h2>
+      <p class="lead">「效率提升 60%」进不了财务和人力口径，所以支撑不了任何决策。</p>
+    </div>
+
+    <div class="eq reveal">
+      <h3>核算口径</h3>
+      <div class="eq-line">
+        单件全成本 <span class="op">=</span> ( <span class="var">token</span>
+        <span class="op">+</span> <span class="var">人工复核</span>
+        <span class="op">+</span> <span class="var">治理</span>
+        <span class="op">+</span> <span class="var">维护迭代</span> )
+        <span class="op">÷</span> <span class="var">被采纳产出件数</span>
+      </div>
+      <div class="eq-line" style="margin-top:12px;">
+        等效人力 <span class="op">=</span>
+        <span class="var">月采纳产出量</span> <span class="op">×</span> <span class="var">人工单件工时</span>
+        <span class="op">÷</span> <span class="var">人均月有效工时</span>
+      </div>
+    </div>
+
+    <div class="cut reveal">
+      <h3>三个关键设计</h3>
+      <p><b>① 只有业务确认可用的产出才计数。</b>生成但未采用的计入成本、不计入产出。</p>
+      <p><b>② 影子期单件成本必然高于人工</b>（产出还没被采纳，复核成本已全额发生）。制度里要提前写明：<em>试运行期只统计、不考核</em>，考核从正式上岗起算。不写这一条，项目会在这个阶段被枪毙。</p>
+      <p><b>③ 人工复核成本是最容易被系统性漏掉的一项</b>，也往往是真正的大头。</p>
+      <p>附带说明：为什么不用「替代率」——它隐含「人可以被整体替换」，而数字员工接管的是<b>任务包</b>，不是岗位。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 07 -->
+<section id="risk">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="tag">07 / 风险</span>
+      <h2>六个会让项目翻车的风险</h2>
+      <p class="lead">
+        前四个是组织风险，第五个是动因风险，第六个是技术风险——<b>第六个最常发生，却最少被写进方案</b>。
+      </p>
+    </div>
+
+    <div class="risks reveal">
+      <div class="risk">
+        <h3>R-01 · 问责真空 — 数字员工成为责任黑洞</h3>
+        <p>出问题时，技术说业务用错了，业务说模型不行，双方都有道理，于是没人负责。这比没有数字员工更危险——它把原本清晰的人工责任链切断了。</p>
+        <p class="fix"><b>对策</b>业务负责人是第一责任人，写进制度，不做技术性豁免；同时保留完整审计日志，让「谁在什么权限下让它做了什么」永远可查。</p>
+      </div>
+
+      <div class="risk">
+        <h3>R-02 · 影子成本被系统性低估</h3>
+        <p>token 成本最容易看见、也最容易拿来汇报。真正的大头是人工复核、治理审批、版本回归验证、业务配合工时——分散在各部门成本里，看不见，于是被默认成零。</p>
+        <p class="fix"><b>对策</b>立项时就把「人工复核工时」作为显式成本项，由业务部门确认。宁可一开始算得难看，也不要三年后发现算错了。</p>
+      </div>
+
+      <div class="risk">
+        <h3>R-03 · 超级助手 — 无法考核，权限失控</h3>
+        <p>最自然的演化方向：用户提什么需求都接，技能越加越多，权限越来越大。结果是没有清晰的产出边界，因此无法被考核；同时对多个系统都有读权限，成为最大的单点风险。</p>
+        <p class="fix"><b>对策</b>一个数字员工只做一个岗位。可以同时用多个数字员工，但不允许存在一个「全能员工」。岗位边界就是权限边界的唯一依据。</p>
+      </div>
+
+      <div class="risk">
+        <h3>R-04 · 叙事错位引发业务部门防御</h3>
+        <p>如果对外传递「降本增效、替代人力」，业务部门的理性反应是防御：只交边缘场景、不投入业务专家、不认真验收。项目会失败，而且原因会被归到技术上。</p>
+        <p class="fix"><b>对策</b>统一口径为「补位」；明确「数字员工不进入减员核算」——这条要写进制度，不是口头承诺。</p>
+      </div>
+
+      <div class="risk">
+        <h3>R-05 · 能力来源踩线 —「AI 炼化」</h3>
+        <p>已有公开报道与司法讨论涉及：把员工工作痕迹用于训练、甚至把离职员工复刻成数字员工继续干活，并出现把「技能包开发数量」纳入员工绩效的做法。法律界认为这实质上是把劳动者的专业能力与思维方式异化为技术资产；监管口径亦明确个人信息不得用于生成式模型训练。</p>
+        <p class="fix"><b>对策</b>在方案里显式切割：只做面向<b>岗位</b>的数字员工，不做面向<b>个人</b>的数字分身。能力来源限定为制度、知识库与公开数据，不来自对在岗员工个人工作痕迹的提取。同时明确禁止把「员工使用 AI 的程度」或「贡献技能包的数量」纳入员工绩效。</p>
+      </div>
+
+      <div class="risk">
+        <h3>R-06 · 能力不足 — 岗位上岗了，但产出不能打</h3>
+        <p>
+          前面五个风险都是「不该出的事」。这个反过来：数字员工制度建得很规范，岗位、工号、权限、台账全都齐了，
+          <b>但它在真实业务里的产出达不到可用标准</b>——长文档理解不稳、跨表口径对不齐、专业判断力不够，最终业务部门不用。
+        </p>
+        <p>
+          这是实际发生概率最高的一种结局，也是最容易被方案略过的一种，因为它不像「问责真空」那样有故事性。
+          公开可见的失败率也不乐观：RPA 类项目两年内被放弃的比例约 30–50%（Gartner / Forrester 口径），
+          而 Gartner 预测到 2027 年底超过 40% 的智能体类项目会被取消，主因是<b>成本上升与商业价值说不清</b>。
+        </p>
+        <p class="fix"><b>对策</b>第一，<b>影子期必须短且必须能失败</b>——设定明确的否决线（如采纳率低于某阈值即退回重做），不要为了面子把不合格的岗位硬推上岗。第二，<b>先选简单闭环的任务</b>，不要在第一个岗位上就追求端到端替代。第三，能力不足是数据与口径问题多过模型问题，回看 R-02 与统一指标库的治理进度。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 -->
+<section id="decision">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="tag">08 / 待定</span>
+      <h2>需要总部明确的五件事</h2>
+      <p class="lead">都不需要技术和预算，只需要表态——但决定后面所有工作有没有地基。</p>
+    </div>
+
+    <div class="decisions reveal">
+      <div class="dec-row head"><div>待明确</div><div>倾向意见</div></div>
+      <div class="dec-row"><div>由谁主管数字员工：科技部门，还是人力 / 运管部门？</div><div>科技部管能力，人力 / 运管部管岗位与编制——「管事」与「管人」分开</div></div>
+      <div class="dec-row"><div>数字员工进不进年度编制表？</div><div>进表，但注明不占人工编制、不进入减员核算</div></div>
+      <div class="dec-row"><div>AI 产出引发的问题，谁是第一责任人？是否有技术性豁免？</div><div>业务负责人为第一责任人，不设技术性豁免</div></div>
+      <div class="dec-row"><div>自主等级封顶在哪一级？</div><div>首批全部封顶 L1；确有把握经审批到 L2；L3 不开放</div></div>
+      <div class="dec-row"><div>首批选哪三个岗位？</div><div>先选制度密度高、产出可验证、不碰资金、不落入高风险清单的岗位</div></div>
+    </div>
+
+    <div class="cut reveal">
+      <h3>术语口径建议</h3>
+      <p>
+        已核对的监管文件<a href="https://www.hnswjrb.gov.cn/2026/08-26/3657373.html" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none;border-bottom:1px solid var(--gold-soft);">《国家金融监督管理总局关于银行业保险业人工智能安全开发应用的指导意见》（金发〔2026〕8 号，2026-06-18，共 32 条）</a>
+        使用的是「<b>金融智能体</b>」与「<b>人机协同</b>」，<b>全文未出现「数字员工」一词</b>。
+        建议：<b>对外汇报与内部制度文件采用监管术语，以降低合规摩擦</b>；「数字员工」留给内部研讨与员工沟通。
+      </p>
+      <p>更值得注意的是，本方案的多道关口在监管口径里已有对应条款——<b>这不再是可选项</b>（条款号已按原文核对）：</p>
+      <ul style="list-style:none;margin:12px 0 4px;">
+        <li style="font-size:13px;color:var(--ink-soft);padding:4px 0 4px 16px;position:relative;"><span style="position:absolute;left:0;color:var(--gold);">·</span>第（三）条要求「科学设定人工智能的<b>功能边界、系统和数据权限</b>，<b>明确人员岗位责任</b>」→ 对应第 02、03 道关口</li>
+        <li style="font-size:13px;color:var(--ink-soft);padding:4px 0 4px 16px;position:relative;"><span style="position:absolute;left:0;color:var(--gold);">·</span>第（二）条要求覆盖「维护迭代、<b>评估退出</b>」的全生命周期管理体系，并「探索建立<b>业务价值导向</b>的绩效评估机制」→ 对应第 04、07 道关口</li>
+        <li style="font-size:13px;color:var(--ink-soft);padding:4px 0 4px 16px;position:relative;"><span style="position:absolute;left:0;color:var(--gold);">·</span>第（十七）条要求明确「<b>紧急停用及模型退出条件</b>」并建立人工替代流程 → 对应第 07 道关口</li>
+        <li style="font-size:13px;color:var(--ink-soft);padding:4px 0 4px 16px;position:relative;"><span style="position:absolute;left:0;color:var(--gold);">·</span>第（二十四）条明确「<b>姓名、身份证号、手机号、银行卡号等个人信息和隐私数据不得用于生成式人工智能模型训练和优化</b>」→ 对应 R-05</li>
+        <li style="font-size:13px;color:var(--ink-soft);padding:4px 0 4px 16px;position:relative;"><span style="position:absolute;left:0;color:var(--gold);">·</span>第（十八）条要求外包合作建立风险隔离「防火墙」并<b>实行名单制管理</b>；第（五）条要求外部引入的生成式 AI 模型<b>经网信部门备案</b>、实施准入管理 → 影响模型供应商选型</li>
+      </ul>
+      <p>
+        本方案在设计时尚未参照该文件，事后核对发现方向高度一致——这说明这些关口不是臆想出来的，
+        而是行业与监管共同收敛到的位置。<b>好处是推进阻力会明显低于预期；代价是不做会有合规问题，而不只是「不够先进」。</b>
+      </p>
+      <p style="font-size:12.5px;color:#8d968f;">
+        引文已按原文逐字核对（来源：河南省地方金融管理局转载金融监管总局网站，2026-06-18）。
+        与正文中的同业数据不同，此处条款可直接引用；但正式行文前建议再取总局官网版本复核一次。
+      </p>
+      <p style="font-size:12.5px;color:#8d968f;">
+        另需注意：本方案第 04 节推荐的「审计底稿整理员」若涉及<b>风险管理定性或资产评估</b>，
+        按第（十六）条属<b>高风险应用</b>，须经风险管理委员会批准——这会显著改变立项路径，建议在选岗前逐项核对。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><span class="brand">从 AI 应用到数字员工</span> · beta 版初步思考 · 2026-10-15</p>
+    <p class="fine">
+      初步思考 · beta · 结论待与各条线讨论后修正<br>
+      瓶颈不在算力、不在模型、不在场景——在于愿不愿意给一个非人类主体发工号
+    </p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var els = document.querySelectorAll('.reveal');
+  if (!('IntersectionObserver' in window)) {
+    for (var i = 0; i < els.length; i++) els[i].classList.add('visible');
+    return;
+  }
+  // threshold 0：元素只要进入视口就显示。
+  // 不用 threshold:0.12 —— 本页有高于视口的区块（如 .gates 875px / 视口 749px），
+  // 按比例取阈值会导致长区块永远达不到，内容停在 opacity:0。
+  var io = new IntersectionObserver(function (entries) {
+    for (var n = 0; n < entries.length; n++) {
+      if (!entries[n].isIntersecting) continue;
+      entries[n].target.classList.add('visible');
+      io.unobserve(entries[n].target);
+    }
+  }, { threshold: 0, rootMargin: '0px 0px -40px 0px' });
+  for (var k = 0; k < els.length; k++) io.observe(els[k]);
+
+  // 载入守卫：浏览器恢复滚动位置、或用户带锚点进入时，
+  // 视口以上的区块不会被 observe 触发，会一直停在 opacity:0。
+  requestAnimationFrame(function () {
+    for (var n = 0; n < els.length; n++) {
+      if (els[n].getBoundingClientRect().top < window.innerHeight) {
+        els[n].classList.add('visible');
+        io.unobserve(els[n]);
+      }
+    }
+  });
+})();
+
+(function () {
+  var links = [];
+  var anchors = document.querySelectorAll('.nav-links a');
+  for (var i = 0; i < anchors.length; i++) links.push(anchors[i]);
+  var sections = [];
+  for (var j = 0; j < links.length; j++) {
+    var el = document.getElementById(links[j].getAttribute('href').slice(1));
+    if (el) sections.push(el);
+  }
+  if (!sections.length) return;
+
+  function sync() {
+    var y = window.scrollY + 110;
+    var cur = sections[0].id;
+    for (var a = 0; a < sections.length; a++) {
+      if (sections[a].offsetTop <= y) cur = sections[a].id;
+    }
+    for (var b = 0; b < links.length; b++) {
+      links[b].classList.toggle('active', links[b].getAttribute('href') === '#' + cur);
+    }
+  }
+
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(function () { sync(); ticking = false; });
+  }, { passive: true });
+  sync();
+})();
+</script>
+</body>
+</html>

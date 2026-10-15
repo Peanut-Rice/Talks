@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文档标题 · Talks</title>
+  <meta name="description" content="一句话说明这份文档回答什么问题。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/site.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body class="doc">
+
+  <!-- 站点导航：所有文档页完全一致，只改当前页高亮 -->
+  <nav class="site-nav">
+    <a class="site-mark" href="index.html"><span class="dot"></span>Talks</a>
+    <ul class="site-links">
+      <li><a href="index.html">索引</a></li>
+      <li><a href="https://github.com/Peanut-Rice/Talks" target="_blank" rel="noreferrer">GitHub</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+
+    <!-- 抬头：全页唯一的 h1，桌面端约 60px，首屏主角就是它 -->
+    <header class="doc-header">
+      <h1>文档标题：一句能说清主题的话</h1>
+      <p class="lede">一段导语，说明这份文档解决什么问题、给谁看。不超过三行。</p>
+      <div class="masthead-meta">
+        <span class="label">2026-10-15</span>
+        <span class="label">类别</span>
+      </div>
+    </header>
+
+    <!-- 正文：每节一个 h2；段落、列表、表格都有共享层样式 -->
+    <section>
+      <h2>第一节：结论先行</h2>
+      <p>正文 16px、行高 1.7、满墨。次要说明才用灰色。</p>
+
+      <div class="note">
+        <p>需要强调的旁注用 <code>.note</code>：一档色调差分区，不描边、不加阴影。</p>
+      </div>
+
+      <table>
+        <thead><tr><th>项</th><th>值</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>示例</td><td>示例</td><td>表格是少数允许用细线的地方</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>第二节</h2>
+      <div class="cards">
+        <div class="card">
+          <div class="card-header"><span class="card-dot highlight"></span><h3>要点一</h3></div>
+          <ul>
+            <li>列表项</li>
+            <li>列表项</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-dot emerald"></span><h3>要点二</h3></div>
+          <ul>
+            <li>列表项</li>
+            <li>列表项</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 需要保留手绘架构图时：图版放在 .diagram-container 里。
+         图内的一像素描边、滤镜与图例符号不适用页面级禁令，
+         但要在 <svg> 内相关行的行尾加 taste-skill-ignore 注释并写明理由。 -->
+    <section>
+      <h2>第三节：图版（可选）</h2>
+      <div class="diagram-container">
+        <!-- 把 <svg> 图版粘到这里 -->
+      </div>
+    </section>
+
+    <footer class="site-foot">
+      <span>Talks · 底层逻辑不变，表达层在进化</span>
+      <a class="link" href="index.html">返回索引</a>
+    </footer>
+
+  </main>
+
+  <script src="assets/site.js"></script>
+</body>
+</html>

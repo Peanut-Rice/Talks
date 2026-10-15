@@ -1,2 +1,8 @@
 # Claude Code local data
 .claude/
+
+# taste-skill 工作产物（截图、报告、改动前备份）——本地验证用，不进版本库
+.taste-skill/inspect/
+.taste-skill/backup/
+
+# 保留方向豁免清单：.taste-skill/direction.json 是有意提交的

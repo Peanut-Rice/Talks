@@ -1,0 +1,820 @@
+/* ============================================================================
+   Talks 文档索引 — 站点样式
+   视觉系统来自 DESIGN.md（Pirsch Analytics 风格参考）：
+   暖纸面画布 + 墨线 + 单一阳光黄强调色 + 单一无衬线字体。
+   中文一律用系统字体，不下载中文网页字体（见 DESIGN-SYSTEM.md §1.1）。
+   ========================================================================= */
+
+/* --- Tokens ------------------------------------------------------------- */
+:root {
+  /* 颜色 */
+  --sunshine: #ffda6e;
+  --mint: #6ece9d;
+  --cream: #f8f5ed;
+  --ink: #000000;
+  --graphite: #707070;
+
+  /* 由上面五个值派生的一档色调差（系统里没有第五个颜色，只有明度台阶） */
+  --cream-tint: #fdfbf6;
+  --cream-deep: #f1ece0;
+  --ink-08: rgba(0, 0, 0, 0.08);
+
+  /* 字体：拉丁用 DM Sans，中文回退系统字体 */
+  --sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Segoe UI', sans-serif;
+
+  /* 字号 */
+  --text-caption: 0.8125rem;  /* 13px 元数据 */
+  --text-body-sm: 1rem;       /* 16px */
+  --text-body: 1.125rem;      /* 18px */
+  --text-heading: 1.75rem;    /* 28px 条目标题 */
+  --text-display: 4rem;       /* 64px 站名 */
+
+  /* 间距（8px 基数） */
+  --sp-8: 0.5rem;
+  --sp-16: 1rem;
+  --sp-24: 1.5rem;
+  --sp-32: 2rem;
+  --sp-48: 3rem;
+  --sp-64: 4rem;
+  --sp-96: 6rem;
+
+  /* 形状 */
+  --radius-input: 6px;
+  --radius-image: 12px;
+  --radius-card: 24px;
+  --radius-tag: 9999px;
+
+  --page-max: 1200px;
+
+  /* 动效 */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+  --t-press: 140ms;
+  --t-hover: 180ms;
+  --t-reveal: 800ms;
+}
+
+/* --- Reset -------------------------------------------------------------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+* { margin: 0; padding: 0; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--text-body-sm);
+  font-weight: 400;
+  line-height: 1.5;
+  font-feature-settings: "ss03", "ss04";
+  -webkit-font-smoothing: antialiased;
+  min-height: 100svh;
+}
+
+img,
+svg { display: block; max-width: 100%; }
+
+a { color: inherit; }
+
+::selection {
+  background: var(--sunshine);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* --- 版心 --------------------------------------------------------------- */
+.page {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--sp-48) var(--sp-32) var(--sp-64);
+}
+
+/* --- 文字层级 ----------------------------------------------------------- */
+.display {
+  /* 首屏主角：视口宽度的 8vw，桌面端约 115px */
+  font-size: clamp(3rem, 8vw, 9rem);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+
+.lede {
+  font-size: var(--text-body);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--graphite);
+  max-width: 46ch;
+}
+
+.prose {
+  max-width: 68ch;
+  font-size: var(--text-body-sm);
+  line-height: 1.7;
+}
+
+.prose p + p { margin-top: var(--sp-16); }
+
+/* 小号标签：不写成大写＋字距，避免被当成 eyebrow；靠字重与颜色分层 */
+.label {
+  font-size: var(--text-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--graphite);
+}
+
+.link {
+  color: var(--graphite);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink-08);
+  padding-bottom: 1px;
+  transition: color var(--t-hover) ease, border-color var(--t-hover) ease;
+}
+
+.link:hover {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+/* --- 站点头（仅文档页） ------------------------------------------------- */
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-16);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-48);
+}
+
+.site-mark {
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.site-mark .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sunshine);
+  margin-right: 0.5rem;
+  vertical-align: baseline;
+}
+
+.site-links {
+  display: flex;
+  gap: var(--sp-24);
+  list-style: none;
+}
+
+.site-links a {
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--graphite);
+  text-decoration: none;
+  transition: color var(--t-hover) ease;
+}
+
+.site-links a:hover { color: var(--ink); }
+
+/* --- 索引页 ------------------------------------------------------------- */
+.masthead {
+  padding-bottom: var(--sp-48);
+}
+
+/* 唯一允许“响”的动作：站名从遮罩里升起 */
+.masthead .display {
+  display: block;
+  margin-bottom: var(--sp-16);
+}
+
+.js .masthead .display > span {
+  display: block;
+  transform: translateY(0);
+  transition: transform var(--t-reveal) var(--ease-out) 60ms,
+              opacity var(--t-reveal) var(--ease-out) 60ms;
+}
+
+.js .masthead.is-revealing .display > span {
+  transform: translateY(105%);
+  opacity: 0;
+}
+
+.masthead .lede { margin-bottom: var(--sp-24); }
+
+.masthead-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-8) var(--sp-16);
+}
+
+/* 筛选条：类别标签即筛选器 */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-8);
+  padding-bottom: var(--sp-32);
+}
+
+.filters-label {
+  margin-right: var(--sp-8);
+}
+
+.filters-count {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.pill {
+  font-family: inherit;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+  background: var(--cream);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-tag);
+  padding: 0.5rem 0.875rem;
+  cursor: pointer;
+  transition: background var(--t-hover) ease, transform var(--t-press) var(--ease-out);
+}
+
+.pill:hover { background: var(--cream-deep); }
+
+.pill:active { transform: scale(0.97); }
+
+.pill[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+/* 索引：一档色调差分区，不描边、不用阴影 */
+.index {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* 同一行的条目等高：留白出现在卡片内部，而不是行与行之间的豁口 */
+  grid-auto-rows: 1fr;
+  gap: var(--sp-16);
+  list-style: none;
+}
+
+/* 条目本身就是网格单元：筛选、动效、悬停都作用在同一个盒子上 */
+.entry {
+  display: flex;
+  flex-direction: column;
+  background: var(--cream-tint);
+  border-radius: var(--radius-card);
+  transition: background var(--t-hover) ease,
+              transform var(--t-hover) var(--ease-out);
+}
+
+.entry:hover {
+  background: var(--cream-deep);
+  transform: translateY(-2px);
+}
+
+.entry:active { transform: translateY(0); }
+
+.entry-link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-8);
+  padding: var(--sp-24);
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+
+.entry-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-16);
+  margin-bottom: var(--sp-8);
+}
+
+.entry-title {
+  font-size: var(--text-heading);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: pretty;
+}
+
+.entry-desc {
+  font-size: var(--text-body-sm);
+  line-height: 1.6;
+  color: var(--graphite);
+  max-width: 60ch;
+}
+
+/* 类型小字：让"这是哪种文档"在标题旁可读，而不是只藏在排版里 */
+.entry-kind {
+  flex-shrink: 0;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--graphite);
+}
+
+.js .entry.is-hidden { display: none; }
+
+/* 默认可见；只有脚本确认后加 is-in 的元素才做入场。
+   行先落位，标题与说明按阅读顺序二次落位。 */
+.js .entry-link {
+  transition: opacity 620ms var(--ease-soft), translate 620ms var(--ease-soft);
+}
+
+.js .entry:not(.is-in) .entry-link {
+  opacity: 0;
+  translate: 0 16px;
+}
+
+.js .entry-title,
+.js .entry-desc {
+  transition: opacity 520ms var(--ease-soft), translate 520ms var(--ease-soft);
+}
+
+.js .entry:not(.is-in) .entry-title,
+.js .entry:not(.is-in) .entry-desc {
+  opacity: 0;
+  translate: 0 10px;
+}
+
+.empty {
+  padding: var(--sp-48) 0;
+  color: var(--graphite);
+  font-size: var(--text-body-sm);
+}
+
+/* 文档页自己的导航与页脚（老类名）：给它们统一的外观 */
+.nav,
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-16);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-32);
+}
+
+.nav-brand {
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.nav-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sunshine);
+  margin-right: 0.5rem;
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-16);
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--graphite);
+  text-decoration: none;
+  transition: color var(--t-hover) ease;
+}
+
+.nav-links a:hover { color: var(--ink); }
+
+/* --- 文档页正文 --------------------------------------------------------- */
+.container {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--sp-48) var(--sp-32) var(--sp-64);
+}
+
+/* 文档页抬头：标题 + 一句副题 */
+.header { margin-bottom: var(--sp-32); }
+
+.header-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-16);
+  margin-bottom: var(--sp-8);
+}
+
+/* 文档页主角：桌面端约 60px，超过「首屏必须有主导元素」的门槛。
+   各页头部类名不一（.doc-header / .header / .hero / .h-hero / .title / 裸 header），
+   所以统一落在 `.doc h1` 上；带 .display 的按 DESIGN.md 的更高一档处理。 */
+.doc h1,
+.header h1,
+.doc-header h1 {
+  /* 下限保证桌面端稳过 4.5vw 的"首屏主角"门槛 */
+  font-size: clamp(2.25rem, 4.6vw, 4rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  text-wrap: pretty;
+}
+
+.doc h1.display,
+.masthead .display {
+  font-size: clamp(3rem, 8vw, 9rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+
+/* 抬头以下的第一段：无论老类名是 .lead / .sub / .subtitle，都按副题处理 */
+.doc .lead,
+.doc .sub,
+.doc .subtitle,
+.header .subtitle {
+  font-size: var(--text-body);
+  line-height: 1.6;
+  color: var(--graphite);
+  max-width: 62ch;
+}
+
+/* 迁移后没有自己样式表的文档：让裸标签也有层次 */
+.doc .wrap,
+.doc > section,
+.doc .section {
+  max-width: 78ch;
+  margin-bottom: var(--sp-48);
+}
+
+.doc h2 {
+  font-size: var(--text-heading);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin: var(--sp-48) 0 var(--sp-16);
+  text-wrap: pretty;
+}
+
+.doc h3 {
+  font-size: var(--text-body);
+  font-weight: 500;
+  margin: var(--sp-32) 0 var(--sp-8);
+}
+
+.doc p,
+.doc li {
+  font-size: var(--text-body-sm);
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.doc p + p { margin-top: var(--sp-16); }
+
+.doc ul,
+.doc ol { margin: var(--sp-16) 0 var(--sp-16) 1.25rem; }
+
+.doc li { margin-bottom: var(--sp-8); }
+
+.doc table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-body-sm);
+  margin: var(--sp-24) 0;
+}
+
+.doc th,
+.doc td {
+  text-align: left;
+  padding: var(--sp-8) var(--sp-16) var(--sp-8) 0;
+  border-bottom: 1px solid var(--ink-08);
+  vertical-align: top;
+}
+
+.doc th { font-weight: 500; }
+
+.doc blockquote {
+  margin: var(--sp-24) 0;
+  padding-left: var(--sp-24);
+  color: var(--graphite);
+}
+
+/* 文档内部常见的老类名：给它们一个落点，别看起来像没样式 */
+.grid,
+.panel,
+.grid-2,
+.grid-3,
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-16);
+  margin-bottom: var(--sp-24);
+}
+
+.note,
+.callout,
+.tip,
+.warn {
+  background: var(--cream-tint);
+  border-radius: var(--radius-card);
+  padding: var(--sp-24);
+  margin: var(--sp-24) 0;
+  font-size: var(--text-body-sm);
+  line-height: 1.7;
+}
+
+.note p:last-child,
+.callout p:last-child { margin-bottom: 0; }
+
+.tag,
+.chip,
+.badge {
+  display: inline-block;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--sunshine);
+  border-radius: var(--radius-tag);
+  padding: 0.25rem 0.625rem;
+  margin-right: var(--sp-8);
+}
+
+/* 文档页入场：导航 → 抬头 → 图版 → 卡片 → 卡片内的行，按阅读顺序 */
+.js .site-nav,
+.js .doc-header,
+.js .diagram-container,
+.js .cards .card,
+.js .doc h2,
+.js .doc .grid > * {
+  transition: opacity 620ms var(--ease-soft), translate 620ms var(--ease-soft);
+}
+
+.js .site-nav:not(.is-in),
+.js .doc-header:not(.is-in),
+.js .diagram-container:not(.is-in),
+.js .cards .card:not(.is-in),
+.js .doc h2:not(.is-in),
+.js .doc .grid > *:not(.is-in) {
+  opacity: 0;
+  translate: 0 16px;
+}
+
+/* 卡片里的行比卡片晚一拍落下 */
+.js .cards .card li,
+.js .doc .grid > * li {
+  transition: opacity 480ms var(--ease-soft), translate 480ms var(--ease-soft);
+}
+
+.js .cards .card:not(.is-in) li,
+.js .doc .grid > *:not(.is-in) li {
+  opacity: 0;
+  translate: 0 8px;
+}
+
+.header .subtitle {
+  font-size: var(--text-body-sm);
+  color: var(--graphite);
+  line-height: 1.6;
+  max-width: 68ch;
+}
+
+.header .pulse-dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--sunshine);
+}
+
+/* 版式遗留物：渐变顶条一律去掉，分隔改用留白 */
+.top-bar,
+.accent-bar {
+  display: none;
+}
+
+/* 节次编号标签：不压在标题上方（那是 eyebrow），改为与紧随其后的标题同一基线 */
+.section-tag {
+  display: inline-block;
+  vertical-align: baseline;
+  margin-right: var(--sp-8);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--graphite);
+}
+
+/* 编号下的标题改为同行排列，避免它继续被判定为"标题上方的小标签" */
+.section-tag + h2,
+.section-tag + h3 {
+  display: inline;
+}
+
+/* 图版：一整块深色，像印刷品里夹的一张图。
+   窄屏时自己横向滚动，绝不把整页撑出横向滚动条。 */
+.diagram-container {
+  background: var(--cream-deep);
+  border-radius: var(--radius-card);
+  padding: var(--sp-24);
+  overflow-x: auto;
+  max-width: 100%;
+  margin-bottom: var(--sp-24);
+}
+
+.diagram-container svg {
+  display: block;
+  width: 100%;
+  /* 图版随版心缩放：宁可整图变小，也不让页面出现横向滚动 */
+  min-width: 0;
+  height: auto;
+}
+
+/* 文档页的要点卡片：一档色调差分区，不描边不用阴影 */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-16);
+  margin-bottom: var(--sp-48);
+}
+
+.card {
+  background: var(--cream-tint);
+  border-radius: var(--radius-card);
+  padding: var(--sp-24);
+  transition: background var(--t-hover) ease;
+}
+
+.card:hover { background: var(--cream-deep); }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-8);
+  margin-bottom: var(--sp-16);
+}
+
+.card-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--graphite);
+}
+
+.card-dot.highlight,
+.card-dot.amber { background: var(--sunshine); }
+
+.card-dot.emerald,
+.card-dot.mint { background: var(--mint); }
+
+.card h3 {
+  font-size: var(--text-body);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.card ul {
+  list-style: none;
+  color: var(--graphite);
+  font-size: var(--text-body-sm);
+  line-height: 1.6;
+}
+
+.card li { margin-bottom: var(--sp-8); }
+
+.card li:last-child { margin-bottom: 0; }
+
+@media (max-width: 900px) {
+  .cards { grid-template-columns: minmax(0, 1fr); }
+}
+
+.doc-header {
+  margin-bottom: var(--sp-48);
+  max-width: 68ch;
+}
+
+.doc-header h1 {
+  font-size: clamp(2rem, 1.4rem + 1.8vw, 3rem);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+  margin-bottom: var(--sp-16);
+}
+
+.doc-header .lede { max-width: 60ch; }
+
+.doc-body section {
+  margin-bottom: var(--sp-64);
+  max-width: 68ch;
+}
+
+.doc-body h2 {
+  font-size: var(--text-heading);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--sp-16);
+  text-wrap: balance;
+}
+
+.doc-body h3 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.3;
+  margin: var(--sp-32) 0 var(--sp-8);
+}
+
+.doc-body p { margin-bottom: var(--sp-16); }
+
+.doc-body ul,
+.doc-body ol {
+  margin: 0 0 var(--sp-16) 1.25rem;
+}
+
+.doc-body li { margin-bottom: var(--sp-8); }
+
+.doc-body strong { font-weight: 500; }
+
+/* --- 页脚 --------------------------------------------------------------- */
+.site-foot {
+  margin-top: var(--sp-96);
+  color: var(--graphite);
+  font-size: var(--text-caption);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-8) var(--sp-16);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.wordmark {
+  display: block;
+  margin-top: var(--sp-32);
+  font-size: clamp(4rem, 19vw, 15rem);
+  font-weight: 500;
+  line-height: 0.86;
+  letter-spacing: -0.05em;
+  color: var(--ink);
+  opacity: 0.09;
+  user-select: none;
+}
+
+/* --- 响应式 ------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .index { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --text-display: 3rem;
+    --text-heading: 1.5rem;
+  }
+
+  .page { padding: var(--sp-32) var(--sp-24) var(--sp-48); }
+  .site-nav { margin-bottom: var(--sp-32); }
+  .filters-count { margin-left: 0; width: 100%; }
+}
+
+/* --- 减少动效 ----------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .js .masthead .display > span,
+  .js .entry:not(.is-in) .entry-link {
+    transform: none;
+    translate: none;
+    opacity: 1;
+  }
+}
+
+/* --- 打印 --------------------------------------------------------------- */
+@media print {
+  body { background: #ffffff; }
+  .filters,
+  .site-nav { display: none; }
+  .entry { background: #ffffff; }
+}

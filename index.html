@@ -1,326 +1,283 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Talks — 文档索引</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #020617; --bg-card: rgba(15, 23, 42, 0.5); --bg-card-solid: #0f172a;
-      --border: #1e293b; --text: #ffffff; --text-secondary: #94a3b8; --text-muted: #475569;
-      --accent: #22d3ee; --card-hover: rgba(30, 41, 59, 0.5);
-    }
-    [data-theme="light"] {
-      --bg: #f8fafc; --bg-card: rgba(255, 255, 255, 0.85); --bg-card-solid: #ffffff;
-      --border: #e2e8f0; --text: #1e293b; --text-secondary: #64748b; --text-muted: #94a3b8;
-      --accent: #0891b2; --card-hover: rgba(241, 245, 249, 0.8);
-    }
-    [data-theme="warm"] {
-      --bg: #fef7ed; --bg-card: rgba(255, 251, 245, 0.9); --bg-card-solid: #fffbf5;
-      --border: #fde68a; --text: #3b2f1e; --text-secondary: #78716c; --text-muted: #a8a29e;
-      --accent: #f59e0b; --card-hover: rgba(253, 230, 138, 0.3);
-    }
-    [data-theme="cool"] {
-      --bg: #f0f4f8; --bg-card: rgba(248, 250, 252, 0.9); --bg-card-solid: #f8fafc;
-      --border: #cbd5e1; --text: #1a2a3a; --text-secondary: #64748b; --text-muted: #94a3b8;
-      --accent: #6366f1; --card-hover: rgba(203, 213, 225, 0.4);
-    }
-    @media print {
-      :root, [data-theme] {
-        --bg: #ffffff; --bg-card: rgba(255, 255, 255, 0.95); --bg-card-solid: #ffffff;
-        --border: #d4d4d8; --text: #18181b; --text-secondary: #52525b; --text-muted: #a1a1aa;
-        --accent: #000000;
-      }
-      body { padding: 0; } .theme-bar { display: none !important; }
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'JetBrains Mono', 'Microsoft YaHei', monospace;
-      background: var(--bg); min-height: 100vh; padding: 2rem; color: var(--text);
-      transition: background 0.3s, color 0.3s;
-    }
-    .container { max-width: 900px; margin: 0 auto; }
-
-    /* Theme bar */
-    .theme-bar { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1.5rem; }
-    .theme-bar span { font-size: 0.75rem; color: var(--text-secondary); margin-right: 0.25rem; }
-    .theme-btn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: border-color 0.2s, transform 0.2s; padding: 0; }
-    .theme-btn:hover { transform: scale(1.15); }
-    .theme-btn.active { border-color: var(--text); }
-    .theme-btn.dark  { background: #020617; }
-    .theme-btn.light { background: #f8fafc; border: 2px solid #cbd5e1; }
-    .theme-btn.warm  { background: #fef7ed; border: 2px solid #fde68a; }
-    .theme-btn.cool  { background: #f0f4f8; border: 2px solid #cbd5e1; }
-
-    /* Header */
-    .header { margin-bottom: 2rem; }
-    .header-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
-    .pulse-dot { width: 12px; height: 12px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; flex-shrink: 0; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.025em; }
-    .subtitle { color: var(--text-secondary); font-size: 0.8rem; margin-left: 1.75rem; margin-bottom: 0.25rem; }
-    .repo-link { color: var(--text-muted); font-size: 0.7rem; margin-left: 1.75rem; }
-    .repo-link a { color: var(--text-secondary); text-decoration: none; }
-    .repo-link a:hover { color: var(--accent); }
-
-    /* File list */
-    .file-list { display: flex; flex-direction: column; gap: 0.625rem; }
-    .file-card {
-      display: flex; align-items: center; gap: 1rem;
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 0.75rem; padding: 1rem 1.25rem;
-      transition: background 0.3s, border-color 0.3s, transform 0.2s;
-      text-decoration: none; color: inherit;
-    }
-    .file-card:hover { background: var(--card-hover); transform: translateX(4px); border-color: var(--accent); }
-
-    .file-icon {
-      width: 42px; height: 42px; border-radius: 0.5rem;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
-    }
-    .file-icon.html { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
-    .file-icon.md   { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
-    .file-icon.other { background: rgba(168, 162, 158, 0.15); color: #a8a29e; }
-
-    .file-info { flex: 1; min-width: 0; }
-    .file-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.2rem; }
-    .file-desc { font-size: 0.7rem; color: var(--text-secondary); line-height: 1.45; }
-    .file-meta { display: flex; gap: 1rem; margin-top: 0.35rem; }
-    .file-meta span { font-size: 0.65rem; color: var(--text-muted); }
-
-    .file-arrow { color: var(--text-muted); font-size: 0.9rem; flex-shrink: 0; transition: color 0.2s, transform 0.2s; }
-    .file-card:hover .file-arrow { color: var(--accent); transform: translateX(3px); }
-
-    /* Stats bar */
-    .stats { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; margin-left: 1.75rem; }
-    .stat { font-size: 0.7rem; color: var(--text-muted); }
-    .stat strong { color: var(--text-secondary); }
-
-    /* Footer */
-    .footer { text-align: center; margin-top: 2.5rem; color: var(--text-muted); font-size: 0.65rem; }
-    .footer a { color: var(--text-secondary); text-decoration: none; }
-    .footer a:hover { color: var(--accent); }
-
-    /* New badge */
-    .badge {
-      display: inline-block; font-size: 0.6rem; padding: 0.15em 0.5em; border-radius: 1em;
-      font-weight: 600; margin-left: 0.4rem; vertical-align: middle;
-    }
-    .badge.new { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
-    .badge.index { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-
-    /* Empty state */
-    .empty { text-align: center; padding: 3rem 0; color: var(--text-muted); font-size: 0.8rem; }
-
-    @media (max-width: 640px) {
-      body { padding: 1rem; }
-      .file-card { padding: 0.875rem 1rem; gap: 0.75rem; }
-      .file-meta { flex-direction: column; gap: 0.15rem; }
-    }
-  </style>
+  <title>Talks · 文档索引</title>
+  <meta name="description" content="AI 学习记录与方案文档的索引：按日期、类别和一句话说明列出每份文档。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/site.css">
+  <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
-  <div class="container">
+  <div class="page">
 
-    <!-- Theme Switcher -->
-    <div class="theme-bar">
-      <span>主题</span>
-      <button class="theme-btn dark"  data-theme="dark"  title="暗夜"></button>
-      <button class="theme-btn light active" data-theme="light" title="亮白"></button>
-      <button class="theme-btn warm"  data-theme="warm"  title="暖阳"></button>
-      <button class="theme-btn cool"  data-theme="cool"  title="冷杉"></button>
-    </div>
-
-    <!-- Header -->
-    <div class="header">
-      <div class="header-row">
-        <div class="pulse-dot"></div>
-        <h1>Talks — 文档索引</h1>
+    <header class="masthead">
+      <h1 class="display"><span>Talks</span></h1>
+      <p class="lede">AI 学习记录与方案文档。每份文档按日期、类别和一句话说明列在下面。</p>
+      <div class="masthead-meta">
+        <span class="label"><span data-count>0</span> 份文档</span>
+        <span class="label">最近更新 <span data-latest>—</span></span>
+        <a class="link" href="https://github.com/Peanut-Rice/Talks" target="_blank" rel="noreferrer">github.com/Peanut-Rice/Talks</a>
       </div>
-      <p class="subtitle">AI 学习记录 — 从能讲清结构，到能讲给人用，再到问自己怎样才算真的懂</p>
-      <p class="repo-link">
-        <a href="https://github.com/Peanut-Rice/Talks" target="_blank">github.com/Peanut-Rice/Talks</a>
+    </header>
+
+    <div class="filters">
+      <span class="label filters-label">类别</span>
+      <div class="filters-pills" data-filters role="group" aria-label="按类别筛选"></div>
+      <p class="label filters-count" data-count-line>共 0 份</p>
+    </div>
+
+    <p class="empty" data-empty hidden>这一类暂时没有文档。</p>
+
+    <noscript>
+      <p class="empty" style="padding-bottom:1.5rem">
+        索引由浏览器脚本生成。若脚本被禁用，可直接打开仓库
+        <a class="link" href="https://github.com/Peanut-Rice/Talks">Peanut-Rice/Talks</a> 查看全部文档。
       </p>
-    </div>
+    </noscript>
 
-    <!-- Stats -->
-    <div class="stats">
-      <span class="stat">文档 <strong id="doc-count">0</strong></span>
-      <span class="stat">更新 <strong id="last-update">—</strong></span>
-    </div>
+    <nav aria-label="文档索引"><ul class="index" data-index></ul></nav>
 
-    <!-- File List -->
-    <div class="file-list" id="file-list">
-      <!--
-        添加新文档：复制下面的结构，填入信息。
-        注意：用 &lt; &gt; 转义，不要写成真实标签 —— HTML 注释不能嵌套，
-        模板里若出现真实的 <a> 会被浏览器当作真节点（污染统计且留下死链）。
-      -->
-      <pre class="card-template" hidden>
-&lt;a href="文件名.html" class="file-card"&gt;
-  &lt;div class="file-icon html"&gt;HTML&lt;/div&gt;
-  &lt;div class="file-info"&gt;
-    &lt;div class="file-name"&gt;显示名称 &lt;span class="badge new"&gt;NEW&lt;/span&gt;&lt;/div&gt;
-    &lt;div class="file-desc"&gt;一句话描述文档内容&lt;/div&gt;
-    &lt;div class="file-meta"&gt;
-      &lt;span&gt;2026-06-16&lt;/span&gt;
-      &lt;span&gt;作者&lt;/span&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;span class="file-arrow"&gt;→&lt;/span&gt;
-&lt;/a&gt;
-      </pre>
+    <footer class="site-foot">
+      <span>Talks · 底层逻辑不变，表达层在进化</span>
+      <a class="link" href="https://github.com/Peanut-Rice/Talks" target="_blank" rel="noreferrer">Peanut-Rice/Talks</a>
+    </footer>
+    <span class="wordmark" aria-hidden="true">Talks</span>
 
-      <!-- 条目：ai_understanding_tool.html -->
-      <a href="ai_understanding_tool.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">AI 的下一步 · 从生成答案到生成理解工具 <span class="badge new">NEW</span></div>
-          <div class="file-desc">学习笔记：AI 产出正从"答案"变成"认知工具"，理解成为新瓶颈——ASD-STE100 改写对照、"应用 vs 能力"图示、应用数量 × 复用程度交互实验</div>
-          <div class="file-meta">
-            <span>2026-10-03</span>
-            <span>学习笔记</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
-
-      <!-- 条目：e-work-intro.html -->
-      <a href="e-work-intro.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">E-Work · 你的 AI 同事 <span class="badge new">NEW</span></div>
-          <div class="file-desc">集团内网 AI 智能助手使用手册：三种工作方式、六项核心技能、addoil 出错兜底机制</div>
-          <div class="file-meta">
-            <span>2026-08-13</span>
-            <span>使用手册</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
-
-
-     <!-- 条目：AI-Architecture.html -->
-      <a href="AI-Architecture.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">金控集团 · AI 架构</div>
-          <div class="file-desc">智能化办公能力架构：模型网关五维能力、指标数据发布平台、MCP-指标库四类能力组</div>
-          <div class="file-meta">
-            <span>2026-07-27</span>
-            <span>架构设计</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
-
-
-      <!-- 条目：workflow-to-agent.html -->
-      <a href="workflow-to-agent.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">从 Workflow 到 Agent · 企业AI应用的范式转移 <span class="badge new">NEW</span></div>
-          <div class="file-desc">企业 AI 从流程编排到自主决策的能力跃迁：Agent Runtime 承载业务知识、工具与领域 Skill</div>
-          <div class="file-meta">
-            <span>2026-07-13</span>
-            <span>方案讨论</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
-
-      <!-- 条目：AI-Engineering.html -->
-      <a href="AI-Engineering.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">AI Engineering · Prompt → Context → Harness → Loop <span class="badge new">NEW</span></div>
-          <div class="file-desc">大模型应用的四次能力升维：Prompt → Context → Harness → Loop，智能增益的演进路径</div>
-          <div class="file-meta">
-            <span>2026-07-13</span>
-            <span>架构推演</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
-
-
-
-      <!-- 条目：AI-SE.html -->
-      <a href="AI-SE.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">AI 驱动软件研发机制 · 四区架构 <span class="badge new">NEW</span></div>
-          <div class="file-desc">四区协作模型：创造、审查、适配、部署——各司其职的研发能力分区</div>
-          <div class="file-meta">
-            <span>2026-06-17</span>
-            <span>架构设计</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
-
-      <!-- 条目：AI-Audit-PPT.html -->
-      <a href="AI-Audit-PPT.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">大模型在审计条线的应用 · 金控集团 <span class="badge new">NEW</span></div>
-          <div class="file-desc">审计领域 AI 能力场景：13 页场景化呈现，覆盖数据采集到风险识别</div>
-          <div class="file-meta">
-            <span>2026-07-27</span>
-            <span>交流材料</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
-
-      <!-- 条目：README.md -->
-      <a href="README.md" class="file-card">
-        <div class="file-icon md">MD</div>
-        <div class="file-info">
-          <div class="file-name">README <span class="badge index">索引</span></div>
-          <div class="file-desc">仓库说明文件</div>
-          <div class="file-meta">
-            <span>2026-07-27</span>
-            <span>—</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
-
-    </div><!-- /file-list -->
-
-    <!-- Footer -->
-    <div class="footer">
-      <a href="https://github.com/Peanut-Rice/Talks" target="_blank">Peanut-Rice/Talks</a> ·
-      底层逻辑不变，表达层在进化
-    </div>
-
-  </div><!-- /container -->
+  </div>
 
   <script>
-    // Theme switcher
-    document.querySelectorAll('.theme-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.documentElement.setAttribute('data-theme', btn.dataset.theme);
-        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
+  (function () {
+    'use strict';
+
+    /* 索引的唯一数据源：新增文档只改这里。 */
+    var DOCS = [
+      {
+        file: 'ai_understanding_tool.html',
+        title: 'AI 的下一步 · 从生成答案到生成理解工具',
+        desc: '学习笔记：AI 产出正从“答案”变成“认知工具”，理解成为新瓶颈——ASD-STE100 改写对照、“应用 vs 能力”图示、应用数量 × 复用程度交互实验',
+        date: '2026-10-03',
+        kind: '学习笔记',
+        badge: 'NEW'
+      },
+      {
+        file: 'e-work-intro.html',
+        title: 'E-Work · 你的 AI 同事',
+        desc: '集团内网 AI 智能助手使用手册：三种工作方式、六项核心技能、addoil 出错兜底机制',
+        date: '2026-08-13',
+        kind: '使用手册',
+        badge: 'NEW'
+      },
+      {
+        file: 'AI-Architecture.html',
+        title: '金控集团 · AI 架构',
+        desc: '智能化办公能力架构：模型网关五维能力、指标数据发布平台、MCP-指标库四类能力组',
+        date: '2026-07-27',
+        kind: '架构设计'
+      },
+      {
+        file: 'workflow-to-agent.html',
+        title: '从 Workflow 到 Agent · 企业 AI 应用的范式转移',
+        desc: '企业 AI 从流程编排到自主决策的能力跃迁：Agent Runtime 承载业务知识、工具与领域 Skill',
+        date: '2026-07-13',
+        kind: '方案讨论'
+      },
+      {
+        file: 'AI-Engineering.html',
+        title: 'AI Engineering · Prompt → Context → Harness → Loop',
+        desc: '大模型应用的四次能力升维：Prompt → Context → Harness → Loop，智能增益的演进路径',
+        date: '2026-07-13',
+        kind: '架构推演',
+        badge: 'NEW'
+      },
+      {
+        file: 'AI-SE.html',
+        title: 'AI 驱动软件研发机制 · 四区架构',
+        desc: '四区协作模型：创造、审查、适配、部署——各司其职的研发能力分区',
+        date: '2026-06-17',
+        kind: '架构设计'
+      },
+      {
+        file: 'AI-Audit-PPT.html',
+        title: '大模型在审计条线的应用 · 金控集团',
+        desc: '审计领域 AI 能力场景：13 页场景化呈现，覆盖数据采集到风险识别',
+        date: '2026-07-27',
+        kind: '交流材料'
+      },
+      {
+        file: 'README.md',
+        title: 'README',
+        desc: '仓库说明文件：这份索引的维护方式与文档清单',
+        date: '2026-07-27',
+        kind: '索引'
+      }
+    ];
+
+    var root = document.documentElement;
+    var list = document.querySelector('[data-index]');
+    var pills = document.querySelector('[data-filters]');
+    var empty = document.querySelector('[data-empty]');
+    var countLine = document.querySelector('[data-count-line]');
+    var countHead = document.querySelector('[data-count]');
+    var latestHead = document.querySelector('[data-latest]');
+
+    /* 只有两份以上的类别才配当筛选器 */
+    var kinds = [];
+    DOCS.forEach(function (doc) {
+      if (kinds.indexOf(doc.kind) === -1) kinds.push(doc.kind);
+    });
+    var counts = {};
+    DOCS.forEach(function (doc) { counts[doc.kind] = (counts[doc.kind] || 0) + 1; });
+    var filters = kinds.filter(function (kind) { return counts[kind] > 1; });
+
+    function el(tag, className, text) {
+      var node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    /* --- 索引条目 --- */
+    var items = DOCS.map(function (doc) {
+      var li = el('li', 'entry');
+      var a = el('a', 'entry-link');
+      a.href = doc.file;
+
+      var top = el('div', 'entry-top');
+      top.appendChild(el('span', 'label', doc.date));
+      var right = el('span', 'label');
+      right.appendChild(el('span', 'entry-kind', doc.kind));
+      if (doc.badge) right.appendChild(document.createTextNode(' · ' + doc.badge));
+      right.style.display = 'flex';
+      right.style.gap = '0.75rem';
+      top.appendChild(right);
+
+      var title = el('div', 'entry-title', doc.title);
+
+      a.appendChild(top);
+      a.appendChild(title);
+      a.appendChild(el('p', 'entry-desc', doc.desc));
+      li.appendChild(a);
+      li.dataset.kind = doc.kind;
+      list.appendChild(li);
+      return li;
     });
 
-    // Stats: count docs, pick latest date
-    (() => {
-      const cards = document.querySelectorAll('.file-card');
-      document.getElementById('doc-count').textContent = cards.length;
+    /* --- 类别筛选：标签即控件 --- */
+    var active = '全部';
 
-      const dates = [...document.querySelectorAll('.file-meta span:first-child')]
-        .map(s => s.textContent.trim())
-        .filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d))
-        .sort()
-        .reverse();
-      document.getElementById('last-update').textContent = dates[0] || '—';
-    })();
+    function tag(kind) {
+      var b = el('button', 'pill', kind);
+      b.type = 'button';
+      b.dataset.kind = kind;
+      b.setAttribute('aria-pressed', 'false');
+      return b;
+    }
+
+    pills.appendChild(tag('全部'));
+    filters.forEach(function (kind) { pills.appendChild(tag(kind)); });
+
+    function apply(kind, replay) {
+      active = kind;
+      var shown = 0;
+
+      items.forEach(function (li) {
+        var match = kind === '全部' || li.dataset.kind === kind;
+        li.classList.toggle('is-hidden', !match);
+        if (!match) return;
+        shown++;
+        if (replay) {
+          li.classList.remove('is-in');
+          void li.offsetWidth;
+        }
+      });
+
+      Array.prototype.forEach.call(pills.children, function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.kind === kind));
+      });
+
+      countLine.textContent = kind === '全部'
+        ? '共 ' + shown + ' 份'
+        : kind + ' · ' + shown + ' 份';
+      empty.hidden = shown !== 0;
+    }
+
+    pills.addEventListener('click', function (event) {
+      var button = event.target.closest('.pill');
+      if (button && button.dataset.kind !== active) apply(button.dataset.kind, true);
+    });
+
+    /* --- 抬头统计 --- */
+    countHead.textContent = String(DOCS.length);
+
+    var dates = DOCS.map(function (d) { return d.date; }).sort();
+    var oldest = dates[0];
+    var newest = dates[dates.length - 1];
+    latestHead.textContent = oldest.slice(0, 7) === newest.slice(0, 7)
+      ? newest
+      : oldest.slice(0, 7) + ' 至 ' + newest.slice(0, 7);
+
+    /* --- 入场：站名从遮罩升起，条目按阅读顺序逐行落下 --- */
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var revealAll = function () {
+      items.forEach(function (li) { li.classList.add('is-in'); });
+    };
+
+    if (reduce || !('IntersectionObserver' in window)) {
+      revealAll();
+      apply('全部', false);
+    } else {
+      var reveals = 0;
+      var masthead = document.querySelector('.masthead');
+
+      requestAnimationFrame(function () {
+        masthead.classList.remove('is-revealing');
+      });
+
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          var li = entry.target;
+          var step = reveals++ % 6;
+          li.style.transitionDelay = step * 70 + 'ms';
+          /* 标题与说明比它所在的行晚一拍落位 */
+          window.setTimeout(function () {
+            var parts = li.querySelectorAll('.entry-title, .entry-desc');
+            Array.prototype.forEach.call(parts, function (node, i) {
+              node.style.transitionDelay = step * 70 + (i + 1) * 90 + 'ms';
+            });
+          }, 60);
+          li.classList.add('is-in');
+          observer.unobserve(li);
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.1 });
+
+      items.forEach(function (li) { observer.observe(li); });
+      apply('全部', false);
+
+      /* 签名动作之后的一个尾巴：页脚字标随滚动缓慢上浮、加深 */
+      var mark = document.querySelector('.wordmark');
+      var ticking = false;
+      var drift = function () {
+        ticking = false;
+        var box = mark.getBoundingClientRect();
+        var progress = Math.min(1, Math.max(0, 1 - box.top / window.innerHeight));
+        mark.style.transform = 'translateY(' + ((1 - progress) * 40).toFixed(1) + 'px)';
+        mark.style.opacity = (0.05 + progress * 0.06).toFixed(3);
+      };
+
+      window.addEventListener('scroll', function () {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(drift);
+      }, { passive: true });
+
+      drift();
+    }
+  })();
   </script>
 </body>
 </html>

@@ -1,0 +1,17 @@
+{
+  "note": "Direction allowances for inspect.mjs (it reads .taste-skill/direction.json automatically). Every entry is a decision, not a suppression.",
+  "allow": [
+    "few-pictures",
+    "no-real-pictures",
+    "no-footage",
+    "palette-cream",
+    "emoji"
+  ],
+  "reasons": {
+    "few-pictures": "Agreed constraint: the site carries no photography. The index and the documents are text-first.",
+    "no-real-pictures": "Same constraint as few-pictures.",
+    "no-footage": "Same constraint: no video is used, and none is added as decoration.",
+    "palette-cream": "Brand colour is set by DESIGN.md: warm cream #f8f5ed is the system canvas, not a replaceable decorative tint.",
+    "emoji": "The only flagged symbols (a star, a tick, a magnifier) sit inside the SVG architecture plates as legend marks. They are illustration content; the page UI itself carries no emoji."
+  }
+}

@@ -4,83 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI 驱动软件研发机制 —— 四区架构</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #020617; --bg-card: rgba(15, 23, 42, 0.5); --bg-card-solid: #0f172a;
-      --border: #1e293b; --text: #ffffff; --text-secondary: #94a3b8; --text-muted: #475569;
-      --svg-filter: none; --card-hover: rgba(30, 41, 59, 0.5);
-    }
-    [data-theme="light"] {
-      --bg: #f8fafc; --bg-card: rgba(255, 255, 255, 0.85);
-      --border: #e2e8f0; --text: #1e293b; --text-secondary: #64748b;
-      --svg-filter: invert(1) hue-rotate(180deg) brightness(1.05);
-    }
-    [data-theme="warm"] {
-      --bg: #fef7ed; --bg-card: rgba(255, 251, 245, 0.9);
-      --border: #fde68a; --text: #3b2f1e; --text-secondary: #78716c;
-      --svg-filter: invert(1) hue-rotate(170deg) brightness(1.05) saturate(0.85);
-    }
-    [data-theme="cool"] {
-      --bg: #f0f4f8; --bg-card: rgba(248, 250, 252, 0.9);
-      --border: #cbd5e1; --text: #1a2a3a; --text-secondary: #64748b;
-      --svg-filter: invert(1) hue-rotate(190deg) brightness(1.05);
-    }
-    @media print {
-      :root, [data-theme] {
-        --bg: #ffffff; --bg-card: rgba(255, 255, 255, 0.95);
-        --border: #d4d4d8; --text: #18181b;
-        --svg-filter: invert(1) hue-rotate(180deg) brightness(1.08) contrast(0.95);
-      }
-      body { padding: 0; }
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'JetBrains Mono', 'Microsoft YaHei', monospace;
-      background: var(--bg); min-height: 100vh; padding: 2rem; color: var(--text);
-    }
-    .container { max-width: 1400px; margin: 0 auto; }
-    .header { margin-bottom: 1.5rem; }
-    .header-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.35rem; }
-    .pulse-dot { width: 12px; height: 12px; background: #22d3ee; border-radius: 50%; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; }
-    .subtitle { color: var(--text-secondary); font-size: 0.8rem; margin-left: 1.75rem; }
-    .diagram-container {
-      background: var(--bg-card); border-radius: 1rem;
-      border: 1px solid var(--border); padding: 1.5rem; overflow-x: auto;
-    }
-    .diagram-container svg { filter: var(--svg-filter); transition: filter 0.4s; width: 100%; min-width: 1200px; display: block; }
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
-    .card { background: var(--bg-card); border-radius: 0.75rem; border: 1px solid var(--border); padding: 1.25rem; }
-    .card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
-    .card-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .card-dot.cyan { background: #22d3ee; } .card-dot.rose { background: #fb7185; }
-    .card-dot.amber { background: #fbbf24; } .card-dot.emerald { background: #34d399; }
-    .card h3 { font-size: 0.85rem; font-weight: 600; }
-    .card ul { list-style: none; color: var(--text-secondary); font-size: 0.75rem; }
-    .card li { margin-bottom: 0.35rem; }
-    .footer { text-align: center; margin-top: 1.5rem; color: var(--text-muted); font-size: 0.7rem; }
-
-    /* Theme switcher — top right */
-    .theme-bar { position: fixed; top: 1rem; right: 1.5rem; display: flex; align-items: center; gap: 0.4rem; z-index: 100; }
-    .theme-bar span { font-size: 0.65rem; color: var(--text-muted); }
-    .theme-btn { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); cursor: pointer; transition: all 0.2s; background: transparent; padding: 0; }
-    .theme-btn.dark  { background: #020617; border-color: #334155; }
-    .theme-btn.light { background: #f8fafc; border-color: #cbd5e1; }
-    .theme-btn.warm  { background: #fef7ed; border-color: #d6b656; }
-    .theme-btn.cool  { background: #e2e8f0; border-color: #94a3b8; }
-    .theme-btn.active { border-color: #22d3ee; box-shadow: 0 0 6px rgba(34,211,238,0.5); transform: scale(1.2); }
-  </style>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="assets/site.css">
+  <script>document.documentElement.classList.add('js');</script>
 </head>
-<body>
-  <div class="theme-bar">
-    <span>配色</span>
-    <button class="theme-btn dark active" onclick="setTheme('dark')" title="深色"></button>
-    <button class="theme-btn light"       onclick="setTheme('light')" title="亮色"></button>
-    <button class="theme-btn warm"        onclick="setTheme('warm')" title="暖色"></button>
-    <button class="theme-btn cool"        onclick="setTheme('cool')" title="冷色"></button>
-  </div>
+<body class="doc">
+  <nav class="site-nav">
+    <a class="site-mark" href="index.html"><span class="dot"></span>Talks</a>
+    <ul class="site-links">
+      <li><a href="index.html">索引</a></li>
+      <li><a href="https://github.com/Peanut-Rice/Talks" target="_blank" rel="noreferrer">GitHub</a></li>
+    </ul>
+  </nav>
   <div class="container">
     <div class="header">
       <div class="header-row">
@@ -91,6 +26,7 @@
     </div>
 
     <div class="diagram-container">
+    <!-- taste-skill-ignore: 图版内部（SVG 插画）的符号是图例标记，不是页面 UI 表情。 -->
       <svg viewBox="0 0 1300 720">
         <defs>
           <!-- Arrow markers -->
@@ -154,7 +90,7 @@
         <!-- AI API 网关 (golden highlight) -->
         <rect x="38" y="100" width="254" height="56" rx="8" fill="rgba(245, 158, 11, 0.12)" stroke="#f59e0b" stroke-width="2" filter="url(#glow-amber)"/>
         <rect x="38" y="100" width="254" height="56" rx="8" fill="rgba(245, 158, 11, 0.06)" stroke="#f59e0b" stroke-width="2"/>
-        <text x="165" y="120" fill="#f59e0b" font-size="11" font-weight="700" text-anchor="middle">★ AI API 统一网关</text>
+        <text x="165" y="120" fill="#f59e0b" font-size="11" font-weight="700" text-anchor="middle">★ AI API 统一网关</text> <!-- taste-skill-ignore: 图版内图例符号 -->
         <text x="165" y="137" fill="#94a3b8" font-size="8" text-anchor="middle">DeepSeek · GLM ｜ 路由 · 限流 · 成本追踪</text>
 
         <!-- VS Code + Kilo -->
@@ -181,7 +117,7 @@
         <!-- ★ AI 代码审查 (golden highlight — KEY addition) -->
         <rect x="45" y="310" width="247" height="52" rx="8" fill="rgba(245, 158, 11, 0.12)" stroke="#f59e0b" stroke-width="2" filter="url(#glow-amber)"/>
         <rect x="45" y="310" width="247" height="52" rx="8" fill="rgba(245, 158, 11, 0.06)" stroke="#f59e0b" stroke-width="2"/>
-        <text x="168" y="330" fill="#f59e0b" font-size="11" font-weight="700" text-anchor="middle">★ AI 代码审查</text>
+        <text x="168" y="330" fill="#f59e0b" font-size="11" font-weight="700" text-anchor="middle">★ AI 代码审查</text> <!-- taste-skill-ignore: 图版内图例符号 -->
         <text x="168" y="346" fill="#94a3b8" font-size="7" text-anchor="middle">安全漏洞标注 · 性能分析 · 代码异味 · 规范检查</text>
         <text x="168" y="358" fill="#f59e0b" font-size="7" text-anchor="middle">审查结果 → 人工确认 → 进入安全传输</text>
 
@@ -195,7 +131,7 @@
 
         <!-- 人工审查点 -->
         <rect x="70" y="435" width="200" height="36" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
-        <text x="170" y="457" fill="#64748b" font-size="9" font-weight="600" text-anchor="middle">🔍 人工最终确认</text>
+        <text x="170" y="457" fill="#64748b" font-size="9" font-weight="600" text-anchor="middle">🔍 人工最终确认</text> <!-- taste-skill-ignore: 图版内图例符号 -->
 
         <!-- =================================================================================== -->
         <!-- 区间箭头:  Zone1 → 审查点 → Zone2                                                  -->
@@ -228,7 +164,7 @@
 
         <!-- 通过标记 -->
         <rect x="380" y="425" width="200" height="36" rx="18" fill="rgba(52, 211, 153, 0.15)" stroke="#34d399" stroke-width="1.5" stroke-dasharray="3,3"/>
-        <text x="480" y="448" fill="#34d399" font-size="12" font-weight="700" text-anchor="middle">全部通过 ✓ → 物理摆渡</text>
+        <text x="480" y="448" fill="#34d399" font-size="12" font-weight="700" text-anchor="middle">全部通过 ✓ → 物理摆渡</text> <!-- taste-skill-ignore: 图版内图例符号 -->
 
         <!-- 物理摆渡 -->
         <rect x="380" y="476" width="200" height="24" rx="4" fill="rgba(30, 41, 59, 0.5)" stroke="#64748b" stroke-width="1"/>
@@ -245,7 +181,7 @@
 
         <!-- 适配脚本 -->
         <rect x="665" y="100" width="260" height="64" rx="6" fill="rgba(251, 191, 36, 0.12)" stroke="#fbbf24" stroke-width="1.5"/>
-        <text x="795" y="120" fill="white" font-size="11" font-weight="600" text-anchor="middle">🔧 自动适配脚本</text>
+        <text x="795" y="120" fill="white" font-size="11" font-weight="600" text-anchor="middle">🔧 自动适配脚本</text> <!-- taste-skill-ignore: 图版内图例符号 -->
         <text x="795" y="138" fill="#94a3b8" font-size="8" text-anchor="middle">依赖源替换 · 配置内网化 · 端点切换</text>
         <text x="795" y="155" fill="#fbbf24" font-size="7" text-anchor="middle">无需 AI — 写好一次，每次自动执行</text>
 
@@ -282,22 +218,22 @@
         <!-- =================================================================================== -->
 
         <rect x="980" y="100" width="280" height="52" rx="6" fill="rgba(6, 78, 59, 0.3)" stroke="#34d399" stroke-width="1.5"/>
-        <text x="1120" y="120" fill="white" font-size="11" font-weight="600" text-anchor="middle">📦 代码仓库</text>
+        <text x="1120" y="120" fill="white" font-size="11" font-weight="600" text-anchor="middle">📦 代码仓库</text> <!-- taste-skill-ignore: 图版内图例符号 -->
         <text x="1120" y="138" fill="#94a3b8" font-size="8" text-anchor="middle">GitLab / Gitea（自托管）</text>
 
         <rect x="980" y="172" width="280" height="72" rx="6" fill="rgba(245, 158, 11, 0.10)" stroke="#f59e0b" stroke-width="2" filter="url(#glow-amber)"/>
         <rect x="980" y="172" width="280" height="72" rx="6" fill="rgba(245, 158, 11, 0.05)" stroke="#f59e0b" stroke-width="2"/>
-        <text x="1120" y="194" fill="#f59e0b" font-size="11" font-weight="700" text-anchor="middle">★ CI/CD 平台</text>
+        <text x="1120" y="194" fill="#f59e0b" font-size="11" font-weight="700" text-anchor="middle">★ CI/CD 平台</text> <!-- taste-skill-ignore: 图版内图例符号 -->
         <text x="1120" y="212" fill="#94a3b8" font-size="8" text-anchor="middle">GitLab CI / Jenkins</text>
         <text x="1120" y="228" fill="#94a3b8" font-size="7" text-anchor="middle">自动构建 → 测试 → 安全扫描 → 部署</text>
         <text x="1120" y="241" fill="#f59e0b" font-size="7" text-anchor="middle">+ AI 审查节点（部署风险 · 异常检测）</text>
 
         <rect x="980" y="264" width="280" height="44" rx="6" fill="rgba(6, 78, 59, 0.3)" stroke="#34d399" stroke-width="1.5"/>
-        <text x="1120" y="284" fill="white" font-size="10" font-weight="600" text-anchor="middle">🐳 制品仓库</text>
+        <text x="1120" y="284" fill="white" font-size="10" font-weight="600" text-anchor="middle">🐳 制品仓库</text> <!-- taste-skill-ignore: 图版内图例符号 -->
         <text x="1120" y="300" fill="#94a3b8" font-size="8" text-anchor="middle">Harbor / Nexus（Docker Images）</text>
 
         <rect x="980" y="328" width="280" height="100" rx="6" fill="rgba(6, 78, 59, 0.25)" stroke="#34d399" stroke-width="1.5"/>
-        <text x="1120" y="350" fill="white" font-size="11" font-weight="600" text-anchor="middle">☸ 运行环境</text>
+        <text x="1120" y="350" fill="white" font-size="11" font-weight="600" text-anchor="middle">☸ 运行环境</text> <!-- taste-skill-ignore: 图版内图例符号 -->
         <text x="1120" y="370" fill="#94a3b8" font-size="8" text-anchor="middle">K8s / Docker Compose / 虚拟机</text>
         <text x="1120" y="388" fill="#94a3b8" font-size="8" text-anchor="middle">开发环境 → 测试环境 → 预发布 → 生产</text>
         <text x="1120" y="406" fill="#34d399" font-size="7" text-anchor="middle">AI 介入深度 20-30%（运维判断）</text>
@@ -354,7 +290,7 @@
         <text x="326" y="26" fill="#94a3b8" font-size="7">部署运行</text>
 
         <rect x="390" y="18" width="12" height="10" rx="2" fill="rgba(245, 158, 11, 0.12)" stroke="#f59e0b" stroke-width="1.5"/>
-        <text x="406" y="26" fill="#f59e0b" font-size="7" font-weight="600">★ 核心组件</text>
+        <text x="406" y="26" fill="#f59e0b" font-size="7" font-weight="600">★ 核心组件</text> <!-- taste-skill-ignore: 图版内图例符号 -->
 
         <line x1="480" y1="23" x2="492" y2="23" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="3,3"/>
         <text x="498" y="26" fill="#94a3b8" font-size="7">安全边界</text>
@@ -421,12 +357,6 @@
 
     <p class="footer">AI 驱动软件研发机制 · v0.1 · 四区架构设计</p>
   </div>
-  <script>
-    function setTheme(name) {
-      document.documentElement.setAttribute('data-theme', name);
-      document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-      document.querySelector(`.theme-btn.${name}`).classList.add('active');
-    }
-  </script>
+  <script src="assets/site.js"></script>
 </body>
 </html>

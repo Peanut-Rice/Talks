@@ -4,79 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>大模型在审计条线的应用 · 金控集团</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-<style>
-  :root{--ink:#0a1f3d;--ink-rgb:10,31,61;--paper:#f1f3f5;--paper-rgb:241,243,245;--paper-tint:#e4e8ec;--ink-tint:#152a4a;--mono:"IBM Plex Mono",ui-monospace,monospace;--serif-en:"Playfair Display","Source Serif 4",Georgia,serif;--serif-body-en:"Source Serif 4",Georgia,serif;--serif-zh:"Noto Serif SC",source-han-serif-sc,serif;--sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif}
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased}
-  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
-  canvas#bg-light{opacity:0}canvas#bg-dark{opacity:1}
-  body.light-bg canvas#bg-light{opacity:1}body.light-bg canvas#bg-dark{opacity:0}
-  body.low-power canvas.bg{display:none!important}
-  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
-  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:5.5vh 5.5vw 9vh 5.5vw;display:flex;flex-direction:column;overflow:hidden}
-  .slide.light{color:var(--ink);background:var(--paper)}.slide.dark{color:var(--paper);background:var(--ink)}
-  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
-  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
-  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
-  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
-  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
-  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
-  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
-  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
-  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;opacity:.65}
-  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.5}
-  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;opacity:.55;margin-bottom:2.2vh}
-  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
-  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:10vw;line-height:.96;letter-spacing:-.02em}
-  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:4.8vw;line-height:1.08;letter-spacing:-.01em}
-  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:2.8vw;line-height:1.25;opacity:.7}
-  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.1vw;line-height:1.3}
-  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.7vw;line-height:1.45;opacity:.85}
-  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.15vw);line-height:1.7;opacity:.8}
-  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.16em;text-transform:uppercase;opacity:.55}
-  .callout{padding:2.5vh 2vw;border-left:3px solid;font-family:var(--serif-zh);font-size:max(14px,1.1vw);line-height:1.5;opacity:.88}
-  .slide.light .callout{background:rgba(var(--ink-rgb),.04)}.slide.dark .callout{background:rgba(var(--paper-rgb),.05)}
-  .callout .cite{display:block;margin-top:1.2vh;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.55}
-  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
-  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:3vw;flex:1;align-content:center}
-  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:3.5vh 5vw;flex:1;align-content:center}
-  .grid-2-6-6{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
-  .pillar{display:flex;flex-direction:column;gap:1.5vh}
-  .pillar .ic{font-family:var(--serif-en);font-style:italic;font-size:2.2vw;opacity:.4;font-weight:400}
-  .pillar .t{font-family:var(--serif-zh);font-weight:700;font-size:2.1vw;line-height:1.15}
-  .pillar .d{font-family:var(--sans-zh);font-weight:400;font-size:max(13px,1vw);opacity:.72;line-height:1.55}
-  .stat-card{display:flex;flex-direction:column;gap:.6vh;align-items:flex-start;padding-top:1.4vh;border-top:1px solid rgba(127,127,127,.25)}
-  .stat-card .stat-label{font-family:var(--mono);font-size:max(9px,.72vw);letter-spacing:.22em;text-transform:uppercase;opacity:.5}
-  .stat-card .stat-nb{font-family:var(--serif-en);font-weight:800;font-size:5.2vw;line-height:.88;letter-spacing:-.03em;font-feature-settings:"tnum";margin-top:.3vh}
-  .stat-card .stat-note{font-family:var(--sans-zh);font-size:max(12px,.95vw);line-height:1.45;opacity:.68;margin-top:.4vh}
-  .tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:4px 10px;border:1px solid;opacity:.75}
-  .tag-rd{color:#e11d48;border-color:#e11d48}.tag-am{color:#ca8a04;border-color:#ca8a04}.tag-gn{color:#059669;border-color:#059669}
-  .rule{width:100%;height:1px;background:currentColor;opacity:.2;margin:2.5vh 0}
-  .center{text-align:center}
-  [data-anim]{opacity:1}
-  body.motion-ready [data-anim]{opacity:0}
-  body.low-power *{animation:none!important;transition:none!important}
-  body.low-power [data-anim]{opacity:1!important;transform:none!important}
-  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px)}
-  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s;border:0}
-  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
-  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
-  body.light-bg #nav{background:rgba(255,255,255,.25)}
-  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
-  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
-  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;opacity:.4;mix-blend-mode:difference;color:#aaa}
-  @media(max-width:900px){.h-hero{font-size:14vw}.h-xl{font-size:8vw}.grid-2,.grid-2-6-6{grid-template-columns:1fr}}
-</style>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="assets/site.css">
+  <script>document.documentElement.classList.add('js');</script>
 </head>
-<body>
+<body class="doc">
 
 <script>
-(function(){const KEY='guizang-ppt-low-power';const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const stored=localStorage.getItem(KEY);window.__lowPowerMode=stored==='1'||(stored===null&&reduced);function updateHint(){const hint=document.getElementById('hint');if(hint)hint.textContent=`← → 翻页 · B ${window.__lowPowerMode?'动态':'静态'} · ESC 索引`}window.__setLowPowerMode=function(on,opts){window.__lowPowerMode=!!on;document.body.classList.toggle('low-power',window.__lowPowerMode);if(opts&&opts.persist!==false)localStorage.setItem(KEY,window.__lowPowerMode?'1':'0');if(window.__lowPowerMode&&document.getAnimations)document.getAnimations().forEach(a=>a.cancel());updateHint();dispatchEvent(new CustomEvent('ppt-low-power-change',{detail:{on:window.__lowPowerMode}}));if(window.__playSlide)window.__playSlide(window.__currentSlideIndex||0)};document.body.classList.toggle('low-power',window.__lowPowerMode);addEventListener('DOMContentLoaded',updateHint,{once:true})})();
+(function(){const KEY='guizang-ppt-low-power';const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const stored=localStorage.getItem(KEY);window.__lowPowerMode=stored==='1'||(stored===null&&reduced);function updateHint(){const hint=document.getElementById('hint');if(hint)hint.textContent=`  翻页 · B ${window.__lowPowerMode?'动态':'静态'} · ESC 索引`}window.__setLowPowerMode=function(on,opts){window.__lowPowerMode=!!on;document.body.classList.toggle('low-power',window.__lowPowerMode);if(opts&&opts.persist!==false)localStorage.setItem(KEY,window.__lowPowerMode?'1':'0');if(window.__lowPowerMode&&document.getAnimations)document.getAnimations().forEach(a=>a.cancel());updateHint();dispatchEvent(new CustomEvent('ppt-low-power-change',{detail:{on:window.__lowPowerMode}}));if(window.__playSlide)window.__playSlide(window.__currentSlideIndex||0)};document.body.classList.toggle('low-power',window.__lowPowerMode);addEventListener('DOMContentLoaded',updateHint,{once:true})})();
 </script>
 
 <canvas id="bg-dark" class="bg"></canvas><canvas id="bg-light" class="bg"></canvas>
-<div id="hint">← → 翻页 · B 静态 · ESC 索引</div>
+<div id="hint">  翻页 · B 静态 · ESC 索引</div>
 
 <div id="deck">
 
@@ -84,7 +23,6 @@
 <section class="slide hero dark">
   <div class="chrome"><div>金控集团 · 内部交流</div><div>2026</div></div>
   <div class="frame" style="display:grid;gap:3.5vh;align-content:center;min-height:78vh">
-    <div class="kicker" data-anim>审计条线 · AI 应用</div>
     <h1 class="h-hero" data-anim>大模型<br>在审计条线的应用</h1>
     <p class="lead" style="max-width:55vw" data-anim>查制度、找异常、比合规、写方案。<br>让 AI 成为审计组的第二个大脑。</p>
     <div class="meta-row" data-anim><span>不替代审计判断</span><span>·</span><span>不绕过治理流程</span></div>
@@ -96,7 +34,6 @@
 <section class="slide light">
   <div class="chrome"><div>整体应用架构</div><div>01 / 12</div></div>
   <div class="frame" style="padding-top:4vh">
-    <div class="kicker" data-anim>ARCHITECTURE</div>
     <h2 class="h-xl" data-anim>以 Skills 为核心资产的 AI 应用架构</h2>
     <p class="lead" style="margin-bottom:4vh" data-anim>知识库和指标库提供原料，Skills 承载判断力，AI 做的是"制度可编译、合规可计算、决策可追溯"。</p>
 
@@ -108,10 +45,10 @@
           <strong>入口层</strong> · 企业微信 · E-Work 桌面 · 金控数字化平台
         </div>
         <div style="padding:1.6vh 1.5vw;border-left:3px solid #ca8a04;background:rgba(202,138,4,.06)">
-          <strong style="color:#ca8a04">★ Skills 服务平台（核心资产）</strong><br>
+          <strong style="color:#ca8a04"> Skills 服务平台（核心资产）</strong><br>
           技能调度 · 身份注入 · 审计日志 · API 暴露
         </div>
-        <div style="padding:1.6vh 1.5vw;border-left:3px solid #7c3aed;background:rgba(124,58,237,.04)">
+        <div style="padding:1.6vh 1.5vw;border-left:3px solid #f59e0b;background:rgba(124,58,237,.04)">
           <strong>数据层</strong> · 统一知识库（制度·报告·法规）· 统一指标库（财务·运营·风控）
         </div>
         <div style="padding:1.6vh 1.5vw;border-left:3px solid #0891b2;background:rgba(8,145,178,.04)">
@@ -120,7 +57,7 @@
       </div>
       <!-- Right: Skills detail -->
       <div style="display:flex;flex-direction:column;gap:1.5vh;font-size:max(12px,.9vw)">
-        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.5">审计条线加载的 Skills</div>
+        <div style="font-family:$1;font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.5">审计条线加载的 Skills</div>
         <div style="display:flex;flex-wrap:wrap;gap:.6vh .8vw">
           <span class="tag tag-gn">合规对齐</span><span class="tag tag-gn">文档比对</span><span class="tag tag-gn">信息提取</span>
           <span class="tag tag-gn">跨文档检索</span><span class="tag tag-gn">场景推理</span><span class="tag tag-gn">影响分析</span>
@@ -139,7 +76,6 @@
 <section class="slide dark">
   <div class="chrome"><div>核心价值</div><div>02 / 12</div></div>
   <div class="frame" style="padding-top:4vh">
-    <div class="kicker" data-anim>AI 为审计带来什么</div>
     <h2 class="h-xl" data-anim>三个"可"</h2>
     <div class="grid-3" style="margin-top:5vh">
       <div class="stat-card" data-anim>
@@ -172,15 +108,15 @@
     <div class="rule" data-anim></div>
     <div class="grid-2-6-6" data-anim>
       <div>
-        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
-        <p class="body-zh">① 信息提取 Skill 检索制度清单（集团制度 + 行业法规 + 子公司细则），剔除废止条款<br>② 合规对齐 Skill 逐条提取义务条款，结构匹配内外条款<br>③ 输出覆盖矩阵（✅/⚠️/❌），未覆盖项生成审计疑点<br>④ 检索同类案例，生成整改建议</p>
+        <div style="font-family:$1;font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <p class="body-zh">① 信息提取 Skill 检索制度清单（集团制度 + 行业法规 + 子公司细则），剔除废止条款<br>② 合规对齐 Skill 逐条提取义务条款，结构匹配内外条款<br>③ 输出覆盖矩阵（/️/），未覆盖项生成审计疑点<br>④ 检索同类案例，生成整改建议</p>
       </div>
       <div class="callout">
-        计划财务部 2024 年度：23 条外部义务 × 41 条内部条款 → 19 条已覆盖、3 条部分覆盖、1 条未覆盖（关联交易独立董事审议）→ 输出整改建议
+        计划财务部 2024 年度：23 条外部义务 × 41 条内部条款  19 条已覆盖、3 条部分覆盖、1 条未覆盖（关联交易独立董事审议） 输出整改建议
         <div class="cite">— 模拟数据</div>
       </div>
     </div>
-    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：知识库 · 合规对齐 Skill（已有）· 信息提取 Skill（已有）</div>
+    <div style="font-family:$1;font-size:10px;opacity:.5" data-anim>依赖：知识库 · 合规对齐 Skill（已有）· 信息提取 Skill（已有）</div>
   </div>
   <div class="foot"><div>场景 1 · 制度合规比对</div><div>03 / 12</div></div>
 </section>
@@ -195,15 +131,15 @@
     <div class="rule" data-anim></div>
     <div class="grid-2-6-6" data-anim>
       <div>
-        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <div style="font-family:$1;font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
         <p class="body-zh">① 异常检测 Skill（需新建）从指标库拉取全量数据并清洗<br>② 三维比对：自身历史 ±2σ / 预算达成 / 同业横比<br>③ 异常点检索关联事件（制度变更、组织调整、重大合同）<br>④ 输出异常清单（偏离度 + 归因 + 置信度 + 核实方向）</p>
       </div>
       <div class="callout">
-        某子公司 2024：人均产出 ↓26%（核心团队离职，置信度 85%）· 应收账款周转天数高于同业 35 天（合同纠纷，置信度 90%）· 费用率超预算 23% 等 5 项异常
+        某子公司 2024：人均产出 26%（核心团队离职，置信度 85%）· 应收账款周转天数高于同业 35 天（合同纠纷，置信度 90%）· 费用率超预算 23% 等 5 项异常
         <div class="cite">— 模拟数据</div>
       </div>
     </div>
-    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：指标库 · 异常检测 Skill（需新建）· 跨文档检索 · DeepSeek-R1</div>
+    <div style="font-family:$1;font-size:10px;opacity:.5" data-anim>依赖：指标库 · 异常检测 Skill（需新建）· 跨文档检索 · DeepSeek-R1</div>
   </div>
   <div class="foot"><div>场景 2 · 经营指标异常检测</div><div>04 / 12</div></div>
 </section>
@@ -218,15 +154,15 @@
     <div class="rule" data-anim></div>
     <div class="grid-2-6-6" data-anim>
       <div>
-        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <div style="font-family:$1;font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
         <p class="body-zh">① 信息提取 Skill 调取干部任职数据与审批权限<br>② 跨文档检索 Skill 抽取任期内全部决策文档<br>③ 场景推理 Skill 逐条判合规（三重一大/回避/权限）<br>④ 生成重大决策清单 + 合规判定表 + 简报框架</p>
       </div>
       <div class="callout">
-        某子公司总经理任期：47 次决策会议、128 份签批合同 → 逐条检查三重一大程序与审批权限 → 标注 3 项存疑决策需补充材料
+        某子公司总经理任期：47 次决策会议、128 份签批合同  逐条检查三重一大程序与审批权限  标注 3 项存疑决策需补充材料
         <div class="cite">— 模拟数据</div>
       </div>
     </div>
-    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：会议纪要+合同+制度 · 场景推理 · 信息提取 · 跨文档检索 · 人事数据</div>
+    <div style="font-family:$1;font-size:10px;opacity:.5" data-anim>依赖：会议纪要+合同+制度 · 场景推理 · 信息提取 · 跨文档检索 · 人事数据</div>
   </div>
   <div class="foot"><div>场景 3 · 经济责任审计辅助</div><div>05 / 12</div></div>
 </section>
@@ -241,15 +177,15 @@
     <div class="rule" data-anim></div>
     <div class="grid-2-6-6" data-anim>
       <div>
-        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <div style="font-family:$1;font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
         <p class="body-zh">① 文档比对 Skill 检出修订版与上一版差异<br>② 影响分析 Skill 遍历依赖链，找出受影响的下游<br>③ 逐条比对下游条款，标注冲突/断链/需更新<br>④ 检索基于旧制度的审批与决议，标注需重新审视项</p>
       </div>
       <div class="callout">
-        《预算管理办法》第 7 条修订 → 4 份下游制度受影响、2 份操作手册需更新、3 笔历史审批在新制度下需重新审视
+        《预算管理办法》第 7 条修订  4 份下游制度受影响、2 份操作手册需更新、3 笔历史审批在新制度下需重新审视
         <div class="cite">— 模拟数据</div>
       </div>
     </div>
-    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：制度全文+修订记录 · 影响分析 Skill · 文档比对 Skill · 依赖链数据</div>
+    <div style="font-family:$1;font-size:10px;opacity:.5" data-anim>依赖：制度全文+修订记录 · 影响分析 Skill · 文档比对 Skill · 依赖链数据</div>
   </div>
   <div class="foot"><div>场景 4 · 制度修订影响审计</div><div>06 / 12</div></div>
 </section>
@@ -264,15 +200,15 @@
     <div class="rule" data-anim></div>
     <div class="grid-2-6-6" data-anim>
       <div>
-        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <div style="font-family:$1;font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
         <p class="body-zh">① 跨文档检索 Skill 检索所有历史审计报告<br>② 按问题类型聚类统计，识别高频薄弱环节<br>③ 关联整改台账，标注整改状态与纸面整改嫌疑<br>④ 生成审计参考摘要与重点关注建议</p>
       </div>
       <div class="callout">
-        某子公司采购业务：过去 3 年 5 份审计报告 → "采购流程合规性"出现 4 次、2 次整改未闭环 → 提示"重点关注围标串标风险"
+        某子公司采购业务：过去 3 年 5 份审计报告  "采购流程合规性"出现 4 次、2 次整改未闭环  提示"重点关注围标串标风险"
         <div class="cite">— 模拟数据</div>
       </div>
     </div>
-    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：知识库（历史报告+整改台账）· 跨文档检索 Skill（已有）</div>
+    <div style="font-family:$1;font-size:10px;opacity:.5" data-anim>依赖：知识库（历史报告+整改台账）· 跨文档检索 Skill（已有）</div>
   </div>
   <div class="foot"><div>场景 5 · 历史审计报告智能检索</div><div>07 / 12</div></div>
 </section>
@@ -287,15 +223,15 @@
     <div class="rule" data-anim></div>
     <div class="grid-2-6-6" data-anim>
       <div>
-        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <div style="font-family:$1;font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
         <p class="body-zh">① Cron 定时三级提醒（截止前 15 天 / 3 天 / 超期告警）<br>② 文档比对 Skill 对比整改报告 vs 原审计问题<br>③ 合规对齐 Skill 检查整改后是否与新制度一致<br>④ 判定闭环状态：已闭环 / 部分闭环 / 纸面整改 / 超期未改</p>
       </div>
       <div class="callout">
-        "制度修订"整改项实际只改了标题未改条文 → AI 判定为"纸面整改" → 自动触发二次整改流程，推送至审计组和被审计部门
+        "制度修订"整改项实际只改了标题未改条文  AI 判定为"纸面整改"  自动触发二次整改流程，推送至审计组和被审计部门
         <div class="cite">— 模拟数据</div>
       </div>
     </div>
-    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：整改台账 · Cron 定时 · 文档比对 Skill · 合规对齐 Skill</div>
+    <div style="font-family:$1;font-size:10px;opacity:.5" data-anim>依赖：整改台账 · Cron 定时 · 文档比对 Skill · 合规对齐 Skill</div>
   </div>
   <div class="foot"><div>场景 6 · 整改跟踪与闭环验证</div><div>08 / 12</div></div>
 </section>
@@ -310,15 +246,15 @@
     <div class="rule" data-anim></div>
     <div class="grid-2-6-6" data-anim>
       <div>
-        <div style="font-family:var(--mono);font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
+        <div style="font-family:$1;font-size:10px;opacity:.5;margin-bottom:1vh">执行流程</div>
         <p class="body-zh">① 跨文档检索 Skill 提取历史问题高发领域并聚类统计<br>② 信息提取 Skill 检索审计期间制度变更热点<br>③ 场景推理 Skill 交叉分析（历史 × 变更 × 单位特征）<br>④ 生成方案框架（依据 + 目标 + 范围 + 抽样 + 资料清单）</p>
       </div>
       <div class="callout">
-        某子公司经责审计：分析 8 份历史报告 + 3 项制度变更 → 推荐重点审计三重一大决策程序、关联交易合规性、干部选任程序 → 附审计依据与抽样方法
+        某子公司经责审计：分析 8 份历史报告 + 3 项制度变更  推荐重点审计三重一大决策程序、关联交易合规性、干部选任程序  附审计依据与抽样方法
         <div class="cite">— 模拟数据</div>
       </div>
     </div>
-    <div style="font-family:var(--mono);font-size:10px;opacity:.5" data-anim>依赖：知识库 · 跨文档检索 Skill · 信息提取 Skill · 场景推理 Skill</div>
+    <div style="font-family:$1;font-size:10px;opacity:.5" data-anim>依赖：知识库 · 跨文档检索 Skill · 信息提取 Skill · 场景推理 Skill</div>
   </div>
   <div class="foot"><div>场景 7 · 审计方案智能生成</div><div>09 / 12</div></div>
 </section>
@@ -327,32 +263,28 @@
 <section class="slide dark">
   <div class="chrome"><div>建设路线</div><div>10 / 12</div></div>
   <div class="frame" style="padding-top:4vh">
-    <div class="kicker" data-anim>三阶段推进</div>
     <h2 class="h-xl" data-anim>从配置即用到闭环嵌入</h2>
     <div class="grid-3" style="margin-top:5vh;gap:4vw">
       <div data-anim style="display:flex;flex-direction:column;gap:2vh;padding:3vh 2vw;border-top:3px solid #e11d48">
-        <div class="kicker" style="color:#e11d48;opacity:1">P0 · 配置即用</div>
         <div class="h-md" style="font-size:1.9vw">跑通三条链路</div>
         <ul style="font-size:max(13px,1vw);line-height:1.7;padding-left:1.2em;opacity:.8;display:flex;flex-direction:column;gap:.8vh">
           <li>场景 1 · 制度合规比对</li><li>场景 5 · 历史报告检索</li><li>场景 7 · 方案智能生成</li>
         </ul>
-        <div style="font-family:var(--mono);font-size:10px;color:#ca8a04;margin-top:.5vh">✓ 覆盖矩阵准确率 > 85%</div>
+        <div style="font-family:$1;font-size:10px;color:#ca8a04;margin-top:.5vh"> 覆盖矩阵准确率 > 85%</div>
       </div>
       <div data-anim style="display:flex;flex-direction:column;gap:2vh;padding:3vh 2vw;border-top:3px solid #ca8a04">
-        <div class="kicker" style="color:#ca8a04;opacity:1">P1 · 二期建设</div>
         <div class="h-md" style="font-size:1.9vw">新建专项能力</div>
         <ul style="font-size:max(13px,1vw);line-height:1.7;padding-left:1.2em;opacity:.8;display:flex;flex-direction:column;gap:.8vh">
           <li>场景 2 · 异常检测开发</li><li>场景 3 · 经济责任审计</li><li>制度编译增加审计标签</li>
         </ul>
-        <div style="font-family:var(--mono);font-size:10px;color:#ca8a04;margin-top:.5vh">✓ 异常疑点确认率 > 60%</div>
+        <div style="font-family:$1;font-size:10px;color:#ca8a04;margin-top:.5vh"> 异常疑点确认率 > 60%</div>
       </div>
       <div data-anim style="display:flex;flex-direction:column;gap:2vh;padding:3vh 2vw;border-top:3px solid #2563eb">
-        <div class="kicker" style="color:#2563eb;opacity:1">P2 · 三期建设</div>
         <div class="h-md" style="font-size:1.9vw">闭环化嵌入</div>
         <ul style="font-size:max(13px,1vw);line-height:1.7;padding-left:1.2em;opacity:.8;display:flex;flex-direction:column;gap:.8vh">
           <li>场景 6 · 整改跟踪闭环</li><li>场景 4 · 制度修订影响</li><li>API 嵌入审计管理系统</li>
         </ul>
-        <div style="font-family:var(--mono);font-size:10px;color:#ca8a04;margin-top:.5vh">✓ 提醒及时率 > 95%</div>
+        <div style="font-family:$1;font-size:10px;color:#ca8a04;margin-top:.5vh"> 提醒及时率 > 95%</div>
       </div>
     </div>
   </div>
@@ -363,7 +295,6 @@
 <section class="slide hero dark" data-animate="quote">
   <div class="chrome"><div>核心理念</div><div>11 / 12</div></div>
   <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:78vh">
-    <div class="kicker" data-anim>POSITION</div>
     <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:5.5vw;line-height:1.2;max-width:72vw">
       <span data-anim="line" style="display:block">AI 做的是</span>
       <span data-anim="line" style="display:block">信息检索 + 制度比对 + 异常标注。</span>
@@ -378,7 +309,6 @@
 <section class="slide hero light">
   <div class="chrome"><div>交流 · 讨论</div><div>12 / 12</div></div>
   <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:78vh">
-    <div class="kicker" data-anim>THANK YOU</div>
     <h1 class="h-hero" style="font-size:8vw" data-anim>谢谢<br>请多指教</h1>
     <p class="lead" style="max-width:50vw" data-anim>欢迎各位老师就实际业务需求提出意见——哪些场景最急、哪些数据最缺、哪些流程最痛。</p>
     <div class="meta-row" data-anim><span>2026</span></div>
@@ -423,5 +353,6 @@ if(r==='hero'){animate(all,{opacity:[0,1],y:[14,0]},{duration:.9,delay:stagger(.
 animate(all,{opacity:[0,1],y:[16,0]},{duration:.75,delay:stagger(.1,{start:.15}),easing:EASE})}
 window.__playSlide=play;play(0)}
 </script>
+  <script src="assets/site.js"></script>
 </body>
 </html>

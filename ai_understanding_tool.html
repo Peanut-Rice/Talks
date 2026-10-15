@@ -4,12 +4,77 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI的下一步：从生成答案到生成理解工具</title>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="assets/site.css">
-  <script>document.documentElement.classList.add('js');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ==== 排版升级（回退方法：删除本 :root 块与上方两行 preconnect + 字体 link）==== */
+:root{
+  /* 中文用系统 CJK 字体（PingFang SC / Microsoft YaHei / Noto Sans SC 本地回退）—— 不下载中文网页字体 */
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans SC","Segoe UI",sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#f5f7fb;color:#172033;font-family:var(--sans)}
+header{max-width:1120px;margin:auto;padding:52px 24px 28px}
+h1{font-size:38px;line-height:1.2;margin:0 0 15px;letter-spacing:-1.2px;font-family:var(--sans)}
+.lead{font-size:19px;line-height:1.8;color:#5d687b;max-width:900px}
+main{max-width:1120px;margin:auto;padding:0 24px 70px}
+.card{background:#fff;border:1px solid #e2e7ef;border-radius:20px;padding:28px;margin-bottom:18px;box-shadow:0 10px 30px rgba(20,35,60,.05)}
+.hero{padding:34px}
+.big{font-size:27px;line-height:1.55;font-weight:650;max-width:900px}
+.highlight{display:inline-block;background:#eef2ff;border-radius:9px;padding:2px 8px}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:26px}
+.flow .step{position:relative;text-align:center;padding:19px 12px;background:#f4f6fa;border-radius:14px}
+.flow .step:not(:last-child):after{content:"→";position:absolute;right:-15px;top:25px;color:#8792a5;font-size:20px;z-index:2}
+.step b{display:block;margin-bottom:7px}.step small{color:#697589;line-height:1.5}
+h2{font-size:24px;margin:0 0 13px;letter-spacing:-.02em;font-family:var(--sans)}h3{font-size:17px;margin:0 0 9px}
+p{line-height:1.8;margin:9px 0}
+.quote{background:#f7f8fa;border-radius:12px;padding:18px;line-height:1.9}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{border:1px solid #e3e7ee;border-radius:14px;padding:19px}
+.panel.bad{background:#fafafa}.panel.good{background:#f8faff}
+.tag{display:inline-block;padding:5px 9px;border-radius:8px;background:#e9edf4;color:#536074;font-size:11px;margin-bottom:10px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.tag.goodtag{background:#e9efff}
+.reason{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.reason div{padding:14px;background:#f7f8fa;border-radius:12px}
+.reason b{display:block;margin-bottom:6px}.reason span{font-size:13px;color:#697589;line-height:1.5}
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tool{padding:20px;border-radius:14px;background:#f5f7fb;cursor:pointer;border:2px solid transparent}
+.tool:hover,.tool.active{border-color:#172033;background:#fff}
+.tool b{display:block;font-size:17px;margin-bottom:7px}.tool span{font-size:13px;color:#687488;line-height:1.55}
+.toolDetail{margin-top:14px;padding:20px;background:#f8f9fb;border-radius:14px;min-height:100px;line-height:1.8}
+.diagram{padding:20px;text-align:center;background:#f7f8fa;border-radius:14px}
+.nodes{display:flex;justify-content:center;align-items:center;gap:9px;flex-wrap:wrap;margin:15px 0}
+.node{padding:12px 16px;background:#fff;border:1px solid #dce2eb;border-radius:10px}.arrow{color:#7a879a}
+.sim{display:grid;grid-template-columns:260px 1fr;gap:20px}
+input[type=range]{width:100%}
+.result{padding:20px;background:#111827;color:#eef2f7;border-radius:14px;min-height:180px;line-height:1.9;font-variant-numeric:tabular-nums}
+textarea{width:100%;min-height:100px;border:1px solid #d7dde7;border-radius:12px;padding:14px;font:inherit;line-height:1.6}
+button{border:0;border-radius:10px;background:#172033;color:white;padding:11px 16px;cursor:pointer;margin-top:9px;font:inherit;font-weight:600}
+input,textarea{font:inherit}
+.prompt{background:#eef2ff;border-radius:12px;padding:17px;line-height:1.7}
+.quote strong{color:#172033}
+@media(max-width:800px){
+.flow{grid-template-columns:1fr}.flow .step:not(:last-child):after{content:"↓";right:auto;top:auto;bottom:-17px;left:50%}
+.compare,.sim{grid-template-columns:1fr}.reason,.tools{grid-template-columns:1fr 1fr}h1{font-size:30px}
+}
+
+.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.metric{padding:18px;border:1px solid rgba(0,0,0,.09);border-radius:14px;background:#fff}
+.metric-label{font-size:13px;opacity:.65;margin-bottom:6px}
+.metric-value{font-size:28px;font-weight:800}
+.app-canvas{display:flex;flex-wrap:wrap;gap:10px;padding:20px;border-radius:16px;background:rgba(0,0,0,.035);min-height:90px}
+.app-card{padding:12px 16px;border-radius:12px;background:#fff;border:1px solid rgba(0,0,0,.09);font-weight:700}
+.cap-line{width:100%;margin-top:8px;padding-top:14px;border-top:1px dashed rgba(0,0,0,.18);font-size:14px;opacity:.75}
+.explain{margin-top:14px;padding:18px;border-radius:14px;background:#f6f7f9;line-height:1.7}
+.insight{margin-top:16px;padding:16px;border-left:4px solid currentColor;background:rgba(0,0,0,.035);line-height:1.7}
+@media(max-width:700px){.metric-grid{grid-template-columns:1fr}.controls label{display:block;margin-bottom:16px}}
+
+#fixed-question{font-size:clamp(22px,3vw,34px);font-weight:800;line-height:1.35;padding:18px 22px;border:1px solid rgba(0,0,0,.10);border-radius:16px;background:#fff;margin:12px 0 20px}
+</style>
 </head>
-<body class="doc">
+<body>
 <header>
 <h1>AI的下一步：从生成答案到生成理解工具</h1>
 <div class="lead">当 AI 越来越擅长生产内容，内容本身会越来越便宜。新的瓶颈可能不再是“谁能得到答案”，而是“谁能更快理解答案、验证答案并做出判断”。</div>
@@ -93,12 +158,12 @@ AI 能做的事情越来越多。<br>
 <div class="nodes">
 <div class="node">AI 审计助手</div><div class="node">AI 合规审核</div><div class="node">AI 财务分析</div>
 </div>
-<div style="font-size:22px;margin:8px"></div>
+<div style="font-size:22px;margin:8px">↓</div>
 <div style="margin-bottom:8px"><strong>共同沉淀的能力</strong></div>
 <div class="nodes">
 <div class="node">企业知识</div><div class="node">业务规则</div><div class="node">判断标准</div><div class="node">业务流程</div>
 </div>
-<div style="font-size:22px;margin:8px"></div>
+<div style="font-size:22px;margin:8px">↓</div>
 <div style="margin-bottom:8px"><strong>能力可以被多个应用重复使用</strong></div>
 <div class="nodes">
 <div class="node">应用 A</div><div class="node">应用 B</div><div class="node">应用 C</div>
@@ -115,11 +180,11 @@ AI 能做的事情越来越多。<br>
   <div>
     <p><strong>AI 应用数量</strong></p>
     <input id="systems" type="range" min="1" max="10" value="6" oninput="simulate()">
-    <p><span id="sysnum" style="font-family:$1;font-weight:700">6</span> 个应用</p>
+    <p><span id="sysnum" style="font-family:var(--mono);font-weight:700">6</span> 个应用</p>
 
     <p><strong>共享同一套能力的应用数量</strong></p>
     <input id="human" type="range" min="1" max="10" value="1" oninput="simulate()">
-    <p><span id="hnum" style="font-family:$1;font-weight:700">1</span> 个</p>
+    <p><span id="hnum" style="font-family:var(--mono);font-weight:700">1</span> 个</p>
   </div>
 
   <div class="result" id="result"></div>
@@ -199,13 +264,12 @@ document.getElementById("generated").innerHTML=
 "<b>问题：</b>"+q+"<br><br>"+
 "<b>① 它是什么？</b><br>企业 AI 的建设对象，不只是一个个 AI 应用，也包括可以被多个应用重复使用的知识、规则、流程和判断标准。<br><br>"+
 "<b>② 它解决什么问题？</b><br>因为每个应用都独立建设，会产生重复建设和能力孤岛。所以企业需要把应用中的共性能力沉淀下来。<br><br>"+
-"<b>③ 它怎样工作？</b><br>发现共性能力  沉淀知识、规则和流程  多个应用复用同一能力  持续改进能力  新应用继续复用。<br><br>"+
+"<b>③ 它怎样工作？</b><br>发现共性能力 → 沉淀知识、规则和流程 → 多个应用复用同一能力 → 持续改进能力 → 新应用继续复用。<br><br>"+
 "<b>关键变化：</b>建设对象从“一个个应用”扩大到“应用背后可以复用的能力”。";
 }
 </script>
 
 
 
-  <script src="assets/site.js"></script>
 </body>
 </html>

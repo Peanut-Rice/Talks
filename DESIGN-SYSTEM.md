@@ -2,108 +2,200 @@
 
 > 本文件描述的是**本仓库实际在用的**视觉规则，不是理想稿。
 > 每条规则都附带判定方法；与代码不符处已明确列为「已知不一致」。
-> 2026-10 改版：视觉系统改由 [`DESIGN.md`](DESIGN.md)（Pirsch Analytics 风格参考）正式接管，
-> 原「四套可切换主题」已移除。旧版规范可从 git 历史取回。
 
 相关文件：
 - [`CLAUDE.md`](CLAUDE.md) — 工作约定与新增文档流程
-- [`DESIGN.md`](DESIGN.md) — **品牌与视觉系统来源**：暖纸面 / 墨线 / 阳光黄 / 单一无衬线
+- [`DESIGN.md`](DESIGN.md) — ⚠️ **外部风格参考（Pirsch Analytics），不是本仓库的设计系统**，其 token 与配色在本仓库中零使用，仅作素材存档
 - [`README.md`](README.md) — 文档索引与更新日志
-- [`assets/site.css`](assets/site.css) — 全站唯一的样式表
-- [`assets/site.js`](assets/site.js) — 文档页入场动效
 
 ---
 
-## 1. 系统一览
+## 1. 三条不可协商的原则
 
-| 项 | 值 |
-| --- | --- |
-| 画布 | 暖纸面 `#f8f5ed`（`--cream`），不出现纯白页面 |
-| 墨色 | `#000000`。正文一律满墨；`--graphite #707070` 只给次要说明与元数据 |
-| 强调色 | 阳光黄 `#ffda6e`，克制使用：主操作、当前筛选态、站点标记点 |
-| 状态色 | 薄荷绿 `#6ece9d`，只做状态信号，不做按钮底色 |
-| 字体 | DM Sans 400/500（拉丁）＋ 系统 CJK 回退 `PingFang SC` / `Microsoft YaHei` / `Noto Sans SC` |
-| 圆角 | 卡片 24px；图片与标签 12px；输入 6px；胶囊 9999px |
-| 分区 | 只用一档色调差：`--cream-tint #fdfbf6` / `--cream-deep #f1ece0` |
-| 间距 | 8px 基数：8 / 16 / 24 / 32 / 48 / 64 / 96 |
+### 1.1 中文一律用系统字体，绝不下载中文网页字体
 
-**不使用**：投影、渐变、玻璃模糊、发丝分隔线、等宽字体（真正的代码除外）、装饰性编号、
-标题上方的小标签（eyebrow）、emoji 当 UI、多主题切换。
+**理由（已实测）：** Google Fonts 的 `Noto Sans SC` 按 unicode-range 被切成 **404 个 `@font-face` 子集**，4 个字重合计数 MB 下载；而系统 CJK 字体（macOS `PingFang SC` / Windows `Microsoft YaHei`）质量已足够。
 
-## 2. 文件结构
+**副作用必须知情：** 移除中文网页字体会改变中文渲染（同为 CJK 字形，差异集中在抗锯齿/次像素层面，正常阅读尺寸下不可分辨）。这不是「零变化」，只是代价可接受。
 
-- `assets/site.css` — 唯一样式表。顺序：tokens → 基础排版 → 索引页 → 文档页 → 响应式 → 减少动效 → 打印。
-- `assets/site.js` — 文档页入场（IntersectionObserver）与卡片落位。
-- `index.html` — 索引页。文档清单位于脚本里的 `DOCS` 数组，**新增文档只改这一处**。
-- 其余 `*.html` — 文档页，各自保留 `<svg>` 图版与正文，共用上面两个资源。
+**判定方法：** 全文搜索 `family=Noto+Sans+SC` 或 `family=Noto+Serif+SC`，命中即违规（唯一例外见 §6）。
 
-## 3. 不可协商的规则
+### 1.2 拉丁字母与数字用等宽字体，中文用无衬线
 
-1. **中文一律用系统字体，不下载中文网页字体。**
-   理由（已实测）：Google Fonts 的 `Noto Sans SC` 按 unicode-range 被切成数百个 `@font-face` 子集，
-   一次访问拉取 MB 级流量；系统 CJK 字体质量已足够。
-   *判定：* 全文搜索 `family=Noto+Sans+SC` 或 `family=Noto+Serif+SC`，命中即违规。
-2. **不引入第二套拉丁字体。** 一律走 `--sans` 回退链。
-3. **页面内没有自己的 `<style>` 块。** 所有样式进 `assets/site.css`；页面里只留说明性注释。
-4. **索引的类别筛选必须来自真实数据**：某类别只有一篇时不生成筛选标签
-   （`index.html` 中 `counts[kind] > 1`）。
-5. **内容不得因脚本失败而消失。** 默认态可见，隐藏态只在 `html.js` 下生效；索引脚本与 `site.js` 都遵守。
-   *判定：* 禁用 JS 打开页面，全部条目仍可见可点。
-6. **图版是插画，不是页面着色。** 文档页里的大 `<svg>` 架构图保留原有深色画法；它内部的
-   一像素描边、发光滤镜、区域渐变与图例符号**不适用**页面级禁令。这些行带 `taste-skill-ignore`
-   注释并写明理由。
-7. **文档页首屏必须有主角。** 抬头 `h1` 在桌面端约 60px（`clamp(2.25rem, 1.4rem + 2.6vw, 3.75rem)`），
-   这是「首屏需有主导元素」的判定门槛。
+科技感来自**排版精度**，不来自霓虹配色。本仓库承担这一职能的是：
 
-## 4. 允许清单
-
-`.taste-skill/allow.json` 记录方向性豁免（无照片、无视频、暖纸面），供 `inspect.mjs` 自动读取。
-允许清单**只用于契约与品牌决定的约束**，不用于掩盖可修的问题。
-
-## 5. 验证方法
-
-```bash
-node <skill>/scripts/lint.mjs   <file>   # 源码层禁用模式
-node <skill>/scripts/inspect.mjs <file>  # 真 Chrome，1440/768/390 三档实测＋截图
+```css
+--mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+--sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Segoe UI", sans-serif;
 ```
 
-截图与报告落盘到 `.taste-skill/inspect/`；改动前的原稿在 `.taste-skill/backup/`。
+**不要把中文放进 `--mono`。** `JetBrains Mono` 没有 CJK 字形，中文会由浏览器回退渲染，导致字重与正文不一致——这一缺陷在本仓库历史上出现过两次（`.skill .trigger`、`.flow .step b`）。
+`Noto Sans SC` 只作为 Linux/Android 的**本地回退名**保留在 `--sans` 末尾，不发起网络请求。
 
-## 6. 新增文档：照 `_template-doc.html` 抄
+### 1.3 修改视觉后，用「几何检测」验证，不要用逐像素对照
 
-`_template-doc.html` 是规范的可执行形式，本身通过 lint 与实测检查。要点：
+**逐像素比对本仓库不可靠**，原因是文本页 + 异步网页字体会产生非确定性渲染。实测证据：
 
-1. `<head>`：DM Sans（只引拉丁）＋ `assets/site.css` ＋ 一行 `document.documentElement.classList.add('js')`。
-2. `<body class="doc">`。
-3. 复制 `.site-nav`（全站一致，只改当前页高亮）。
-4. 抬头固定为 `<header class="doc-header">` ＋ **全页唯一 `<h1>`**（桌面端约 60px，首屏主角就是它）。
-5. 每节一个 `<h2>`；旁注用 `.note`；要点用 `.cards > .card`；图版用 `.diagram-container`。
-6. 页脚复用 `.site-foot`；结尾挂 `<script src="assets/site.js"></script>`。
-7. 新增文档后，在 `index.html` 的 `DOCS` 数组加一条（**索引的唯一数据源**），类别只有 1 篇时不会生成筛选标签。
-8. 提交前跑 `lint.mjs` 与 `inspect.mjs`；两者都干净才算完成。
+| 对象 | 连续 5 次渲染的 `h1` 高度 |
+|---|---|
+| 首位为 `'Noto Sans SC'` 的旧写法 | 30.0 / **28.0** / 30.0 / 30.0 / 30.0 ← 自身不稳定 |
+| 改为 `'DM Sans'` 领先 + 系统 CJK 回退 | 28.0 / 28.0 / 28.0 / 28.0 / 28.0 ← 稳定 |
 
-**不要**：页面内写 `<style>`；引第二套字体或中文网页字体；用 emoji 当图例；在标题上方放小标签；用 `01 / 02` 这类独立编号；把卡片描边加阴影。
+一次真实的误判记录：某次改动曾报出 39%–70% 的像素差异，排查后确认全部是测量缺陷——① 基线文件放在工作区外，相对路径 `Images/*.jpg` 加载失败；② 旧版字体栈首位 `Noto Sans SC` 对拉丁字形覆盖不全，导致标题渲染在 Noto 与 DM Sans 之间摇摆。
 
-**节次编号的算法**：想给章节编号就用真实的 `<ol>`，或者把编号**写进标题文字**（"第一步：…"）。
-考试式的独立编号块会被判定为 eyebrow / numbering，且实测表明它不提供任何定位价值。
+**推荐验证顺序：**
+1. **计算字体断言** — `getComputedStyle(el).fontFamily` 首个字体名是否符合预期
+2. **几何检测** — 横向溢出、内容裁切（`scrollHeight > clientHeight`）、`scrollWidth > innerWidth`
+3. 目视截图 — 仅在需要确认观感时使用
 
-## 7. 已知不一致（待办）
+也可用 `document.fonts.check()`，但注意：它返回 `true` 只代表「该 family 可用于匹配」，**不代表字形来自该字体文件**（浏览器可能回退到通用族却仍报 `true`）。
 
-改版后 8 页实测（`inspect.mjs` 三档真机测量）：
+---
 
-| 页面 | lint | 实测 | 剩余问题 |
-| --- | --- | --- | --- |
-| `index.html` | 0 | **0 FAIL** / 1 WARN | 仅次要灰正文 4.8:1（系统要求的次要色） |
-| `AI-Architecture.html` | 0 | **0 FAIL** / 1 WARN | 首屏无按钮（文档页性质） |
-| `AI-SE.html` | 0 | **0 FAIL** / 2 WARN | 同上＋灰正文 |
-| `ai_understanding_tool.html` | 0 | 2 FAIL | 首屏无主角（`h1` 只有 4.2vw，需提到 `display` 档）、动效不足 |
-| `AI-Engineering.html` | 0 | 1 FAIL | 动效不足、末屏偏空 |
-| `workflow-to-agent.html` | 0 | 4 FAIL | 首屏无 `<h1>` 语义、标题在 390px 折 4 行、正文 13.6px、动效不足 |
-| `e-work-intro.html` | 9 | 3 FAIL | 抬头 kicker 与章节编号、末屏偏空、卡片行重复、混排字体 |
-| `AI-Audit-PPT.html` | 7 | 超时 | 它是一套带翻页脚本的演示稿（键盘翻页/低功耗开关），需要单独决定是保留"演示稿"形态还是改成分节长文 |
+## 2. 文档分类（4 类）
 
-**lint 全站 FAIL：143 → 16。** 剩余 16 条集中在 `e-work-intro` 与 `AI-Audit-PPT` 的
-`eyebrow`：这两页把节次编号与标题分成两行摆放，几何上就构成"标题上方的小标签"。
-CSS 的 `display:inline` 改不了它的基线位置，真正的修法是**把编号并进标题文字**或改用 `<ol>`。
+| 类型 | 文档 | 关键特征 |
+|---|---|---|
+| **A 滚动文档** | [`AI-Engineering.html`](AI-Engineering.html)、[`ai_understanding_tool.html`](ai_understanding_tool.html) | 自上而下阅读；卡片网格、流程条、表格 |
+| **B 架构图** | [`AI-SE.html`](AI-SE.html)、[`AI-Architecture.html`](AI-Architecture.html) | 核心是 1200–1300px 手写内联 SVG；下方 2–4 列信息卡 |
+| **C 幻灯片** | [`AI-Audit-PPT.html`](AI-Audit-PPT.html)、[`workflow-to-agent.html`](workflow-to-agent.html) | 全屏翻页或单页响应式；键盘/滚动/触摸导航 |
+| **D 固定主题单页** | [`e-work-intro.html`](e-work-intro.html)、[`index.html`](index.html) | 不参与 4 主题切换，各自一套固定配色；锚点导航或列表 |
 
+---
 
+## 3. 配色家族现状（3 族，尚未收敛）
+
+| 族 | 文档 | 画布 | 主强调色 | 次强调色 |
+|---|---|---|---|---|
+| **Ⅰ 深空青（4 主题）** | [`index.html`](index.html)、[`AI-SE.html`](AI-SE.html)、[`AI-Architecture.html`](AI-Architecture.html) | `#020617` 深空 / `#f8fafc` 亮白 / `#fef7ed` 暖阳 / `#f0f4f8` 冷杉 | `#22d3ee` cyan（Dark） | `#f59e0b` amber |
+| **Ⅱ 浅板岩青绿** | [`workflow-to-agent.html`](workflow-to-agent.html)、[`AI-Engineering.html`](AI-Engineering.html) | `#f4f2ef` 暖灰 | `#2d9d73` teal | `#4a85a8` slate blue |
+| **Ⅲ 暖白墨绿金** | [`e-work-intro.html`](e-work-intro.html) | `#f7f5f0` 暖白 | `#1f4438` 深墨绿 | `#b8860b` 琥珀金 |
+| **（散列，未 token 化）** | [`ai_understanding_tool.html`](ai_understanding_tool.html) | `#f5f7fb` 冷灰蓝 | `#172033` 墨蓝 | `#eef2ff` 淡紫 |
+
+**强调色配额：** 同一文档内主强调色只用于「数据/连接/关键路径」，次强调色只用于「阈值/警示/次级状态」。不要为装饰新增第三种强调色。
+
+族 Ⅰ 的 4 主题完整 token（取自 [`index.html`](index.html)）：
+
+```css
+:root {                    /* dark —— 默认主题 */
+  --bg:#020617; --bg-card:rgba(15,23,42,.5); --bg-card-solid:#0f172a;
+  --border:#1e293b; --text:#ffffff; --text-secondary:#94a3b8; --text-muted:#475569;
+  --accent:#22d3ee; --card-hover:rgba(30,41,59,.5);
+}
+[data-theme="light"] { --bg:#f8fafc; --bg-card:rgba(255,255,255,.85); --bg-card-solid:#ffffff;
+  --border:#e2e8f0; --text:#1e293b; --text-secondary:#64748b; --text-muted:#94a3b8;
+  --accent:#0891b2; --card-hover:rgba(241,245,249,.8); }
+[data-theme="warm"]  { --bg:#fef7ed; --bg-card:rgba(255,251,245,.9); --bg-card-solid:#fffbf5;
+  --border:#fde68a; --text:#3b2f1e; --text-secondary:#78716c; --text-muted:#a8a29e;
+  --accent:#f59e0b; --card-hover:rgba(253,230,138,.3); }
+[data-theme="cool"]  { --bg:#f0f4f8; --bg-card:rgba(248,250,252,.9); --bg-card-solid:#f8fafc;
+  --border:#cbd5e1; --text:#1a2a3a; --text-secondary:#64748b; --text-muted:#94a3b8;
+  --accent:#6366f1; --card-hover:rgba(203,213,225,.4); }
+```
+
+> **dark 的实现细节：** dark 由 `:root` 承担，**没有** `[data-theme="dark"]` 选择器。因此 `<html>` 上写 `data-theme="dark"` 也能正常工作（回落到 `:root`），但不能靠搜索 `[data-theme="dark"]` 判断某文档是否支持 dark。
+
+---
+
+## 4. 排版规则
+
+### 4.1 字体归属
+
+| 用途 | 字体 | 说明 |
+|---|---|---|
+| 中文正文/标题 | 系统 CJK（`PingFang SC` / `Microsoft YaHei`） | 不下载 |
+| 拉丁字母、数字、代码标签 | `JetBrains Mono` | 下载体积数十 KB |
+| 拉丁标题（族 Ⅱ） | `DM Sans` | 与 `JetBrains Mono` 同批请求 |
+
+### 4.2 微标签（本仓库最有效的「科技感」开关）
+
+```css
+.tag / .eyebrow / .meta-row {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .08em;      /* 章节号可用 .18em–.3em */
+  text-transform: uppercase;
+  opacity: .55 – .75;
+}
+```
+
+历史上效果最好的是 [`AI-Audit-PPT.html`](AI-Audit-PPT.html) 的 `.chrome` / `.kicker` / `.foot`（`IBM Plex Mono`，字距 `.14em`–`.3em`，透明度 `.5`–`.65`）。
+
+### 4.3 数字
+
+所有指标、编号、进度数值加：
+
+```css
+font-variant-numeric: tabular-nums;
+```
+
+已应用：[`ai_understanding_tool.html`](ai_understanding_tool.html)、[`e-work-intro.html`](e-work-intro.html)。
+[`AI-Audit-PPT.html`](AI-Audit-PPT.html) 用的是等效的 `font-feature-settings:"tnum"`。
+
+### 4.4 中文标题
+
+收紧字距 `letter-spacing: -.02em` 左右，避免中文大字显得松散。
+
+---
+
+## 5. 间距、形状与动效
+
+| 项 | 现状 | 备注 |
+|---|---|---|
+| 卡片圆角 | 12px（族 Ⅱ）、14–20px（单页）、16px（墨绿）、`0.75rem`（索引） | 未统一 |
+| 卡片描边 | 族 Ⅰ 用 `--border` 1px；族 Ⅱ/Ⅲ 用 1px + 轻阴影 | 阴影使用不一致，见 §7 |
+| 区块间距 | 56–88px（单页）、48px（族 Ⅱ） | |
+| 响应式断点 | 480 / 560 / 640 / 700 / 800 / 860 / 900 px | 各文档自选，未统一；两个架构图文档无断点 |
+| 入场动效 | `translateY(12–24px)` + `opacity` | 只做位移与淡入，不做扫描线/故障字等装饰效果 |
+
+**减动效：** 有动画的文档必须支持 `prefers-reduced-motion: reduce`。
+现状：[`workflow-to-agent.html`](workflow-to-agent.html)、[`e-work-intro.html`](e-work-intro.html)、[`AI-Engineering.html`](AI-Engineering.html)、[`AI-Audit-PPT.html`](AI-Audit-PPT.html) 已支持。
+
+**打印：** 有 `position:fixed` 顶栏或主题切换器的文档应提供 `@media print` 隐藏交互 UI。
+现状：[`index.html`](index.html)、[`AI-SE.html`](AI-SE.html)、[`AI-Architecture.html`](AI-Architecture.html)、[`AI-Engineering.html`](AI-Engineering.html) 有；[`e-work-intro.html`](e-work-intro.html) **缺**（有 fixed 顶栏 + `backdrop-filter`，打印会糊）。
+
+---
+
+## 6. 唯一例外：AI-Audit-PPT 保留中文网页字体
+
+[`AI-Audit-PPT.html`](AI-Audit-PPT.html) 请求 `Playfair Display + Source Serif 4 + IBM Plex Mono + Noto Serif SC + Noto Sans SC`。
+
+**这是刻意保留的，不要「顺手优化」掉。** 该文档是 13 页幻灯片的印刷级排版，中文衬线（`Noto Serif SC`）是其视觉核心，不是可选装饰。它同时是唯一使用衬线字体的文档。
+
+---
+
+## 7. 已知不一致（待收敛，按优先级）
+
+1. **配色家族未收敛** —— 3 族 + 1 组散列共存。新文档应复用族 Ⅰ 或族 Ⅱ，不要再开新色板。
+2. **[`ai_understanding_tool.html`](ai_understanding_tool.html) 配色未 token 化** —— 颜色全是散列字面量（`#172033`、`#f5f7fb`、`#eef2ff`…）。它的 `:root` 只有排版升级时加入的 `--sans` / `--mono` 两个变量，没有颜色变量。建议抽出 `--bg` / `--ink` / `--accent`。
+3. **阴影政策不一致** —— [`AI-Engineering.html`](AI-Engineering.html) 9 处 `box-shadow`、[`e-work-intro.html`](e-work-intro.html) 6 处，而族 Ⅰ 基本不用阴影。族 Ⅰ 的「描边优先、克制阴影」是更好的方向。
+4. **[`e-work-intro.html`](e-work-intro.html) 缺打印样式**，且 640px 以下 `.nav-links{display:none}` 隐藏全部导航且无替代菜单。
+5. **无障碍普遍缺失** —— 全仓 `aria-*` 出现次数为 0；[`AI-Audit-PPT.html`](AI-Audit-PPT.html) 的翻页按钮无 `aria-label`；[`ai_understanding_tool.html`](ai_understanding_tool.html) 的 `.tool` 是 `onclick` 的 `div`，键盘不可达。
+6. **[`index.html`](index.html) 的 `NEW` 徽章不自动过期** —— 7 个条目挂 `NEW`，最久的来自 6 月。
+
+### 各文档断点明细
+
+| 文档 | `max-width` 断点 |
+|---|---|
+| [`AI-Architecture.html`](AI-Architecture.html) | 无（仅容器 1350px） |
+| [`AI-SE.html`](AI-SE.html) | 无（仅容器 1400px） |
+| [`AI-Audit-PPT.html`](AI-Audit-PPT.html) | 900 |
+| [`ai_understanding_tool.html`](ai_understanding_tool.html) | 700, 800（另容器 1120 / 900） |
+| [`AI-Engineering.html`](AI-Engineering.html) | 480, 900（另容器 1100） |
+| [`e-work-intro.html`](e-work-intro.html) | 560, 640, 900（另容器 1080） |
+| [`index.html`](index.html) | 640（另容器 900） |
+| [`workflow-to-agent.html`](workflow-to-agent.html) | 480, 560, 860, 1024, 1280 |
+
+---
+
+## 8. 新增文档检查清单
+
+- [ ] 复用族 Ⅰ 或族 Ⅱ 配色，**不新开色板**
+- [ ] 中文不请求网页字体；拉丁/数字用 `--mono`
+- [ ] 微标签等宽 + 大写 + 字距；数字加 `tabular-nums`
+- [ ] 不含 `Noto Sans SC` / `Noto Serif SC` 的网络请求（例外见 §6）
+- [ ] 有动画则支持 `prefers-reduced-motion`
+- [ ] 有 fixed 顶栏或交互 UI 则提供 `@media print`
+- [ ] 图片路径 `Images/`（**大写 I**，GitHub Pages 大小写敏感）
+- [ ] **同时**登记到 [`index.html`](index.html) 与 [`README.md`](README.md)
+- [ ] 验证方式用 §1.3 的几何检测 + 计算字体断言，不用逐像素对照

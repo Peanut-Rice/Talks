@@ -3,12 +3,439 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Engineering — Prompt  Context  Harness  Loop</title>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="assets/site.css">
-  <script>document.documentElement.classList.add('js');</script>
+  <title>AI Engineering — Prompt → Context → Harness → Loop</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================================================
+       RESET & BASE
+       ======================================================================== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      background: #f4f2ef;
+      color: #1a1f2e;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ========================================================================
+       DESIGN TOKENS
+       ======================================================================== */
+    :root {
+      --bg-page: #f4f2ef;
+      --bg-card: #ffffff;
+      --bg-tag: #f0f4f6;
+      --text-primary: #1a1f2e;
+      --text-secondary: #4a5568;
+      --text-muted: #7a8699;
+      --accent: #2d9d73;
+      --accent-alt: #4a85a8;
+      --blue: #3b7fc4;
+      --cyan: #2d9d8e;
+      --purple: #7c6db8;
+      --amber: #c6802e;
+      --border: #e2e6ea;
+      --border-amber: rgba(198, 128, 46, 0.25);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    @media print {
+      body { background: #fff; }
+      .top-bar { display: none; }
+    }
+
+    /* ========================================================================
+       TOP ACCENT BAR
+       ======================================================================== */
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent-alt) 55%, transparent 100%);
+    }
+
+    /* ========================================================================
+       PAGE CONTAINER
+       ======================================================================== */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 72px 48px 48px 48px;
+    }
+
+    /* ========================================================================
+       HEADER
+       ======================================================================== */
+    .header { margin-bottom: 28px; }
+    .header-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .pulse-dot {
+      width: 12px; height: 12px; background: var(--accent); border-radius: 50%;
+      animation: pulse 2s infinite; flex-shrink: 0;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    h1 {
+      font-family: 'DM Sans', "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      font-size: 1.55rem; font-weight: 700; letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+    .subtitle {
+      font-size: 0.85rem; color: var(--text-secondary);
+      margin-left: 28px; line-height: 1.6;
+    }
+
+    /* ========================================================================
+       HERO IMAGE
+       ======================================================================== */
+    .hero-image {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      margin-bottom: 36px;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-lg);
+    }
+    .hero-image img { width: 100%; display: block; }
+
+    /* ========================================================================
+       SECTION TITLE
+       ======================================================================== */
+    .section-title {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 24px;
+    }
+    .section-title .line {
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+    .section-title .line:last-child {
+      background: linear-gradient(270deg, var(--border), transparent);
+    }
+    .section-title span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap; letter-spacing: 0.06em;
+    }
+
+    /* ========================================================================
+       ERA BANNERS
+       ======================================================================== */
+    .era-row {
+      display: flex; gap: 0; margin-bottom: 8px;
+    }
+    .era-banner {
+      flex: 1; text-align: center;
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em;
+      padding: 10px 0; border-radius: var(--radius-sm);
+    }
+    .era-banner.y2025 {
+      background: rgba(45, 157, 142, 0.08);
+      color: var(--cyan);
+      border: 1px solid rgba(45, 157, 142, 0.2);
+      margin-right: 24px;
+    }
+    .era-banner.y2026 {
+      background: rgba(198, 128, 46, 0.08);
+      color: var(--amber);
+      border: 1px solid rgba(198, 128, 46, 0.2);
+      margin-left: 24px;
+    }
+    .era-banner .era-year {
+      font-size: 0.8rem; font-weight: 700; margin-right: 4px;
+    }
+
+    /* ========================================================================
+       EVOLUTION FLOW — 4 stages
+       ======================================================================== */
+    .evolution-flow {
+      display: flex; align-items: stretch; gap: 0;
+      margin-bottom: 36px;
+    }
+
+    .evo-stage {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 24px 20px;
+      position: relative;
+      transition: transform 0.25s, box-shadow 0.25s;
+      cursor: default;
+      box-shadow: var(--shadow-sm);
+    }
+    .evo-stage:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      z-index: 2;
+    }
+    .evo-stage.era-left:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+    .evo-stage.era-left:last-child  { border-radius: 0; }
+    .evo-stage.era-right:first-child { border-radius: 0; }
+    .evo-stage.era-right:last-child  { border-radius: 0 var(--radius) var(--radius) 0; }
+
+    /* Divider between eras */
+    .evo-divider {
+      width: 48px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative; z-index: 1;
+    }
+    .evo-divider-inner {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .evo-divider-inner .divider-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.5rem; font-weight: 700; letter-spacing: 0.06em;
+      color: var(--amber); white-space: nowrap;
+      background: rgba(198, 128, 46, 0.08);
+      padding: 3px 8px; border-radius: 4px;
+    }
+
+    /* Arrows between same-era stages */
+    .evo-arrow {
+      width: 48px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative; z-index: 1;
+    }
+    .evo-arrow svg { width: 100%; height: 24px; }
+
+    .evo-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+    .evo-label.prompt  { color: var(--blue); }
+    .evo-label.context { color: var(--cyan); }
+    .evo-label.harness { color: var(--purple); }
+    .evo-label.loop    { color: var(--amber); }
+
+    .evo-icon { font-size: 2rem; margin-bottom: 8px; line-height: 1; }
+
+    .evo-title {
+      font-family: 'DM Sans', "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; line-height: 1.3;
+      color: var(--text-primary);
+    }
+    .evo-desc {
+      font-size: 0.72rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;
+    }
+    .evo-token {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; font-weight: 600; padding: 4px 10px;
+      border-radius: 20px; white-space: nowrap;
+    }
+    .evo-token.low    { background: rgba(59, 127, 196, 0.08); color: var(--blue); }
+    .evo-token.medium { background: rgba(45, 157, 142, 0.08); color: var(--cyan); }
+    .evo-token.high   { background: rgba(124, 109, 184, 0.08); color: var(--purple); }
+    .evo-token.max    { background: rgba(198, 128, 46, 0.08); color: var(--amber); }
+
+    /* ========================================================================
+       DETAIL CARDS
+       ======================================================================== */
+    .detail-cards {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      margin-bottom: 36px;
+    }
+    .detail-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative; overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .detail-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Left accent line */
+    .detail-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 20px; bottom: 20px;
+      width: 3px; border-radius: 0 3px 3px 0;
+    }
+    .detail-card.d1::before { background: var(--blue); }
+    .detail-card.d2::before { background: var(--purple); }
+    .detail-card.d3::before { background: var(--amber); }
+
+    .detail-card .dc-step {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+    .detail-card.d1 .dc-step { color: var(--blue); }
+    .detail-card.d2 .dc-step { color: var(--purple); }
+    .detail-card.d3 .dc-step { color: var(--amber); }
+
+    .detail-card h3 {
+      font-family: 'DM Sans', "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      font-size: 0.88rem; font-weight: 700; margin-bottom: 10px;
+      line-height: 1.35; color: var(--text-primary);
+    }
+    .detail-card .dc-body {
+      font-size: 0.75rem; color: var(--text-secondary); line-height: 1.7;
+    }
+    .detail-card .dc-highlight {
+      display: inline-block; margin-top: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; font-weight: 600; padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .detail-card.d1 .dc-highlight { background: rgba(59, 127, 196, 0.07); color: var(--blue); }
+    .detail-card.d2 .dc-highlight { background: rgba(124, 109, 184, 0.07); color: var(--purple); }
+    .detail-card.d3 .dc-highlight { background: rgba(198, 128, 46, 0.07); color: var(--amber); }
+
+    /* ========================================================================
+       TOKEN VIZ
+       ======================================================================== */
+    .token-viz {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 36px;
+      box-shadow: var(--shadow-sm);
+    }
+    .token-viz h3 {
+      font-family: 'DM Sans', "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      font-size: 0.88rem; font-weight: 700; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 8px;
+      color: var(--text-primary);
+    }
+    .token-viz h3 .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--amber);
+    }
+
+    .token-bars { display: flex; flex-direction: column; gap: 12px; }
+    .token-bar-row { display: flex; align-items: center; gap: 16px; }
+    .token-bar-label {
+      width: 90px; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; font-weight: 600; text-align: right; flex-shrink: 0;
+    }
+    .token-bar-track {
+      flex: 1; height: 28px; background: #eef1f4; border-radius: 6px;
+      overflow: hidden; position: relative;
+    }
+    .token-bar-fill {
+      height: 100%; border-radius: 6px;
+      display: flex; align-items: center; padding-left: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; font-weight: 600; white-space: nowrap;
+      transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .token-bar-fill.prompt  { background: linear-gradient(90deg, #7aacdc, #3b7fc4); color: #fff; }
+    .token-bar-fill.context { background: linear-gradient(90deg, #6db8a8, #2d9d8e); color: #fff; }
+    .token-bar-fill.harness { background: linear-gradient(90deg, #a89ad4, #7c6db8); color: #fff; }
+    .token-bar-fill.loop    { background: linear-gradient(90deg, #e0b970, #c6802e); color: #fff; }
+    .token-bar-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem; font-weight: 700; width: 72px; flex-shrink: 0;
+    }
+
+    /* ========================================================================
+       CONCLUSION
+       ======================================================================== */
+    .conclusion {
+      background: var(--bg-card);
+      border: 1px solid var(--border-amber);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.3s;
+    }
+    .conclusion:hover { border-color: rgba(198, 128, 46, 0.45); }
+
+    .conclusion-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+    }
+    .conclusion-header .icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: rgba(198, 128, 46, 0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .conclusion-header h3 {
+      font-family: 'DM Sans', "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      font-size: 0.9rem; font-weight: 700; color: var(--amber);
+    }
+    .conclusion p {
+      font-size: 0.8rem; color: var(--text-secondary); line-height: 1.85;
+    }
+    .conclusion p strong { color: var(--text-primary); font-weight: 600; }
+
+    /* ========================================================================
+       FOOTER
+       ======================================================================== */
+    .footer {
+      text-align: center; padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem; letter-spacing: 0.04em;
+    }
+
+    /* ========================================================================
+       REVEAL ANIMATIONS
+       ======================================================================== */
+    .reveal {
+      opacity: 0; transform: translateY(22px);
+      animation: revealUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .reveal-d1 { animation-delay: 0.06s; }
+    .reveal-d2 { animation-delay: 0.16s; }
+    .reveal-d3 { animation-delay: 0.26s; }
+    .reveal-d4 { animation-delay: 0.36s; }
+    .reveal-d5 { animation-delay: 0.46s; }
+    .reveal-d6 { animation-delay: 0.56s; }
+    .reveal-d7 { animation-delay: 0.66s; }
+
+    @keyframes revealUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { animation: none !important; opacity: 1 !important; transform: none !important; }
+    }
+
+    /* ========================================================================
+       RESPONSIVE
+       ======================================================================== */
+    @media (max-width: 900px) {
+      .page { padding: 60px 20px 36px 20px; }
+
+      .era-row { flex-direction: column; gap: 8px; }
+      .era-banner.y2025, .era-banner.y2026 { margin: 0; }
+
+      .evolution-flow { flex-direction: column; gap: 0; }
+      .evo-stage { border-radius: var(--radius) !important; margin-bottom: 0; }
+      .evo-arrow, .evo-divider { width: 100%; height: 32px; }
+      .evo-arrow svg { transform: rotate(90deg); width: 32px; }
+      .evo-divider { justify-content: flex-start; padding-left: 16px; }
+      .evo-divider-inner { flex-direction: row; gap: 10px; }
+
+      .detail-cards { grid-template-columns: 1fr; }
+
+      .token-bar-label { width: 64px; font-size: 0.6rem; }
+      .token-bar-value { width: 56px; font-size: 0.6rem; }
+
+      h1 { font-size: 1.3rem; }
+    }
+
+    @media (max-width: 480px) {
+      .page { padding: 52px 14px 28px 14px; }
+      h1 { font-size: 1.15rem; }
+      .subtitle { font-size: 0.75rem; margin-left: 20px; }
+    }
+  </style>
 </head>
-<body class="doc">
+<body>
 
 <!-- Top accent bar -->
 <div class="top-bar"></div>
@@ -24,12 +451,12 @@
       <div class="pulse-dot"></div>
       <h1>AI Engineering · 智能工程的四次升维</h1>
     </div>
-    <p class="subtitle reveal reveal-d2">2025 编排式工作流（Prompt  Context）&nbsp;&nbsp; 2026 Agent Runtime（Harness  Loop）—— 大模型应用的深化路径</p>
+    <p class="subtitle reveal reveal-d2">2025 编排式工作流（Prompt → Context）&nbsp;→&nbsp; 2026 Agent Runtime（Harness → Loop）—— 大模型应用的深化路径</p>
   </div>
 
   <!-- Hero Image -->
   <div class="hero-image reveal reveal-d3">
-    <img src="Images/prompt2loop.jpg" alt="Prompt  Context  Harness  Loop Engineering">
+    <img src="Images/prompt2loop.jpg" alt="Prompt → Context → Harness → Loop Engineering">
   </div>
 
   <!-- Section Title -->
@@ -49,6 +476,8 @@
   <div class="evolution-flow">
 
     <div class="evo-stage era-left reveal reveal-d5">
+      <div class="evo-label prompt">01 · Prompt</div>
+      <div class="evo-icon">💬</div>
       <div class="evo-title">提示工程</div>
       <div class="evo-desc">单条提示，一问一答。模型能力的最浅层释放，几百 token 即可完成一次交互。</div>
       <span class="evo-token low">~10² tokens</span>
@@ -59,6 +488,8 @@
     </div>
 
     <div class="evo-stage era-left reveal reveal-d5">
+      <div class="evo-label context">02 · Context</div>
+      <div class="evo-icon">📚</div>
       <div class="evo-title">上下文工程</div>
       <div class="evo-desc">拼接文档、历史与长文本，窗口从 4K 猛增至 128K 乃至 1M，单次消耗跃升几个数量级。</div>
       <span class="evo-token medium">~10⁴ tokens</span>
@@ -74,8 +505,10 @@
     </div>
 
     <div class="evo-stage era-right reveal reveal-d5">
+      <div class="evo-label harness">03 · Harness</div>
+      <div class="evo-icon">🔧</div>
       <div class="evo-title">工具编排</div>
-      <div class="evo-desc">任务外包给工具，但每次调用都将工具描述、参数与结果重新注入上下文，"推理调用返回再推理"循环往复。</div>
+      <div class="evo-desc">任务外包给工具，但每次调用都将工具描述、参数与结果重新注入上下文，"推理→调用→返回→再推理"循环往复。</div>
       <span class="evo-token high">~10⁵ tokens</span>
     </div>
 
@@ -84,6 +517,8 @@
     </div>
 
     <div class="evo-stage era-right reveal reveal-d5">
+      <div class="evo-label loop">04 · Loop</div>
+      <div class="evo-icon">🔄</div>
       <div class="evo-title">自主循环</div>
       <div class="evo-desc">模型进入自主循环，每步重审历史。嵌套探索与多智能体协作，token 按"决策树分支 × 反思深度"指数膨胀。</div>
       <span class="evo-token max">~10⁶+ tokens</span>
@@ -102,25 +537,25 @@
   <div class="detail-cards">
 
     <div class="detail-card d1 reveal reveal-d6">
-      <div class="dc-step">2025 · Prompt  Context</div>
+      <div class="dc-step">2025 · Prompt → Context</div>
       <h3>编排式工作流<br>从一问一答到上下文装配</h3>
       <div class="dc-body">
         单条提示也许只需几百 token，但上下文工程会拼接文档、历史与长文本，窗口从 4K 猛增至 128K 乃至 1M，单次消耗直接跃升几个数量级。
       </div>
-      <span class="dc-highlight">4K  128K  1M tokens</span>
+      <span class="dc-highlight">4K → 128K → 1M tokens</span>
     </div>
 
     <div class="detail-card d2 reveal reveal-d6">
-      <div class="dc-step">2026 · Context  Harness</div>
+      <div class="dc-step">2026 · Context → Harness</div>
       <h3>Agent Runtime 起步<br>从静态上下文到工具交互链</h3>
       <div class="dc-body">
-        看似将任务外包给工具，实际每次调用都要将工具描述、参数与返回结果重新注入上下文，一个简单任务就会产生"推理  调用  返回  再推理"的多次交互，整个对话历史被反复传递，token 消耗成倍甚至平方级增长。
+        看似将任务外包给工具，实际每次调用都要将工具描述、参数与返回结果重新注入上下文，一个简单任务就会产生"推理 → 调用 → 返回 → 再推理"的多次交互，整个对话历史被反复传递，token 消耗成倍甚至平方级增长。
       </div>
       <span class="dc-highlight">对话历史反复传递 · 平方级增长</span>
     </div>
 
     <div class="detail-card d3 reveal reveal-d6">
-      <div class="dc-step">2026 · Harness  Loop</div>
+      <div class="dc-step">2026 · Harness → Loop</div>
       <h3>Agent Runtime 深化<br>从工具调用到自主决策循环</h3>
       <div class="dc-body">
         模型进入自主循环，每一步都重审历史。随着嵌套探索与多智能体协作，token 需求按"决策树分支 × 反思深度"指数膨胀，通往更高自主性的代价是指数级增长的 token 消耗。
@@ -168,18 +603,18 @@
   <!-- Conclusion -->
   <div class="conclusion reveal reveal-d7">
     <div class="conclusion-header">
-      <div class="icon"></div>
+      <div class="icon">⚡</div>
       <h3>Token — 未来的算力基础设施</h3>
     </div>
     <p>
       本质上，这是一场<strong>智能增益与成本膨胀的博弈</strong>。更高的自主性与任务泛化能力背后，是指数级增长的 token 需求，这是架构上的必然。<br><br>
-      Token 将成为未来的算力基础设施——<strong>像电力一样不可或缺</strong>，同时<strong>像货币一样被定价、交易，乃至成为投机标的</strong>。在 Prompt  Context  Harness  Loop 的每一步升维中，我们获得的每一分智能，都以 token 为代价。这场博弈的终局，不在于阻止膨胀，而在于让每一枚 token 都物有所值。
+      Token 将成为未来的算力基础设施——<strong>像电力一样不可或缺</strong>，同时<strong>像货币一样被定价、交易，乃至成为投机标的</strong>。在 Prompt → Context → Harness → Loop 的每一步升维中，我们获得的每一分智能，都以 token 为代价。这场博弈的终局，不在于阻止膨胀，而在于让每一枚 token 都物有所值。
     </p>
   </div>
 
   <!-- Footer -->
   <div class="footer reveal reveal-d7">
-    AI Engineering · Prompt  Context  Harness  Loop Engineering · 2026
+    AI Engineering · Prompt → Context → Harness → Loop Engineering · 2026
   </div>
 
 </main>
@@ -208,6 +643,5 @@
   if (tokenViz) observer.observe(tokenViz);
 </script>
 
-  <script src="assets/site.js"></script>
 </body>
 </html>

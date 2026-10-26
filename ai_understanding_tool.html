@@ -3,273 +3,626 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AI的下一步：从生成答案到生成理解工具</title>
+<title>AI 的下一步：从生成答案到生成理解工具</title>
+<meta name="description" content="AI 的下一步不是更多答案，而是可复用的理解工具：表达对照、因果链拆解，以及一个观察“应用数量 × 能力复用”的交互实验。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* ==== 排版升级（回退方法：删除本 :root 块与上方两行 preconnect + 字体 link）==== */
+/* ============================================================
+   学习笔记 · 固定冷灰蓝主题
+   中文走系统 CJK 字体；--mono 只承载拉丁、数字与微标签
+   ============================================================ */
 :root{
-  /* 中文用系统 CJK 字体（PingFang SC / Microsoft YaHei / Noto Sans SC 本地回退）—— 不下载中文网页字体 */
   --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans SC","Segoe UI",sans-serif;
   --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
-}
-*{box-sizing:border-box}
-body{margin:0;background:#f5f7fb;color:#172033;font-family:var(--sans)}
-header{max-width:1120px;margin:auto;padding:52px 24px 28px}
-h1{font-size:38px;line-height:1.2;margin:0 0 15px;letter-spacing:-1.2px;font-family:var(--sans)}
-.lead{font-size:19px;line-height:1.8;color:#5d687b;max-width:900px}
-main{max-width:1120px;margin:auto;padding:0 24px 70px}
-.card{background:#fff;border:1px solid #e2e7ef;border-radius:20px;padding:28px;margin-bottom:18px;box-shadow:0 10px 30px rgba(20,35,60,.05)}
-.hero{padding:34px}
-.big{font-size:27px;line-height:1.55;font-weight:650;max-width:900px}
-.highlight{display:inline-block;background:#eef2ff;border-radius:9px;padding:2px 8px}
-.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:26px}
-.flow .step{position:relative;text-align:center;padding:19px 12px;background:#f4f6fa;border-radius:14px}
-.flow .step:not(:last-child):after{content:"→";position:absolute;right:-15px;top:25px;color:#8792a5;font-size:20px;z-index:2}
-.step b{display:block;margin-bottom:7px}.step small{color:#697589;line-height:1.5}
-h2{font-size:24px;margin:0 0 13px;letter-spacing:-.02em;font-family:var(--sans)}h3{font-size:17px;margin:0 0 9px}
-p{line-height:1.8;margin:9px 0}
-.quote{background:#f7f8fa;border-radius:12px;padding:18px;line-height:1.9}
-.compare{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.panel{border:1px solid #e3e7ee;border-radius:14px;padding:19px}
-.panel.bad{background:#fafafa}.panel.good{background:#f8faff}
-.tag{display:inline-block;padding:5px 9px;border-radius:8px;background:#e9edf4;color:#536074;font-size:11px;margin-bottom:10px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase}
-.tag.goodtag{background:#e9efff}
-.reason{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
-.reason div{padding:14px;background:#f7f8fa;border-radius:12px}
-.reason b{display:block;margin-bottom:6px}.reason span{font-size:13px;color:#697589;line-height:1.5}
-.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.tool{padding:20px;border-radius:14px;background:#f5f7fb;cursor:pointer;border:2px solid transparent}
-.tool:hover,.tool.active{border-color:#172033;background:#fff}
-.tool b{display:block;font-size:17px;margin-bottom:7px}.tool span{font-size:13px;color:#687488;line-height:1.55}
-.toolDetail{margin-top:14px;padding:20px;background:#f8f9fb;border-radius:14px;min-height:100px;line-height:1.8}
-.diagram{padding:20px;text-align:center;background:#f7f8fa;border-radius:14px}
-.nodes{display:flex;justify-content:center;align-items:center;gap:9px;flex-wrap:wrap;margin:15px 0}
-.node{padding:12px 16px;background:#fff;border:1px solid #dce2eb;border-radius:10px}.arrow{color:#7a879a}
-.sim{display:grid;grid-template-columns:260px 1fr;gap:20px}
-input[type=range]{width:100%}
-.result{padding:20px;background:#111827;color:#eef2f7;border-radius:14px;min-height:180px;line-height:1.9;font-variant-numeric:tabular-nums}
-textarea{width:100%;min-height:100px;border:1px solid #d7dde7;border-radius:12px;padding:14px;font:inherit;line-height:1.6}
-button{border:0;border-radius:10px;background:#172033;color:white;padding:11px 16px;cursor:pointer;margin-top:9px;font:inherit;font-weight:600}
-input,textarea{font:inherit}
-.prompt{background:#eef2ff;border-radius:12px;padding:17px;line-height:1.7}
-.quote strong{color:#172033}
-@media(max-width:800px){
-.flow{grid-template-columns:1fr}.flow .step:not(:last-child):after{content:"↓";right:auto;top:auto;bottom:-17px;left:50%}
-.compare,.sim{grid-template-columns:1fr}.reason,.tools{grid-template-columns:1fr 1fr}h1{font-size:30px}
+
+  --bg:#f5f7fb;
+  --surface:#ffffff;
+  --surface-2:#f4f6fa;
+  --line:#e3e8f2;
+  --line-strong:#d5ddeb;
+
+  --ink:#172033;
+  --ink-body:#34405a;
+  --ink-soft:#5d687b;
+  --ink-mute:#6e7b91;
+
+  --accent:#3d4ed8;
+  --accent-ink:#2b3a9e;
+  --accent-soft:#eef2ff;
+  --accent-line:#c9d3f7;
+
+  --radius:16px;
+  --radius-sm:12px;
+  --measure:44rem;
 }
 
-.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
-.metric{padding:18px;border:1px solid rgba(0,0,0,.09);border-radius:14px;background:#fff}
-.metric-label{font-size:13px;opacity:.65;margin-bottom:6px}
-.metric-value{font-size:28px;font-weight:800}
-.app-canvas{display:flex;flex-wrap:wrap;gap:10px;padding:20px;border-radius:16px;background:rgba(0,0,0,.035);min-height:90px}
-.app-card{padding:12px 16px;border-radius:12px;background:#fff;border:1px solid rgba(0,0,0,.09);font-weight:700}
-.cap-line{width:100%;margin-top:8px;padding-top:14px;border-top:1px dashed rgba(0,0,0,.18);font-size:14px;opacity:.75}
-.explain{margin-top:14px;padding:18px;border-radius:14px;background:#f6f7f9;line-height:1.7}
-.insight{margin-top:16px;padding:16px;border-left:4px solid currentColor;background:rgba(0,0,0,.035);line-height:1.7}
-@media(max-width:700px){.metric-grid{grid-template-columns:1fr}.controls label{display:block;margin-bottom:16px}}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:70px}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);line-height:1.8;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+::selection{background:var(--accent-soft);color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+.skip{
+  position:absolute;left:-9999px;top:0;z-index:100;
+  background:var(--surface);color:var(--ink);padding:10px 14px;
+  border:1px solid var(--accent);border-radius:8px;text-decoration:none;font-size:14px;
+}
+.skip:focus{left:12px;top:12px}
 
-#fixed-question{font-size:clamp(22px,3vw,34px);font-weight:800;line-height:1.35;padding:18px 22px;border:1px solid rgba(0,0,0,.10);border-radius:16px;background:#fff;margin:12px 0 20px}
+/* === 顶栏 === */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(245,247,251,.86);
+  -webkit-backdrop-filter:blur(14px) saturate(160%);
+  backdrop-filter:blur(14px) saturate(160%);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{
+  max-width:1000px;margin:0 auto;
+  padding:0 clamp(16px,4vw,24px);
+  height:54px;display:flex;align-items:center;gap:12px;
+}
+.topbar-back{
+  width:44px;height:44px;margin-left:-12px;flex-shrink:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:50%;color:var(--ink);text-decoration:none;font-size:18px;
+  transition:background-color .2s ease,color .2s ease;
+}
+.topbar-back:hover{background:#e9eefa;color:var(--accent-ink)}
+.topbar-title{
+  font-size:13px;font-weight:700;letter-spacing:.01em;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.topbar-kind{
+  margin-left:auto;flex-shrink:0;
+  font-family:var(--sans);font-size:10.5px;letter-spacing:.12em;
+  color:var(--ink-soft);border:1px solid var(--line);border-radius:999px;
+  padding:3px 9px;background:var(--surface);
+}
+.progress{
+  position:absolute;left:0;right:0;bottom:-1px;height:2px;
+  background:var(--accent);transform:scaleX(0);transform-origin:0 50%;
+  transition:transform .1s linear;
+}
+
+/* === 头部 === */
+.hero{max-width:1000px;margin:0 auto;padding:clamp(40px,7vw,60px) clamp(16px,4vw,24px) 22px}
+.eyebrow{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:10px;font-weight:500;
+  letter-spacing:.24em;text-transform:uppercase;color:var(--ink-mute);
+  margin:0 0 14px;
+}
+.eyebrow::before{content:"";width:24px;height:1px;background:currentColor;opacity:.55}
+.hero h1{
+  font-size:clamp(27px,4.6vw,44px);font-weight:800;line-height:1.2;
+  letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance;
+}
+.t-half{white-space:nowrap}
+.hero .lead{
+  margin:0;max-width:42em;
+  font-size:clamp(15.5px,1.7vw,18px);line-height:1.85;color:var(--ink-soft);
+  text-wrap:pretty;
+}
+
+/* === 版面 === */
+main{max-width:1000px;margin:0 auto;padding:6px clamp(16px,4vw,24px) 56px}
+.card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:clamp(20px,3.6vw,32px);
+  margin-bottom:16px;
+}
+.hero-card{padding:clamp(22px,4vw,36px)}
+.sec-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sec-head .eyebrow{margin:0}
+h2{
+  font-size:clamp(21px,2.7vw,27px);font-weight:800;line-height:1.4;
+  letter-spacing:-.015em;margin:0 0 12px;text-wrap:balance;
+}
+h3{font-size:16px;margin:0 0 8px;line-height:1.5}
+p{margin:10px 0;max-width:var(--measure);line-height:1.85;color:var(--ink-body);text-wrap:pretty}
+strong{color:var(--ink)}
+.big{
+  font-size:clamp(20px,2.5vw,28px);font-weight:700;line-height:1.6;
+  letter-spacing:-.01em;max-width:38em;color:var(--ink);text-wrap:pretty;
+}
+.highlight{
+  background:var(--accent-soft);color:var(--accent-ink);
+  padding:.06em .28em;border-radius:.28em;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+}
+
+/* === 五步流程 === */
+.flow{
+  list-style:none;counter-reset:flow;
+  margin:26px 0 0;padding:0;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:14px;
+}
+.flow li{position:relative;padding:15px 10px 0 0;border-top:2px solid var(--line)}
+.flow li:last-child{border-top-color:var(--accent-line)}
+.flow li::before{
+  counter-increment:flow;content:counter(flow,decimal-leading-zero);
+  display:block;margin-bottom:8px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--accent);
+}
+.flow b{display:block;font-size:14.5px;font-weight:700;line-height:1.45;margin-bottom:4px}
+.flow small{display:block;font-size:12.5px;line-height:1.6;color:var(--ink-soft)}
+
+/* === 对照 === */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.panel{border:1px solid var(--line);border-radius:var(--radius-sm);padding:20px;background:var(--surface-2)}
+.panel.bad{background:#fafbfc}
+.panel.good{background:var(--accent-soft);border-color:var(--accent-line)}
+.tag{
+  display:inline-block;margin-bottom:10px;
+  font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.02em;
+  color:var(--ink-soft);background:#e9eef7;border-radius:6px;padding:4px 9px;
+}
+.tag.goodtag{background:#fff;color:var(--accent-ink);border:1px solid var(--accent-line)}
+.quote{line-height:1.9;font-size:15px;color:var(--ink-body)}
+.quote strong{color:var(--ink)}
+
+/* === 四列理由 === */
+.reason{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+.reason div{padding:14px 16px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm)}
+.reason b{display:block;font-size:14px;margin-bottom:4px;color:var(--ink)}
+.reason span{font-size:12.5px;line-height:1.6;color:var(--ink-soft)}
+
+/* === 因果链 === */
+.prompt{
+  margin:14px 0;padding:18px 20px;background:var(--surface-2);
+  border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:var(--radius-sm);line-height:1.85;font-size:15px;color:var(--ink-body);
+  max-width:var(--measure);
+}
+.prompt strong{color:var(--accent-ink)}
+
+/* === 四种接口 === */
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+.tool{
+  appearance:none;-webkit-appearance:none;font:inherit;text-align:left;
+  padding:18px;min-height:96px;cursor:pointer;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm);
+  transition:border-color .2s ease,background-color .2s ease;
+}
+.tool b{display:block;font-size:15px;font-weight:700;line-height:1.4;margin-bottom:6px;color:var(--ink)}
+.tool span{display:block;font-size:12.5px;line-height:1.55;color:var(--ink-soft)}
+.tool:hover,.tool.active{border-color:var(--accent);background:var(--accent-soft)}
+.tool.active b{color:var(--accent-ink)}
+.tool:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toolDetail{
+  margin-top:14px;padding:18px 20px;min-height:76px;max-width:var(--measure);
+  background:var(--surface-2);border:1px solid var(--line);
+  border-radius:var(--radius-sm);line-height:1.8;font-size:15px;color:var(--ink-body);
+}
+
+/* === 结构图 === */
+.diagram{
+  margin-top:16px;padding:24px 20px;text-align:center;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm);
+}
+.diagram .lab{
+  margin:0 0 8px;font-family:var(--sans);font-size:12px;font-weight:600;
+  letter-spacing:.06em;color:var(--ink-soft);
+}
+.nodes{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}
+.node{
+  padding:9px 14px;background:var(--surface);border:1px solid var(--line-strong);
+  border-radius:8px;font-size:13px;line-height:1.4;color:var(--ink);
+}
+.arrow{font-family:var(--mono);font-size:16px;line-height:1;color:var(--ink-mute);margin:6px 0}
+
+/* === 交互实验 === */
+.sim{display:grid;grid-template-columns:minmax(0,300px) 1fr;gap:22px;margin-top:18px}
+.control + .control{margin-top:20px}
+.sim label{display:block;font-size:13.5px;font-weight:600;line-height:1.5;color:var(--ink);margin-bottom:6px}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:32px;margin:0;
+  background:transparent;accent-color:var(--accent);cursor:pointer;
+}
+input[type=range]::-webkit-slider-runnable-track{height:4px;background:#dbe2ef;border-radius:99px}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:24px;height:24px;margin-top:-10px;
+  border-radius:50%;background:#fff;border:2px solid var(--accent);
+  box-shadow:0 1px 3px rgba(20,35,60,.18);
+}
+input[type=range]::-moz-range-track{height:4px;background:#dbe2ef;border-radius:99px}
+input[type=range]::-moz-range-thumb{
+  width:24px;height:24px;border-radius:50%;background:#fff;
+  border:2px solid var(--accent);box-shadow:0 1px 3px rgba(20,35,60,.18);
+}
+.range-row{margin:4px 0 0;font-size:13px;color:var(--ink-soft)}
+.range-row output{
+  font-family:var(--mono);font-weight:700;color:var(--accent-ink);
+  font-variant-numeric:tabular-nums;
+}
+.result{
+  padding:18px 20px;background:#111827;color:#e8edf7;
+  border-radius:var(--radius-sm);line-height:1.85;font-size:15px;
+  font-variant-numeric:tabular-nums;
+}
+.result b{color:#fff}
+#generated{margin-top:16px}
+
+/* === 说明块 === */
+.note{
+  margin-top:14px;padding:16px 18px;max-width:var(--measure);
+  background:var(--surface-2);border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:var(--radius-sm);
+  font-size:14.5px;line-height:1.8;color:var(--ink-body);
+}
+.note b{color:var(--ink)}
+
+/* === 固定问题 === */
+#fixed-question{
+  margin:18px 0 20px;padding:20px 22px;
+  font-size:clamp(19px,2.6vw,28px);font-weight:800;line-height:1.5;
+  letter-spacing:-.01em;color:var(--accent-ink);
+  background:var(--accent-soft);border:1px solid var(--accent-line);
+  border-left:3px solid var(--accent);border-radius:var(--radius-sm);
+  text-wrap:balance;
+}
+
+/* === 按钮 === */
+.btn{
+  appearance:none;-webkit-appearance:none;border:0;cursor:pointer;
+  font:inherit;font-size:15px;font-weight:600;
+  min-height:46px;padding:12px 18px;border-radius:10px;
+  background:var(--ink);color:#fff;
+  transition:background-color .2s ease,transform .1s ease;
+}
+.btn:hover{background:#243049}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* === 页脚 === */
+.footer{
+  max-width:1000px;margin:0 auto;padding:22px clamp(16px,4vw,24px) 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;
+  border-top:1px solid var(--line);
+  font-size:12px;color:var(--ink-mute);
+}
+.footer a{color:var(--ink-soft);text-decoration:none;transition:color .2s ease}
+.footer a:hover{color:var(--accent-ink)}
+
+/* === 响应式 === */
+@media (max-width:820px){
+  .reason{grid-template-columns:1fr 1fr}
+  .tools{grid-template-columns:1fr 1fr}
+  .sim{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+  .hero{padding-top:34px;padding-bottom:18px}
+  .hero h1{font-size:clamp(26px,6.4vw,32px);line-height:1.25}
+  .hero .lead{font-size:16px;line-height:1.9}
+  .eyebrow{font-size:11px;letter-spacing:.2em}
+  main{padding-bottom:40px}
+  .card{padding:20px 18px;border-radius:14px;margin-bottom:12px}
+  .hero-card{padding:22px 18px}
+  .big{font-size:21px;line-height:1.65}
+  h2{font-size:21px}
+  p{font-size:16px;line-height:1.9}
+  .compare{grid-template-columns:1fr}
+  .panel{padding:16px}
+  .quote{font-size:15px;line-height:1.95}
+  .flow{grid-template-columns:1fr;gap:0;margin-top:20px}
+  .flow li{
+    padding:13px 0 13px 16px;border-top:0;
+    border-left:2px solid var(--line);
+  }
+  .flow li:last-child{border-left-color:var(--accent-line)}
+  .flow li + li{margin-top:4px}
+  .flow li::before{display:inline-block;margin:0 8px 0 0}
+  .flow b{display:inline;font-size:15px}
+  .flow small{margin-top:4px;font-size:13px}
+  .reason span{font-size:13px}
+  .toolDetail{font-size:15px;padding:16px}
+  .tool span{font-size:13px}
+  .diagram{padding:20px 14px}
+  .result{font-size:14.5px;padding:16px 17px}
+  .note{font-size:14.5px;padding:14px 15px;max-width:none}
+  #fixed-question{padding:18px;line-height:1.55}
+  .footer{padding-bottom:36px}
+}
+@media (max-width:520px){
+  .tools{grid-template-columns:1fr}
+  .tool{min-height:0;padding:16px}
+  .reason{grid-template-columns:1fr 1fr;gap:8px}
+  .reason div{padding:12px 13px}
+}
+@media (max-width:420px){
+  .topbar-kind{display:none}
+  .card{padding:18px 15px}
+  .big{font-size:20px}
+  .hero h1{letter-spacing:-.01em}
+  .node{font-size:12.5px;padding:8px 12px}
+  .toolDetail,.note{font-size:13.5px}
+}
+@media (max-width:380px){
+  .hero h1{font-size:24px;line-height:1.28}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+@media print{
+  .topbar,.footer,.progress,.skip{display:none!important}
+  body{background:#fff}
+  .hero{padding-top:0}
+  .card{break-inside:avoid;border-color:#d4d4d8}
+  .tool,.note,.prompt,.panel,.diagram,.surface{background:#fff!important}
+  .result{background:#fff!important;color:#111!important;border:1px solid #d4d4d8}
+  .result b{color:#111}
+  #fixed-question{background:#fff!important;color:#111!important;border-color:#d4d4d8}
+  .highlight{background:transparent!important;color:inherit!important;padding:0}
+  a{color:inherit!important}
+}
 </style>
 </head>
 <body>
-<header>
-<h1>AI的下一步：从生成答案到生成理解工具</h1>
-<div class="lead">当 AI 越来越擅长生产内容，内容本身会越来越便宜。新的瓶颈可能不再是“谁能得到答案”，而是“谁能更快理解答案、验证答案并做出判断”。</div>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="topbar-back" href="index.html" aria-label="返回文档索引">←</a>
+    <span class="topbar-title">AI 的下一步</span>
+    <span class="topbar-kind">学习笔记</span>
+  </div>
+  <span class="progress" aria-hidden="true"></span>
 </header>
 
-<main>
-<section class="card hero">
-<div class="big">
-AI 能做的事情越来越多。<br>
-人需要亲自完成的事情越来越少。<br><br>
-所以人的工作会逐渐上移：<span class="highlight">从生产，走向理解、判断和监督。</span>
-</div>
-<div class="flow">
-<div class="step"><b>AI 能力提升</b><small>生成、分析、执行越来越便宜</small></div>
-<div class="step"><b>内容变便宜</b><small>报告、代码、图表都可以快速生成</small></div>
-<div class="step"><b>理解成为瓶颈</b><small>人仍然需要知道发生了什么</small></div>
-<div class="step"><b>AI 设计解释</b><small>不只给答案，还设计理解过程</small></div>
-<div class="step"><b>人负责判断</b><small>目标、取舍、责任仍由人承担</small></div>
-</div>
-</section>
-
-<section class="card">
-<h2>一个简单实验：同一个思想，可以怎样表达？</h2>
-<p>核心问题：<strong>为什么企业 AI 要从“应用建设”走向“能力建设”？</strong></p>
-<div class="compare">
-<div class="panel bad">
-<div class="tag">普通咨询式表达</div>
-<div class="quote">随着大模型技术快速演进，企业 AI 建设正逐渐从单点场景探索迈向体系化能力重塑。企业需要通过平台化、组件化和知识资产化，形成可复用、可组合、可持续演进的 AI 能力体系，从而避免应用孤岛，并构建长期竞争优势。</div>
-</div>
-<div class="panel good">
-<div class="tag goodtag">接近 ASD-STE100</div>
-<div class="quote">
-企业可以建设很多 AI 应用。<br>
-每个应用可以解决一个问题。<br><br>
-但是，一个应用通常只服务一个场景。<br>
-另一个应用不能直接使用它的能力。<br><br>
-因此，应用数量增加，不一定带来企业能力增加。<br><br>
-企业需要把知识、规则和流程沉淀成能力。<br>
-多个应用可以使用同一个能力。<br>
-企业也可以持续改进这个能力。
-</div>
-</div>
-</div>
-<div class="reason">
-<div><b>短句</b><span>减少工作记忆负担</span></div>
-<div><b>单一动作</b><span>降低句法解析成本</span></div>
-<div><b>统一术语</b><span>减少概念切换</span></div>
-<div><b>显式因果</b><span>减少推理成本</span></div>
-</div>
-</section>
-
-<section class="card">
-<h2>ASD-STE 真正有价值的地方</h2>
-<p>它不是简单地要求“把文章写得更简单”。它迫使 AI 把“应用为什么不够、能力为什么重要”拆成可以逐句验证的因果链。</p>
-<div class="prompt">
-<strong>因为：</strong>一个 AI 应用通常只解决一个具体场景。<br>
-<strong>所以：</strong>企业建设很多应用，不等于企业获得很多可复用能力。<br>
-<strong>因为：</strong>知识、规则和流程没有被沉淀。<br>
-<strong>所以：</strong>新的应用仍然需要重新建设。<br>
-<strong>因此：</strong>企业需要把知识、规则和流程变成可重复使用的能力。
-</div>
-<p>这样，AI 不只是告诉我们“应该能力建设”。<strong>它把这个判断背后的因果关系拆开，让人可以逐句检查。</strong></p>
-</section>
-
-<section class="card">
-<h2>从“解释”走向“理解工具”</h2>
-<p>不同问题需要不同的认知接口。点击下面四种方式。</p>
-<div class="tools">
-<div class="tool active" onclick="tool(0,this)"><b>ASD-STE</b><span>降低语言歧义</span></div>
-<div class="tool" onclick="tool(1,this)"><b>Diagram</b><span>展示结构和关系</span></div>
-<div class="tool" onclick="tool(2,this)"><b>Interactive Web</b><span>让人自己探索</span></div>
-<div class="tool" onclick="tool(3,this)"><b>Explainer Video</b><span>展示变化和过程</span></div>
-</div>
-<div class="toolDetail" id="toolDetail">适合复杂概念。让 AI 使用短句、统一术语和明确因果关系，把复杂内容变成容易逐句检查的表达。</div>
-</section>
-
-<section class="card">
-<h2>图示：从“应用”看到“能力”</h2>
-<div class="diagram">
-<div style="margin-bottom:8px"><strong>应用建设</strong></div>
-<div class="nodes">
-<div class="node">AI 审计助手</div><div class="node">AI 合规审核</div><div class="node">AI 财务分析</div>
-</div>
-<div style="font-size:22px;margin:8px">↓</div>
-<div style="margin-bottom:8px"><strong>共同沉淀的能力</strong></div>
-<div class="nodes">
-<div class="node">企业知识</div><div class="node">业务规则</div><div class="node">判断标准</div><div class="node">业务流程</div>
-</div>
-<div style="font-size:22px;margin:8px">↓</div>
-<div style="margin-bottom:8px"><strong>能力可以被多个应用重复使用</strong></div>
-<div class="nodes">
-<div class="node">应用 A</div><div class="node">应用 B</div><div class="node">应用 C</div>
-</div>
-</div>
-<p>关键变化不是“少建设应用”。而是<strong>让应用背后的知识、规则和流程成为可复用资产</strong>。</p>
-</section>
-
-<section class="card">
-<h2>交互：为什么“应用越多”不等于“能力越强”？</h2>
-<p>这个实验只观察两个变量：应用数量，以及这些应用对共同能力的复用程度。</p>
-
-<div class="sim">
-  <div>
-    <p><strong>AI 应用数量</strong></p>
-    <input id="systems" type="range" min="1" max="10" value="6" oninput="simulate()">
-    <p><span id="sysnum" style="font-family:var(--mono);font-weight:700">6</span> 个应用</p>
-
-    <p><strong>共享同一套能力的应用数量</strong></p>
-    <input id="human" type="range" min="1" max="10" value="1" oninput="simulate()">
-    <p><span id="hnum" style="font-family:var(--mono);font-weight:700">1</span> 个</p>
-  </div>
-
-  <div class="result" id="result"></div>
+<div class="hero">
+  <p class="eyebrow">Learning Note · 2026-10-03</p>
+  <h1><span class="t-half">AI 的下一步：从生成答案</span><wbr><span class="t-half">到生成理解工具</span></h1>
+  <p class="lead">当 AI 越来越擅长生产内容，内容本身会越来越便宜。新的瓶颈可能不再是“谁能得到答案”，而是“谁能更快理解答案、验证答案并做出判断”。</p>
 </div>
 
-<div class="result" style="margin-top:16px">
-  <b>怎么看这个实验？</b><br>
-  当共享数量为 1 时，每个应用基本都在独立建设能力。应用增加，能力也接近按应用数量重复建设。<br><br>
-  当共享数量逐渐接近应用数量时，应用仍然很多，但它们开始复用同一套知识、规则和流程。此时，企业增加的不只是应用，还在形成可复用能力。
-</div>
+<main id="main">
+  <section class="card hero-card">
+    <div class="big">
+      AI 能做的事情越来越多。<br>
+      人需要亲自完成的事情越来越少。<br><br>
+      所以人的工作会逐渐上移：<span class="highlight">从生产，走向理解、判断和监督。</span>
+    </div>
+    <ol class="flow">
+      <li><b>AI 能力提升</b><small>生成、分析、执行越来越便宜</small></li>
+      <li><b>内容变便宜</b><small>报告、代码、图表都可以快速生成</small></li>
+      <li><b>理解成为瓶颈</b><small>人仍然需要知道发生了什么</small></li>
+      <li><b>AI 设计解释</b><small>不只给答案，还设计理解过程</small></li>
+      <li><b>人负责判断</b><small>目标、取舍、责任仍由人承担</small></li>
+    </ol>
+  </section>
 
-<div class="result" style="margin-top:16px">
-  <b>注意：</b>这里不是说“应用越少越好”。真正要观察的是：一个能力能不能被多个应用重复使用，并能不能持续改进。
-</div>
-</section>
+  <section class="card">
+    <div class="sec-head"><p class="eyebrow">01 / Contrast</p></div>
+    <h2>一个简单实验：同一个思想，可以怎样表达？</h2>
+    <p>核心问题：<strong>为什么企业 AI 要从“应用建设”走向“能力建设”？</strong></p>
+    <div class="compare">
+      <div class="panel bad">
+        <span class="tag">普通咨询式表达</span>
+        <div class="quote">随着大模型技术快速演进，企业 AI 建设正逐渐从单点场景探索迈向体系化能力重塑。企业需要通过平台化、组件化和知识资产化，形成可复用、可组合、可持续演进的 AI 能力体系，从而避免应用孤岛，并构建长期竞争优势。</div>
+      </div>
+      <div class="panel good">
+        <span class="tag goodtag">接近 ASD-STE100</span>
+        <div class="quote">
+          企业可以建设很多 AI 应用。<br>
+          每个应用可以解决一个问题。<br><br>
+          但是，一个应用通常只服务一个场景。<br>
+          另一个应用不能直接使用它的能力。<br><br>
+          因此，应用数量增加，不一定带来企业能力增加。<br><br>
+          企业需要把知识、规则和流程沉淀成能力。<br>
+          多个应用可以使用同一个能力。<br>
+          企业也可以持续改进这个能力。
+        </div>
+      </div>
+    </div>
+    <div class="reason">
+      <div><b>短句</b><span>减少工作记忆负担</span></div>
+      <div><b>单一动作</b><span>降低句法解析成本</span></div>
+      <div><b>统一术语</b><span>减少概念切换</span></div>
+      <div><b>显式因果</b><span>减少推理成本</span></div>
+    </div>
+  </section>
 
-<section class="card">
-<h2>最后一步：不要再问“给我答案”</h2>
-<p>这里不再让你修改问题。我们固定使用前面的核心问题，直接生成一个“理解工具”。</p>
+  <section class="card">
+    <div class="sec-head"><p class="eyebrow">02 / Causal Chain</p></div>
+    <h2>ASD-STE 真正有价值的地方</h2>
+    <p>它不是简单地要求“把文章写得更简单”。它迫使 AI 把“应用为什么不够、能力为什么重要”拆成可以逐句验证的因果链。</p>
+    <div class="prompt">
+      <strong>因为：</strong>一个 AI 应用通常只解决一个具体场景。<br>
+      <strong>所以：</strong>企业建设很多应用，不等于企业获得很多可复用能力。<br>
+      <strong>因为：</strong>知识、规则和流程没有被沉淀。<br>
+      <strong>所以：</strong>新的应用仍然需要重新建设。<br>
+      <strong>因此：</strong>企业需要把知识、规则和流程变成可重复使用的能力。
+    </div>
+    <p>这样，AI 不只是告诉我们“应该能力建设”。<strong>它把这个判断背后的因果关系拆开，让人可以逐句检查。</strong></p>
+  </section>
 
-<div id="fixed-question">
-为什么企业 AI 要从“应用建设”走向“能力建设”？
-</div>
+  <section class="card">
+    <div class="sec-head"><p class="eyebrow">03 / Interfaces</p></div>
+    <h2>从“解释”走向“理解工具”</h2>
+    <p>不同问题需要不同的认知接口。点击下面四种方式。</p>
+    <div class="tools">
+      <button type="button" class="tool active" aria-pressed="true" aria-controls="toolDetail" onclick="tool(0,this)"><b>ASD-STE</b><span>降低语言歧义</span></button>
+      <button type="button" class="tool" aria-pressed="false" aria-controls="toolDetail" onclick="tool(1,this)"><b>Diagram</b><span>展示结构和关系</span></button>
+      <button type="button" class="tool" aria-pressed="false" aria-controls="toolDetail" onclick="tool(2,this)"><b>Interactive Web</b><span>让人自己探索</span></button>
+      <button type="button" class="tool" aria-pressed="false" aria-controls="toolDetail" onclick="tool(3,this)"><b>Explainer Video</b><span>展示变化和过程</span></button>
+    </div>
+    <div class="toolDetail" id="toolDetail" aria-live="polite">适合复杂概念。让 AI 使用短句、统一术语和明确因果关系，把复杂内容变成容易逐句检查的表达。</div>
+  </section>
 
-<button onclick="generate()">生成一个“理解工具”</button>
-<div class="result" id="generated">
-这里不会直接给你一篇长文章。它会先把问题拆成三个最小问题，再决定应该怎样帮助你理解。
-</div>
-</section>
+  <section class="card">
+    <div class="sec-head"><p class="eyebrow">04 / Structure</p></div>
+    <h2>图示：从“应用”看到“能力”</h2>
+    <div class="diagram">
+      <p class="lab">应用建设</p>
+      <div class="nodes">
+        <div class="node">AI 审计助手</div><div class="node">AI 合规审核</div><div class="node">AI 财务分析</div>
+      </div>
+      <div class="arrow" aria-hidden="true">↓</div>
+      <p class="lab">共同沉淀的能力</p>
+      <div class="nodes">
+        <div class="node">企业知识</div><div class="node">业务规则</div><div class="node">判断标准</div><div class="node">业务流程</div>
+      </div>
+      <div class="arrow" aria-hidden="true">↓</div>
+      <p class="lab">能力可以被多个应用重复使用</p>
+      <div class="nodes">
+        <div class="node">应用 A</div><div class="node">应用 B</div><div class="node">应用 C</div>
+      </div>
+    </div>
+    <p>关键变化不是“少建设应用”。而是<strong>让应用背后的知识、规则和流程成为可复用资产</strong>。</p>
+  </section>
 
-<section class="card">
-<h2>核心思想</h2>
-<div class="big">
-不要只问 AI：<br>
-<span class="highlight">“给我答案。”</span><br><br>
-开始问 AI：<br>
-<span class="highlight">“给我一个能让我搞懂这件事情的东西。”</span>
-</div>
-<p style="margin-top:22px">未来 AI 产生的不只是内容。它还可以产生大量一次性的、定制的、用完即丢的认知工具：网页、图、模拟器、动画、视频，甚至一个专门帮助你理解某个问题的小型软件。</p>
-</section>
+  <section class="card">
+    <div class="sec-head"><p class="eyebrow">05 / Simulation</p></div>
+    <h2>交互：为什么“应用越多”不等于“能力越强”？</h2>
+    <p>这个实验只观察两个变量：应用数量，以及这些应用对共同能力的复用程度。</p>
+
+    <div class="sim">
+      <div class="controls">
+        <div class="control">
+          <label for="systems">AI 应用数量</label>
+          <input id="systems" type="range" min="1" max="10" value="6" oninput="simulate()">
+          <p class="range-row"><output id="sysnum" for="systems">6</output> 个应用</p>
+        </div>
+        <div class="control">
+          <label for="human">共享同一套能力的应用数量</label>
+          <input id="human" type="range" min="1" max="10" value="1" oninput="simulate()">
+          <p class="range-row"><output id="hnum" for="human">1</output> 个</p>
+        </div>
+      </div>
+      <div class="result" id="result" aria-live="polite">
+        应用数量：<b>6 个</b><br>
+        共享同一能力的应用：<b>1 个</b><br>
+        可复用能力组：<b>6 个</b><br>
+        能力复用率：<b>17%</b><br><br>
+        现在主要是在增加应用。不同应用仍然需要分别建设知识、规则和流程。
+      </div>
+    </div>
+
+    <div class="note">
+      <b>怎么看这个实验？</b><br>
+      当共享数量为 1 时，每个应用基本都在独立建设能力。应用增加，能力也接近按应用数量重复建设。<br><br>
+      当共享数量逐渐接近应用数量时，应用仍然很多，但它们开始复用同一套知识、规则和流程。此时，企业增加的不只是应用，还在形成可复用能力。
+    </div>
+
+    <div class="note">
+      <b>注意：</b>这里不是说“应用越少越好”。真正要观察的是：一个能力能不能被多个应用重复使用，并能不能持续改进。
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="sec-head"><p class="eyebrow">06 / Generate</p></div>
+    <h2>最后一步：不要再问“给我答案”</h2>
+    <p>这里不再让你修改问题。我们固定使用前面的核心问题，直接生成一个“理解工具”。</p>
+
+    <div id="fixed-question">
+      为什么企业 AI 要从“应用建设”走向“能力建设”？
+    </div>
+
+    <button class="btn" type="button" onclick="generate()">生成一个“理解工具”</button>
+    <div class="result" id="generated" aria-live="polite">
+      这里不会直接给你一篇长文章。它会先把问题拆成三个最小问题，再决定应该怎样帮助你理解。
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="sec-head"><p class="eyebrow">07 / Core Idea</p></div>
+    <h2>核心思想</h2>
+    <div class="big">
+      不要只问 AI：<br>
+      <span class="highlight">“给我答案。”</span><br><br>
+      开始问 AI：<br>
+      <span class="highlight">“给我一个能让我搞懂这件事情的东西。”</span>
+    </div>
+    <p style="margin-top:20px">未来 AI 产生的不只是内容。它还可以产生大量一次性的、定制的、用完即丢的认知工具：网页、图、模拟器、动画、视频，甚至一个专门帮助你理解某个问题的小型软件。</p>
+  </section>
 </main>
 
+<footer class="footer">
+  <a href="index.html">← 返回文档索引</a>
+  <span>Talks · 学习笔记</span>
+</footer>
+
 <script>
-function tool(i,el){
-document.querySelectorAll(".tool").forEach(x=>x.classList.remove("active"));el.classList.add("active");
-const a=[
-"适合复杂概念。让 AI 使用短句、统一术语和明确因果关系，把复杂内容变成容易逐句检查的表达。",
-"适合流程、关系、因果和循环。让 AI 把“谁做什么、先后顺序、反馈关系”直接变成视觉结构。",
-"适合存在变量的问题。让 AI 把结论变成可以点击、调整和观察的实验，让用户自己验证因果关系。",
-"适合时间和变化。让 AI 不只写解释词，而是设计“先展示什么、再展示什么”的理解过程。"
-];document.getElementById("toolDetail").textContent=a[i];
-}
-function simulate(){
-let apps=+document.getElementById("systems").value;
-let shared=Math.min(+document.getElementById("human").value, apps);
-document.getElementById("sysnum").textContent=apps;
-document.getElementById("hnum").textContent=shared;
+var TOOL_TEXTS = [
+  "适合复杂概念。让 AI 使用短句、统一术语和明确因果关系，把复杂内容变成容易逐句检查的表达。",
+  "适合流程、关系、因果和循环。让 AI 把“谁做什么、先后顺序、反馈关系”直接变成视觉结构。",
+  "适合存在变量的问题。让 AI 把结论变成可以点击、调整和观察的实验，让用户自己验证因果关系。",
+  "适合时间和变化。让 AI 不只写解释词，而是设计“先展示什么、再展示什么”的理解过程。"
+];
 
-let reusableCapabilities = 1 + (apps-shared);
-let reuseRate = Math.round(shared/apps*100);
-
-document.getElementById("result").innerHTML=
-"应用数量：<b>"+apps+" 个</b><br>"+
-"共享同一能力的应用：<b>"+shared+" 个</b><br>"+
-"可复用能力组：<b>"+reusableCapabilities+" 个</b><br>"+
-"能力复用率：<b>"+reuseRate+"%</b><br><br>"+
-(shared===1
-?"现在主要是在增加应用。不同应用仍然需要分别建设知识、规则和流程。"
-:shared===apps
-?"现在 "+apps+" 个应用共同复用一套能力。新增应用不需要重新建设同一套知识、规则和流程。"
-:"现在有 "+shared+" 个应用共享同一能力。企业开始把一部分建设工作从“做一个应用”转向“沉淀一个能力”。");
+function tool(i, el) {
+  document.querySelectorAll('.tool').forEach(function (x) {
+    x.classList.remove('active');
+    x.setAttribute('aria-pressed', 'false');
+  });
+  el.classList.add('active');
+  el.setAttribute('aria-pressed', 'true');
+  document.getElementById('toolDetail').textContent = TOOL_TEXTS[i];
 }
 
-function generate(){
-const q="为什么企业 AI 要从“应用建设”走向“能力建设”？";
-document.getElementById("generated").innerHTML=
-"<b>问题：</b>"+q+"<br><br>"+
-"<b>① 它是什么？</b><br>企业 AI 的建设对象，不只是一个个 AI 应用，也包括可以被多个应用重复使用的知识、规则、流程和判断标准。<br><br>"+
-"<b>② 它解决什么问题？</b><br>因为每个应用都独立建设，会产生重复建设和能力孤岛。所以企业需要把应用中的共性能力沉淀下来。<br><br>"+
-"<b>③ 它怎样工作？</b><br>发现共性能力 → 沉淀知识、规则和流程 → 多个应用复用同一能力 → 持续改进能力 → 新应用继续复用。<br><br>"+
-"<b>关键变化：</b>建设对象从“一个个应用”扩大到“应用背后可以复用的能力”。";
+function simulate() {
+  var apps = +document.getElementById('systems').value;
+  var humanEl = document.getElementById('human');
+  humanEl.max = apps;
+  if (+humanEl.value > apps) humanEl.value = apps;
+  var shared = +humanEl.value;
+  document.getElementById('sysnum').textContent = apps;
+  document.getElementById('hnum').textContent = shared;
+
+  var reusableCapabilities = 1 + (apps - shared);
+  var reuseRate = Math.round(shared / apps * 100);
+
+  document.getElementById('result').innerHTML =
+    "应用数量：<b>" + apps + " 个</b><br>" +
+    "共享同一能力的应用：<b>" + shared + " 个</b><br>" +
+    "可复用能力组：<b>" + reusableCapabilities + " 个</b><br>" +
+    "能力复用率：<b>" + reuseRate + "%</b><br><br>" +
+    (shared === 1
+      ? "现在主要是在增加应用。不同应用仍然需要分别建设知识、规则和流程。"
+      : shared === apps
+        ? "现在 " + apps + " 个应用共同复用一套能力。新增应用不需要重新建设同一套知识、规则和流程。"
+        : "现在有 " + shared + " 个应用共享同一能力。企业开始把一部分建设工作从“做一个应用”转向“沉淀一个能力”。");
 }
+
+function generate() {
+  var q = "为什么企业 AI 要从“应用建设”走向“能力建设”？";
+  document.getElementById('generated').innerHTML =
+    "<b>问题：</b>" + q + "<br><br>" +
+    "<b>① 它是什么？</b><br>企业 AI 的建设对象，不只是一个个 AI 应用，也包括可以被多个应用重复使用的知识、规则、流程和判断标准。<br><br>" +
+    "<b>② 它解决什么问题？</b><br>因为每个应用都独立建设，会产生重复建设和能力孤岛。所以企业需要把应用中的共性能力沉淀下来。<br><br>" +
+    "<b>③ 它怎样工作？</b><br>发现共性能力 → 沉淀知识、规则和流程 → 多个应用复用同一能力 → 持续改进能力 → 新应用继续复用。<br><br>" +
+    "<b>关键变化：</b>建设对象从“一个个应用”扩大到“应用背后可以复用的能力”。";
+}
+
+// 阅读进度：顶栏底部 2px 细线
+(function () {
+  var bar = document.querySelector('.progress');
+  if (!bar) return;
+  var ticking = false;
+  function update() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    bar.style.transform = 'scaleX(' + p + ')';
+  }
+  window.addEventListener('scroll', function () {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () { update(); ticking = false; });
+  }, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+
+// 首屏就把模拟结果填上，避免出现空的深色块
+simulate();
 </script>
-
-
-
 </body>
 </html>

@@ -80,18 +80,28 @@
 :root {                    /* dark —— 默认主题 */
   --bg:#020617; --bg-card:rgba(15,23,42,.5); --bg-card-solid:#0f172a;
   --border:#1e293b; --text:#ffffff; --text-secondary:#94a3b8; --text-muted:#475569;
-  --accent:#22d3ee; --card-hover:rgba(30,41,59,.5);
+  --accent:#22d3ee; --accent-ink:#67e8f9; --accent-soft:rgba(34,211,238,.12);
+  --warn:#fbbf24; --warn-soft:rgba(251,191,36,.12);
+  --card-hover:rgba(30,41,59,.5); --bar:rgba(2,6,23,.82);
 }
 [data-theme="light"] { --bg:#f8fafc; --bg-card:rgba(255,255,255,.85); --bg-card-solid:#ffffff;
   --border:#e2e8f0; --text:#1e293b; --text-secondary:#64748b; --text-muted:#94a3b8;
-  --accent:#0891b2; --card-hover:rgba(241,245,249,.8); }
+  --accent:#0891b2; --accent-ink:#0e7490; --accent-soft:rgba(8,145,178,.08);
+  --warn:#b45309; --warn-soft:rgba(180,83,9,.09);
+  --card-hover:rgba(241,245,249,.8); --bar:rgba(248,250,252,.86); }
 [data-theme="warm"]  { --bg:#fef7ed; --bg-card:rgba(255,251,245,.9); --bg-card-solid:#fffbf5;
   --border:#fde68a; --text:#3b2f1e; --text-secondary:#78716c; --text-muted:#a8a29e;
-  --accent:#f59e0b; --card-hover:rgba(253,230,138,.3); }
+  --accent:#f59e0b; --accent-ink:#b45309; --accent-soft:rgba(245,158,11,.14);
+  --warn:#92400e; --warn-soft:rgba(146,64,14,.10);
+  --card-hover:rgba(253,230,138,.3); --bar:rgba(254,247,237,.88); }
 [data-theme="cool"]  { --bg:#f0f4f8; --bg-card:rgba(248,250,252,.9); --bg-card-solid:#f8fafc;
   --border:#cbd5e1; --text:#1a2a3a; --text-secondary:#64748b; --text-muted:#94a3b8;
-  --accent:#6366f1; --card-hover:rgba(203,213,225,.4); }
+  --accent:#6366f1; --accent-ink:#4338ca; --accent-soft:rgba(99,102,241,.10);
+  --warn:#b45309; --warn-soft:rgba(180,83,9,.09);
+  --card-hover:rgba(203,213,225,.4); --bar:rgba(240,244,248,.88); }
 ```
+
+> **派生 token（索引页在用，其余族 Ⅰ 文档尚未引入）：** `--accent-ink` 是强调色的**文字态**（暖色主题的 `--accent` 是 `#f59e0b`，直接做小字号文字对比度不足，故另设 `#b45309`）；`--accent-soft` / `--warn-soft` 是徽标底色；`--warn` 用于 BETA 状态；`--bar` 是吸顶栏的半透明底色。`--bg-card` / `--bg-card-solid` 在索引页只用作顶栏控件的底色。
 
 > **dark 的实现细节：** dark 由 `:root` 承担，**没有** `[data-theme="dark"]` 选择器。因此 `<html>` 上写 `data-theme="dark"` 也能正常工作（回落到 `:root`），但不能靠搜索 `[data-theme="dark"]` 判断某文档是否支持 dark。
 
@@ -129,7 +139,7 @@
 font-variant-numeric: tabular-nums;
 ```
 
-已应用：[`ai_understanding_tool.html`](ai_understanding_tool.html)、[`e-work-intro.html`](e-work-intro.html)。
+已应用：[`ai_understanding_tool.html`](ai_understanding_tool.html)、[`e-work-intro.html`](e-work-intro.html)、[`index.html`](index.html)。
 [`AI-Audit-PPT.html`](AI-Audit-PPT.html) 用的是等效的 `font-feature-settings:"tnum"`。
 
 ### 4.4 中文标题
@@ -142,17 +152,17 @@ font-variant-numeric: tabular-nums;
 
 | 项 | 现状 | 备注 |
 |---|---|---|
-| 卡片圆角 | 12px（族 Ⅱ）、14–20px（单页）、16px（墨绿）、`0.75rem`（索引） | 未统一 |
+| 卡片圆角 | 12px（族 Ⅱ）、14–20px（单页）、16px（墨绿）；索引改为 flush 列表：行本身无圆角，只有悬停底色带 10px 圆角 | 未统一 |
 | 卡片描边 | 族 Ⅰ 用 `--border` 1px；族 Ⅱ/Ⅲ 用 1px + 轻阴影 | 阴影使用不一致，见 §7 |
-| 区块间距 | 56–88px（单页）、48px（族 Ⅱ） | |
+| 区块间距 | 56–88px（单页）、48px（族 Ⅱ）、`clamp(2.5rem,6vw,4rem)`（索引） | |
 | 响应式断点 | 480 / 560 / 640 / 700 / 800 / 860 / 900 px | 各文档自选，未统一；两个架构图文档无断点 |
-| 入场动效 | `translateY(12–24px)` + `opacity` | 只做位移与淡入，不做扫描线/故障字等装饰效果 |
+| 入场动效 | `translateY(12–24px)` + `opacity` | 只做位移与淡入，不做扫描线/故障字等装饰效果。索引页按**整块列表**入场（不是逐行）：逐行动画会在筛选回填时重播，导致行半透明闪烁 |
 
 **减动效：** 有动画的文档必须支持 `prefers-reduced-motion: reduce`。
-现状：[`workflow-to-agent.html`](workflow-to-agent.html)、[`e-work-intro.html`](e-work-intro.html)、[`AI-Engineering.html`](AI-Engineering.html)、[`AI-Audit-PPT.html`](AI-Audit-PPT.html) 已支持。
+现状：[`workflow-to-agent.html`](workflow-to-agent.html)、[`e-work-intro.html`](e-work-intro.html)、[`AI-Engineering.html`](AI-Engineering.html)、[`AI-Audit-PPT.html`](AI-Audit-PPT.html)、[`index.html`](index.html) 已支持。
 
 **打印：** 有 `position:fixed` 顶栏或主题切换器的文档应提供 `@media print` 隐藏交互 UI。
-现状：[`index.html`](index.html)、[`AI-SE.html`](AI-SE.html)、[`AI-Architecture.html`](AI-Architecture.html)、[`AI-Engineering.html`](AI-Engineering.html) 有；[`e-work-intro.html`](e-work-intro.html) **缺**（有 fixed 顶栏 + `backdrop-filter`，打印会糊）。
+现状：[`index.html`](index.html)（吸顶栏 + 筛选器 + 主题切换器全部隐藏）、[`AI-SE.html`](AI-SE.html)、[`AI-Architecture.html`](AI-Architecture.html)、[`AI-Engineering.html`](AI-Engineering.html) 有；[`e-work-intro.html`](e-work-intro.html) **缺**（有 fixed 顶栏 + `backdrop-filter`，打印会糊）。
 
 ---
 
@@ -170,8 +180,8 @@ font-variant-numeric: tabular-nums;
 2. **[`ai_understanding_tool.html`](ai_understanding_tool.html) 配色未 token 化** —— 颜色全是散列字面量（`#172033`、`#f5f7fb`、`#eef2ff`…）。它的 `:root` 只有排版升级时加入的 `--sans` / `--mono` 两个变量，没有颜色变量。建议抽出 `--bg` / `--ink` / `--accent`。
 3. **阴影政策不一致** —— [`AI-Engineering.html`](AI-Engineering.html) 9 处 `box-shadow`、[`e-work-intro.html`](e-work-intro.html) 6 处，而族 Ⅰ 基本不用阴影。族 Ⅰ 的「描边优先、克制阴影」是更好的方向。
 4. **[`e-work-intro.html`](e-work-intro.html) 缺打印样式**，且 640px 以下 `.nav-links{display:none}` 隐藏全部导航且无替代菜单。
-5. **无障碍普遍缺失** —— 全仓 `aria-*` 出现次数为 0；[`AI-Audit-PPT.html`](AI-Audit-PPT.html) 的翻页按钮无 `aria-label`；[`ai_understanding_tool.html`](ai_understanding_tool.html) 的 `.tool` 是 `onclick` 的 `div`，键盘不可达。
-6. **[`index.html`](index.html) 的 `NEW` 徽章不自动过期** —— 7 个条目挂 `NEW`，最久的来自 6 月。
+5. **无障碍仍普遍缺失** —— [`index.html`](index.html) 已补 `aria-label` / `aria-pressed` / `aria-live` 与 `.sr-only`（筛选器、主题按钮、结果计数），共 37 处 `aria-*`；其余 8 个文档仍为 **0**：[`AI-Audit-PPT.html`](AI-Audit-PPT.html) 的翻页按钮无 `aria-label`；[`ai_understanding_tool.html`](ai_understanding_tool.html) 的 `.tool` 是 `onclick` 的 `div`，键盘不可达。
+6. **[`index.html`](index.html) 的 `NEW` 徽章不自动过期** —— 仍然是手写标签（5 个条目挂 `NEW`），最久的来自 6 月。索引已按日期倒序排列，但徽章不会随日期失效。
 
 ### 各文档断点明细
 
@@ -183,7 +193,7 @@ font-variant-numeric: tabular-nums;
 | [`ai_understanding_tool.html`](ai_understanding_tool.html) | 700, 800（另容器 1120 / 900） |
 | [`AI-Engineering.html`](AI-Engineering.html) | 480, 900（另容器 1100） |
 | [`e-work-intro.html`](e-work-intro.html) | 560, 640, 900（另容器 1080） |
-| [`index.html`](index.html) | 640（另容器 900） |
+| [`index.html`](index.html) | 480, 700（另容器 900） |
 | [`workflow-to-agent.html`](workflow-to-agent.html) | 480, 560, 860, 1024, 1280 |
 
 ---

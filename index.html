@@ -4,336 +4,752 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Talks — 文档索引</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta name="description" content="Talks 文档索引 — AI 学习记录与架构推演的静态文档集合，可按关键词筛选。">
+  <script>
+    // 首屏前恢复主题（避免闪烁）；同时标记 JS 可用 —— 筛选器只在有 JS 时出现
+    document.documentElement.classList.add('js');
+    try {
+      var savedTheme = localStorage.getItem('talks.theme');
+      if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+    } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+    /* ================================================================
+       族 Ⅰ 深空青 · 四主题 token
+       dark 由 :root 承担（没有 [data-theme="dark"] 选择器）
+       中文一律走 --sans；--mono 只承载拉丁、数字、微标签
+       ================================================================ */
     :root {
+      --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Segoe UI", sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+
       --bg: #020617; --bg-card: rgba(15, 23, 42, 0.5); --bg-card-solid: #0f172a;
       --border: #1e293b; --text: #ffffff; --text-secondary: #94a3b8; --text-muted: #475569;
-      --accent: #22d3ee; --card-hover: rgba(30, 41, 59, 0.5);
+      --accent: #22d3ee; --accent-ink: #67e8f9; --accent-soft: rgba(34, 211, 238, 0.12);
+      --warn: #fbbf24; --warn-soft: rgba(251, 191, 36, 0.12);
+      --card-hover: rgba(30, 41, 59, 0.5); --bar: rgba(2, 6, 23, 0.82);
     }
     [data-theme="light"] {
       --bg: #f8fafc; --bg-card: rgba(255, 255, 255, 0.85); --bg-card-solid: #ffffff;
       --border: #e2e8f0; --text: #1e293b; --text-secondary: #64748b; --text-muted: #94a3b8;
-      --accent: #0891b2; --card-hover: rgba(241, 245, 249, 0.8);
+      --accent: #0891b2; --accent-ink: #0e7490; --accent-soft: rgba(8, 145, 178, 0.08);
+      --warn: #b45309; --warn-soft: rgba(180, 83, 9, 0.09);
+      --card-hover: rgba(241, 245, 249, 0.8); --bar: rgba(248, 250, 252, 0.86);
     }
     [data-theme="warm"] {
       --bg: #fef7ed; --bg-card: rgba(255, 251, 245, 0.9); --bg-card-solid: #fffbf5;
       --border: #fde68a; --text: #3b2f1e; --text-secondary: #78716c; --text-muted: #a8a29e;
-      --accent: #f59e0b; --card-hover: rgba(253, 230, 138, 0.3);
+      --accent: #f59e0b; --accent-ink: #b45309; --accent-soft: rgba(245, 158, 11, 0.14);
+      --warn: #92400e; --warn-soft: rgba(146, 64, 14, 0.10);
+      --card-hover: rgba(253, 230, 138, 0.3); --bar: rgba(254, 247, 237, 0.88);
     }
     [data-theme="cool"] {
       --bg: #f0f4f8; --bg-card: rgba(248, 250, 252, 0.9); --bg-card-solid: #f8fafc;
       --border: #cbd5e1; --text: #1a2a3a; --text-secondary: #64748b; --text-muted: #94a3b8;
-      --accent: #6366f1; --card-hover: rgba(203, 213, 225, 0.4);
+      --accent: #6366f1; --accent-ink: #4338ca; --accent-soft: rgba(99, 102, 241, 0.10);
+      --warn: #b45309; --warn-soft: rgba(180, 83, 9, 0.09);
+      --card-hover: rgba(203, 213, 225, 0.4); --bar: rgba(240, 244, 248, 0.88);
     }
+
+    /* ================================================================
+       基础
+       ================================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      min-height: 100vh; background: var(--bg); color: var(--text);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      transition: background-color 0.35s ease, color 0.35s ease;
+    }
+    [hidden] { display: none !important; }
+    ::selection { background: var(--accent-soft); color: var(--text); }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+      font-family: var(--sans);
+    }
+
+    /* ================================================================
+       顶栏：吸顶 + 毛玻璃，主题切换保留在右上
+       ================================================================ */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--bar);
+      border-bottom: 1px solid var(--border);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      backdrop-filter: blur(16px) saturate(180%);
+      transition: background-color 0.35s ease, border-color 0.35s ease;
+    }
+    .topbar-inner {
+      max-width: 900px; margin: 0 auto;
+      padding: 0 clamp(1.25rem, 4vw, 2rem);
+      height: 58px;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .brand { display: inline-flex; align-items: baseline; gap: 0.45rem; text-decoration: none; color: var(--text); }
+    .brand-mark { font-family: var(--mono); font-size: 0.8125rem; font-weight: 600; letter-spacing: -0.01em; }
+    .brand-sep { font-family: var(--mono); font-size: 0.8125rem; color: var(--text-muted); }
+    .brand-sub {
+      font-family: var(--mono); font-size: 0.625rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--text-secondary);
+    }
+
+    /* 筛选器（无 JS 时整块不出现，避免留下失效输入框） */
+    .filter {
+      display: none; align-items: center; gap: 0.45rem;
+      margin-left: auto;
+      max-width: 14rem;
+      padding: 0.3rem 0.5rem 0.3rem 0.65rem;
+      border: 1px solid var(--border); border-radius: 999px;
+      background: var(--bg-card);
+      transition: border-color 0.25s ease, background-color 0.25s ease;
+    }
+    .js .filter { display: flex; }
+    .filter:focus-within { border-color: var(--accent); background: var(--bg-card-solid); }
+    .filter-icon {
+      width: 12px; height: 12px; flex-shrink: 0; fill: none;
+      stroke: var(--text-muted); stroke-width: 1.6; stroke-linecap: round;
+    }
+    .filter input {
+      flex: 1; min-width: 0; width: 8rem; border: 0; outline: 0; background: transparent;
+      font-family: var(--sans); font-size: 0.75rem; color: var(--text);
+    }
+    .filter input::placeholder { color: var(--text-muted); }
+    .filter input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+    .filter kbd {
+      font-family: var(--mono); font-size: 0.5625rem; line-height: 1;
+      color: var(--text-muted); border: 1px solid var(--border);
+      border-radius: 3px; padding: 0.15em 0.34em;
+      transition: opacity 0.2s ease;
+    }
+    .filter input:not(:placeholder-shown) + kbd { opacity: 0; }
+
+    /* 主题切换：4 个色点，active 用双环标出 */
+    .theme-bar {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.3rem 0.45rem;
+      border: 1px solid var(--border); border-radius: 999px;
+      background: var(--bg-card);
+      transition: background-color 0.35s ease, border-color 0.35s ease;
+    }
+    .theme-btn {
+      width: 18px; height: 18px; padding: 0; border-radius: 50%;
+      border: 1px solid rgba(100, 116, 139, 0.45); cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .theme-btn.dark  { background: #020617; }
+    .theme-btn.light { background: #f8fafc; border-color: #cbd5e1; }
+    .theme-btn.warm  { background: #fef7ed; border-color: #e7c88f; }
+    .theme-btn.cool  { background: #f0f4f8; border-color: #b6c4d4; }
+    .theme-btn:hover { transform: scale(1.2); }
+    .theme-btn.active { box-shadow: 0 0 0 2px var(--bg-card-solid), 0 0 0 3.5px var(--accent); }
+    .theme-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ================================================================
+       版面
+       ================================================================ */
+    main {
+      max-width: 900px; margin: 0 auto;
+      padding: clamp(2.5rem, 6vw, 4rem) clamp(1.25rem, 4vw, 2rem) 0;
+    }
+
+    /* Hero */
+    .hero { margin-bottom: clamp(2.5rem, 5vw, 3.5rem); }
+    .eyebrow {
+      display: flex; align-items: center; gap: 0.75rem;
+      font-family: var(--mono); font-size: 0.625rem; font-weight: 500;
+      letter-spacing: 0.24em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 1.25rem;
+    }
+    .eyebrow::before { content: ''; width: 26px; height: 1px; background: currentColor; opacity: 0.45; }
+    .hero-title {
+      font-size: clamp(2.125rem, 1.4rem + 3.2vw, 3.25rem);
+      font-weight: 700; line-height: 1.12; letter-spacing: -0.03em;
+      text-wrap: balance;
+    }
+    .hero-lead {
+      margin-top: 1.25rem; max-width: 36em;
+      font-size: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
+      line-height: 1.8; color: var(--text-secondary); text-wrap: pretty;
+    }
+    .hero-meta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem 1.75rem;
+      margin-top: 2rem; padding-top: 1.1rem; border-top: 1px solid var(--border);
+    }
+    .meta { display: inline-flex; align-items: baseline; gap: 0.5rem; font-size: 0.6875rem; color: var(--text-muted); }
+    .meta-k { letter-spacing: 0.04em; }
+    .meta-v {
+      font-family: var(--mono); font-size: 0.6875rem; letter-spacing: 0.02em;
+      color: var(--text-secondary); font-variant-numeric: tabular-nums;
+    }
+    .repo-link {
+      margin-left: auto; white-space: nowrap;
+      font-family: var(--mono); font-size: 0.625rem; letter-spacing: 0.06em;
+      color: var(--text-muted); text-decoration: none;
+      transition: color 0.25s ease;
+    }
+    .repo-link:hover { color: var(--accent-ink); }
+
+    /* 列表头 */
+    .list-head {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+      padding: 0 0.875rem 0.75rem;
+    }
+    .list-title { font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.01em; }
+    .list-count {
+      font-family: var(--mono); font-size: 0.625rem; letter-spacing: 0.14em;
+      color: var(--text-muted); font-variant-numeric: tabular-nums;
+    }
+
+    /* 索引行：flush 列表 + 发丝分隔线，编号由 counter 自动生成 */
+    .doc-list { list-style: none; counter-reset: doc; border-top: 1px solid var(--border); }
+    .doc-item { counter-increment: doc; border-bottom: 1px solid var(--border); }
+    .doc {
+      position: relative;
+      display: grid;
+      grid-template-columns: 2.75rem minmax(0, 1fr) auto 1.25rem;
+      gap: clamp(1rem, 2.4vw, 1.6rem);
+      align-items: start;
+      padding: 1.35rem 0.875rem;
+      border-radius: 10px;
+      text-decoration: none; color: inherit;
+      transition: background-color 0.3s ease;
+    }
+    .doc:hover { background: var(--card-hover); }
+    .doc::before {
+      content: ''; position: absolute; left: 0; top: 0.6rem; bottom: 0.6rem; width: 2px;
+      border-radius: 2px; background: var(--accent);
+      transform: scaleY(0); transform-origin: top;
+      transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .doc:hover::before, .doc:focus-visible::before { transform: scaleY(1); }
+    .doc:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+    .doc-no {
+      display: flex; flex-direction: column; gap: 0.3rem; padding-top: 0.2rem;
+      font-family: var(--mono); font-variant-numeric: tabular-nums;
+    }
+    .doc-no::before {
+      content: counter(doc, decimal-leading-zero);
+      font-size: 0.75rem; letter-spacing: 0.04em; color: var(--text-muted);
+      transition: color 0.3s ease;
+    }
+    .doc-type { font-size: 0.5625rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); opacity: 0.75; }
+    .doc:hover .doc-no::before { color: var(--accent-ink); }
+
+    .doc-body { min-width: 0; }
+    .doc-head { display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 0.4rem; }
+    .doc-title {
+      font-size: 1rem; font-weight: 600; line-height: 1.5; letter-spacing: -0.008em;
+      transition: color 0.25s ease;
+    }
+    .doc:hover .doc-title { color: var(--accent-ink); }
+    .doc-desc { font-size: 0.8125rem; line-height: 1.72; color: var(--text-secondary); text-wrap: pretty; }
+
+    .doc-side {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 0.45rem;
+      padding-top: 0.2rem; min-width: 5rem; text-align: right;
+    }
+    .doc-kind { font-size: 0.6875rem; line-height: 1.4; letter-spacing: 0.02em; color: var(--text-secondary); }
+    .doc-date {
+      font-family: var(--mono); font-size: 0.625rem; letter-spacing: 0.06em;
+      color: var(--text-secondary); font-variant-numeric: tabular-nums;
+    }
+
+    .doc-arrow {
+      align-self: center; font-family: var(--mono); font-size: 0.875rem;
+      color: var(--text-muted);
+      transition: color 0.25s ease, transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .doc:hover .doc-arrow { color: var(--accent-ink); transform: translateX(3px); }
+
+    /* 微标签：等宽 + 大写 + 宽字距 */
+    .badge {
+      display: inline-block; white-space: nowrap;
+      font-family: var(--mono); font-size: 0.5625rem; font-weight: 600;
+      letter-spacing: 0.12em; line-height: 1.5;
+      padding: 0.1em 0.45em; border-radius: 3px;
+    }
+    .badge--new   { color: var(--accent-ink); background: var(--accent-soft); }
+    .badge--beta  { color: var(--warn); background: var(--warn-soft); }
+    .badge--index { color: var(--text-secondary); background: var(--card-hover); }
+
+    /* 空状态 */
+    .empty { padding: 4rem 1rem 4.5rem; text-align: center; }
+    .empty-k {
+      font-family: var(--mono); font-size: 0.5625rem; letter-spacing: 0.28em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.9rem;
+    }
+    .empty-t { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.4rem; }
+    .empty-btn {
+      font-family: var(--sans); font-size: 0.75rem; letter-spacing: 0.02em;
+      cursor: pointer;
+      color: var(--accent-ink); background: transparent;
+      border: 1px solid var(--border); border-radius: 999px;
+      padding: 0.55rem 1.1rem;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+    .empty-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .empty-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* 页脚 */
+    .footer {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 0.75rem 1.5rem;
+      margin-top: clamp(2.5rem, 6vw, 4rem); padding: 1.4rem 0 3rem;
+      border-top: 1px solid var(--border);
+      font-family: var(--mono); font-size: 0.625rem; letter-spacing: 0.06em; color: var(--text-muted);
+    }
+    .footer a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s ease; }
+    .footer a:hover { color: var(--accent-ink); }
+    .foot-note { font-family: var(--sans); font-size: 0.6875rem; letter-spacing: 0.04em; }
+
+    /* ================================================================
+       入场：只做位移 + 淡入（不扫描、不故障）
+       ================================================================ */
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: none; }
+    }
+    .eyebrow, .hero-title, .hero-lead, .hero-meta, .list-head, .doc-list, .footer {
+      animation: rise 0.65s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    }
+    .hero-title { animation-delay: 0.05s; }
+    .hero-lead  { animation-delay: 0.1s; }
+    .hero-meta  { animation-delay: 0.16s; }
+    .list-head  { animation-delay: 0.24s; }
+    .doc-list   { animation-delay: 0.3s; }
+    .footer     { animation-delay: 0.7s; }
+    .empty:not([hidden]) { animation: rise 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+
+    /* ================================================================
+       响应式
+       ================================================================ */
+    @media (max-width: 700px) {
+      .topbar-inner {
+        height: auto; flex-wrap: wrap;
+        padding-top: 0.6rem; padding-bottom: 0.6rem; row-gap: 0.55rem;
+      }
+      .theme-bar { margin-left: auto; }
+      .filter { order: 3; flex: 1 1 100%; max-width: none; margin-left: 0; }
+      .filter input { width: 100%; }
+
+      .doc {
+        grid-template-columns: 2.25rem minmax(0, 1fr) 1.125rem;
+        row-gap: 0.55rem;
+        padding: 1.15rem 0.5rem;
+      }
+      .doc-no   { grid-column: 1; grid-row: 1; }
+      .doc-body { grid-column: 2; grid-row: 1; }
+      .doc-arrow { grid-column: 3; grid-row: 1; align-self: start; padding-top: 0.15rem; }
+      .doc-side {
+        grid-column: 2; grid-row: 2;
+        flex-direction: row; align-items: center; gap: 0.75rem;
+        padding-top: 0; min-width: 0; text-align: left;
+      }
+      .doc-title { font-size: 0.9375rem; }
+      .repo-link { margin-left: 0; }
+      .list-head { padding-left: 0.5rem; padding-right: 0.5rem; }
+    }
+
+    @media (max-width: 480px) {
+      .brand-sep, .brand-sub { display: none; }
+      .hero-title { letter-spacing: -0.02em; }
+      .doc { grid-template-columns: 1.75rem minmax(0, 1fr) 1rem; gap: 0.85rem; }
+      .hero-meta { gap: 0.55rem 1.25rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .eyebrow, .hero-title, .hero-lead, .hero-meta, .list-head, .doc-list, .footer, .empty {
+        animation: none !important; opacity: 1 !important; transform: none !important;
+      }
+    }
+
     @media print {
       :root, [data-theme] {
         --bg: #ffffff; --bg-card: rgba(255, 255, 255, 0.95); --bg-card-solid: #ffffff;
         --border: #d4d4d8; --text: #18181b; --text-secondary: #52525b; --text-muted: #a1a1aa;
-        --accent: #000000;
+        --accent: #000000; --accent-ink: #000000; --accent-soft: transparent;
+        --warn: #52525b; --warn-soft: transparent;
+        --card-hover: #ffffff; --bar: #ffffff;
       }
-      body { padding: 0; } .theme-bar { display: none !important; }
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'JetBrains Mono', 'Microsoft YaHei', monospace;
-      background: var(--bg); min-height: 100vh; padding: 2rem; color: var(--text);
-      transition: background 0.3s, color 0.3s;
-    }
-    .container { max-width: 900px; margin: 0 auto; }
-
-    /* Theme bar */
-    .theme-bar { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1.5rem; }
-    .theme-bar span { font-size: 0.75rem; color: var(--text-secondary); margin-right: 0.25rem; }
-    .theme-btn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: border-color 0.2s, transform 0.2s; padding: 0; }
-    .theme-btn:hover { transform: scale(1.15); }
-    .theme-btn.active { border-color: var(--text); }
-    .theme-btn.dark  { background: #020617; }
-    .theme-btn.light { background: #f8fafc; border: 2px solid #cbd5e1; }
-    .theme-btn.warm  { background: #fef7ed; border: 2px solid #fde68a; }
-    .theme-btn.cool  { background: #f0f4f8; border: 2px solid #cbd5e1; }
-
-    /* Header */
-    .header { margin-bottom: 2rem; }
-    .header-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
-    .pulse-dot { width: 12px; height: 12px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; flex-shrink: 0; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.025em; }
-    .subtitle { color: var(--text-secondary); font-size: 0.8rem; margin-left: 1.75rem; margin-bottom: 0.25rem; }
-    .repo-link { color: var(--text-muted); font-size: 0.7rem; margin-left: 1.75rem; }
-    .repo-link a { color: var(--text-secondary); text-decoration: none; }
-    .repo-link a:hover { color: var(--accent); }
-
-    /* File list */
-    .file-list { display: flex; flex-direction: column; gap: 0.625rem; }
-    .file-card {
-      display: flex; align-items: center; gap: 1rem;
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 0.75rem; padding: 1rem 1.25rem;
-      transition: background 0.3s, border-color 0.3s, transform 0.2s;
-      text-decoration: none; color: inherit;
-    }
-    .file-card:hover { background: var(--card-hover); transform: translateX(4px); border-color: var(--accent); }
-
-    .file-icon {
-      width: 42px; height: 42px; border-radius: 0.5rem;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
-    }
-    .file-icon.html { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
-    .file-icon.md   { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
-    .file-icon.other { background: rgba(168, 162, 158, 0.15); color: #a8a29e; }
-
-    .file-info { flex: 1; min-width: 0; }
-    .file-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.2rem; }
-    .file-desc { font-size: 0.7rem; color: var(--text-secondary); line-height: 1.45; }
-    .file-meta { display: flex; gap: 1rem; margin-top: 0.35rem; }
-    .file-meta span { font-size: 0.65rem; color: var(--text-muted); }
-
-    .file-arrow { color: var(--text-muted); font-size: 0.9rem; flex-shrink: 0; transition: color 0.2s, transform 0.2s; }
-    .file-card:hover .file-arrow { color: var(--accent); transform: translateX(3px); }
-
-    /* Stats bar */
-    .stats { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; margin-left: 1.75rem; }
-    .stat { font-size: 0.7rem; color: var(--text-muted); }
-    .stat strong { color: var(--text-secondary); }
-
-    /* Footer */
-    .footer { text-align: center; margin-top: 2.5rem; color: var(--text-muted); font-size: 0.65rem; }
-    .footer a { color: var(--text-secondary); text-decoration: none; }
-    .footer a:hover { color: var(--accent); }
-
-    /* New badge */
-    .badge {
-      display: inline-block; font-size: 0.6rem; padding: 0.15em 0.5em; border-radius: 1em;
-      font-weight: 600; margin-left: 0.4rem; vertical-align: middle;
-    }
-    .badge.new { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
-    .badge.index { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-
-    /* Empty state */
-    .empty { text-align: center; padding: 3rem 0; color: var(--text-muted); font-size: 0.8rem; }
-
-    @media (max-width: 640px) {
-      body { padding: 1rem; }
-      .file-card { padding: 0.875rem 1rem; gap: 0.75rem; }
-      .file-meta { flex-direction: column; gap: 0.15rem; }
+      body { background: #ffffff; }
+      .topbar, .filter, .theme-bar, .empty-btn, .doc-arrow { display: none !important; }
+      main { padding-top: 0; }
+      .eyebrow, .hero-title, .hero-lead, .hero-meta, .list-head, .doc-list, .footer, .empty {
+        animation: none !important; opacity: 1 !important; transform: none !important;
+      }
+      .doc { padding-left: 0; padding-right: 0; }
+      .doc::before { display: none; }
+      .doc-item { break-inside: avoid; }
+      a { color: inherit !important; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
 
-    <!-- Theme Switcher -->
-    <div class="theme-bar">
-      <span>主题</span>
-      <button class="theme-btn dark"  data-theme="dark"  title="暗夜"></button>
-      <button class="theme-btn light active" data-theme="light" title="亮白"></button>
-      <button class="theme-btn warm"  data-theme="warm"  title="暖阳"></button>
-      <button class="theme-btn cool"  data-theme="cool"  title="冷杉"></button>
-    </div>
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html" aria-label="Talks 文档索引">
+        <span class="brand-mark">Talks</span>
+        <span class="brand-sep" aria-hidden="true">/</span>
+        <span class="brand-sub">Docs</span>
+      </a>
 
-    <!-- Header -->
-    <div class="header">
-      <div class="header-row">
-        <div class="pulse-dot"></div>
-        <h1>Talks — 文档索引</h1>
+      <div class="filter" role="search">
+        <svg class="filter-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.6 10.6 14 14"/></svg>
+        <input id="filter" type="search" placeholder="筛选文档…" aria-label="筛选文档"
+               autocomplete="off" spellcheck="false">
+        <kbd aria-hidden="true">/</kbd>
       </div>
-      <p class="subtitle">AI 学习记录 — 从能讲清结构，到能讲给人用，再到问自己怎样才算真的懂</p>
-      <p class="repo-link">
-        <a href="https://github.com/Peanut-Rice/Talks" target="_blank">github.com/Peanut-Rice/Talks</a>
-      </p>
+
+      <div class="theme-bar" role="group" aria-label="主题切换">
+        <button type="button" class="theme-btn dark"  data-theme="dark"  title="暗夜" aria-label="暗夜主题" aria-pressed="false"></button>
+        <button type="button" class="theme-btn light" data-theme="light" title="亮白" aria-label="亮白主题" aria-pressed="false"></button>
+        <button type="button" class="theme-btn warm"  data-theme="warm"  title="暖阳" aria-label="暖阳主题" aria-pressed="false"></button>
+        <button type="button" class="theme-btn cool"  data-theme="cool"  title="冷杉" aria-label="冷杉主题" aria-pressed="false"></button>
+      </div>
     </div>
+  </header>
 
-    <!-- Stats -->
-    <div class="stats">
-      <span class="stat">文档 <strong id="doc-count">0</strong></span>
-      <span class="stat">更新 <strong id="last-update">—</strong></span>
-    </div>
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <p class="eyebrow">Document Index · 2026</p>
+      <h1 class="hero-title">文档索引</h1>
+      <p class="hero-lead">AI 学习记录 — 从能讲清结构，到能讲给人用，再到问自己怎样才算真的懂</p>
+      <div class="hero-meta">
+        <span class="meta"><span class="meta-k">文档</span><span class="meta-v" id="doc-count">09</span></span>
+        <span class="meta"><span class="meta-k">更新</span><time class="meta-v" id="last-update" datetime="2026-10-15">2026.10.15</time></span>
+        <a class="repo-link" href="https://github.com/Peanut-Rice/Talks" target="_blank" rel="noopener">github.com/Peanut-Rice/Talks ↗</a>
+      </div>
+    </section>
 
-    <!-- File List -->
-    <div class="file-list" id="file-list">
-      <!--
-        添加新文档：复制下面的结构，填入信息。
-        注意：用 &lt; &gt; 转义，不要写成真实标签 —— HTML 注释不能嵌套，
-        模板里若出现真实的 <a> 会被浏览器当作真节点（污染统计且留下死链）。
-      -->
-      <pre class="card-template" hidden>
-&lt;a href="文件名.html" class="file-card"&gt;
-  &lt;div class="file-icon html"&gt;HTML&lt;/div&gt;
-  &lt;div class="file-info"&gt;
-    &lt;div class="file-name"&gt;显示名称 &lt;span class="badge new"&gt;NEW&lt;/span&gt;&lt;/div&gt;
-    &lt;div class="file-desc"&gt;一句话描述文档内容&lt;/div&gt;
-    &lt;div class="file-meta"&gt;
-      &lt;span&gt;2026-06-16&lt;/span&gt;
-      &lt;span&gt;作者&lt;/span&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;span class="file-arrow"&gt;→&lt;/span&gt;
-&lt;/a&gt;
-      </pre>
+    <!-- 索引 -->
+    <section class="list" aria-labelledby="list-title">
+      <div class="list-head">
+        <h2 class="list-title" id="list-title">全部文档</h2>
+        <span class="list-count"><span id="list-count" aria-live="polite">09</span><span class="sr-only"> 篇文档</span></span>
+      </div>
 
-      <!-- 条目：digital-employee.html -->
-      <a href="digital-employee.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">从 AI 应用到数字员工 · 初步思考 <span class="badge index">BETA</span></div>
-          <div class="file-desc">数字员工不是技术名词，而是一套管理语法：存量盘点、七道组织关口、三个岗位画像、三阶段路线、等效人力核算口径与六个翻车风险</div>
-          <div class="file-meta">
-            <span>2026-10-15</span>
-            <span>规划思考</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
+      <ol class="doc-list" id="doc-list">
 
-      <!-- 条目：ai_understanding_tool.html -->
-      <a href="ai_understanding_tool.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">AI 的下一步 · 从生成答案到生成理解工具 <span class="badge new">NEW</span></div>
-          <div class="file-desc">学习笔记：AI 产出正从"答案"变成"认知工具"，理解成为新瓶颈——ASD-STE100 改写对照、"应用 vs 能力"图示、应用数量 × 复用程度交互实验</div>
-          <div class="file-meta">
-            <span>2026-10-03</span>
-            <span>学习笔记</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
+        <!-- 条目：digital-employee.html -->
+        <li class="doc-item">
+          <a class="doc" href="digital-employee.html">
+            <span class="doc-no" aria-hidden="true"><span class="doc-type">HTML</span></span>
+            <div class="doc-body">
+              <div class="doc-head">
+                <h3 class="doc-title">从 AI 应用到数字员工 · 初步思考</h3>
+                <span class="badge badge--beta">BETA</span>
+              </div>
+              <p class="doc-desc">数字员工不是技术名词，而是一套管理语法：存量盘点、七道组织关口、三个岗位画像、三阶段路线、等效人力核算口径与六个翻车风险</p>
+            </div>
+            <div class="doc-side">
+              <span class="doc-kind">规划思考</span>
+              <time class="doc-date" datetime="2026-10-15">2026.10.15</time>
+            </div>
+            <span class="doc-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
 
-      <!-- 条目：e-work-intro.html -->
-      <a href="e-work-intro.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">E-Work · 你的 AI 同事 <span class="badge new">NEW</span></div>
-          <div class="file-desc">集团内网 AI 智能助手使用手册：三种工作方式、六项核心技能、addoil 出错兜底机制</div>
-          <div class="file-meta">
-            <span>2026-08-13</span>
-            <span>使用手册</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
+        <!-- 条目：ai_understanding_tool.html -->
+        <li class="doc-item">
+          <a class="doc" href="ai_understanding_tool.html">
+            <span class="doc-no" aria-hidden="true"><span class="doc-type">HTML</span></span>
+            <div class="doc-body">
+              <div class="doc-head">
+                <h3 class="doc-title">AI 的下一步 · 从生成答案到生成理解工具</h3>
+                <span class="badge badge--new">NEW</span>
+              </div>
+              <p class="doc-desc">学习笔记：AI 产出正从“答案”变成“认知工具”，理解成为新瓶颈——ASD-STE100 改写对照、“应用 vs 能力”图示、应用数量 × 复用程度交互实验</p>
+            </div>
+            <div class="doc-side">
+              <span class="doc-kind">学习笔记</span>
+              <time class="doc-date" datetime="2026-10-03">2026.10.03</time>
+            </div>
+            <span class="doc-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
 
+        <!-- 条目：e-work-intro.html -->
+        <li class="doc-item">
+          <a class="doc" href="e-work-intro.html">
+            <span class="doc-no" aria-hidden="true"><span class="doc-type">HTML</span></span>
+            <div class="doc-body">
+              <div class="doc-head">
+                <h3 class="doc-title">E-Work · 你的 AI 同事</h3>
+                <span class="badge badge--new">NEW</span>
+              </div>
+              <p class="doc-desc">集团内网 AI 智能助手使用手册：三种工作方式、六项核心技能、addoil 出错兜底机制</p>
+            </div>
+            <div class="doc-side">
+              <span class="doc-kind">使用手册</span>
+              <time class="doc-date" datetime="2026-08-13">2026.08.13</time>
+            </div>
+            <span class="doc-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
 
-     <!-- 条目：AI-Architecture.html -->
-      <a href="AI-Architecture.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">金控集团 · AI 架构</div>
-          <div class="file-desc">智能化办公能力架构：模型网关五维能力、指标数据发布平台、MCP-指标库四类能力组</div>
-          <div class="file-meta">
-            <span>2026-07-27</span>
-            <span>架构设计</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
+        <!-- 条目：AI-Architecture.html -->
+        <li class="doc-item">
+          <a class="doc" href="AI-Architecture.html">
+            <span class="doc-no" aria-hidden="true"><span class="doc-type">HTML</span></span>
+            <div class="doc-body">
+              <div class="doc-head">
+                <h3 class="doc-title">金控集团 · AI 架构</h3>
+              </div>
+              <p class="doc-desc">智能化办公能力架构：模型网关五维能力、指标数据发布平台、MCP-指标库四类能力组</p>
+            </div>
+            <div class="doc-side">
+              <span class="doc-kind">架构设计</span>
+              <time class="doc-date" datetime="2026-07-27">2026.07.27</time>
+            </div>
+            <span class="doc-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
 
+        <!-- 条目：AI-Audit-PPT.html -->
+        <li class="doc-item">
+          <a class="doc" href="AI-Audit-PPT.html">
+            <span class="doc-no" aria-hidden="true"><span class="doc-type">HTML</span></span>
+            <div class="doc-body">
+              <div class="doc-head">
+                <h3 class="doc-title">大模型在审计条线的应用 · 金控集团</h3>
+                <span class="badge badge--new">NEW</span>
+              </div>
+              <p class="doc-desc">审计领域 AI 能力场景：13 页场景化呈现，覆盖数据采集到风险识别</p>
+            </div>
+            <div class="doc-side">
+              <span class="doc-kind">交流材料</span>
+              <time class="doc-date" datetime="2026-07-27">2026.07.27</time>
+            </div>
+            <span class="doc-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
 
-      <!-- 条目：workflow-to-agent.html -->
-      <a href="workflow-to-agent.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">从 Workflow 到 Agent · 企业AI应用的范式转移 <span class="badge new">NEW</span></div>
-          <div class="file-desc">企业 AI 从流程编排到自主决策的能力跃迁：Agent Runtime 承载业务知识、工具与领域 Skill</div>
-          <div class="file-meta">
-            <span>2026-07-13</span>
-            <span>方案讨论</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
+        <!-- 条目：workflow-to-agent.html -->
+        <li class="doc-item">
+          <a class="doc" href="workflow-to-agent.html">
+            <span class="doc-no" aria-hidden="true"><span class="doc-type">HTML</span></span>
+            <div class="doc-body">
+              <div class="doc-head">
+                <h3 class="doc-title">从 Workflow 到 Agent · 企业 AI 应用的范式转移</h3>
+                <span class="badge badge--new">NEW</span>
+              </div>
+              <p class="doc-desc">企业 AI 从流程编排到自主决策的能力跃迁：Agent Runtime 承载业务知识、工具与领域 Skill</p>
+            </div>
+            <div class="doc-side">
+              <span class="doc-kind">方案讨论</span>
+              <time class="doc-date" datetime="2026-07-13">2026.07.13</time>
+            </div>
+            <span class="doc-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
 
-      <!-- 条目：AI-Engineering.html -->
-      <a href="AI-Engineering.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">AI Engineering · Prompt → Context → Harness → Loop <span class="badge new">NEW</span></div>
-          <div class="file-desc">大模型应用的四次能力升维：Prompt → Context → Harness → Loop，智能增益的演进路径</div>
-          <div class="file-meta">
-            <span>2026-07-13</span>
-            <span>架构推演</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
+        <!-- 条目：AI-Engineering.html -->
+        <li class="doc-item">
+          <a class="doc" href="AI-Engineering.html">
+            <span class="doc-no" aria-hidden="true"><span class="doc-type">HTML</span></span>
+            <div class="doc-body">
+              <div class="doc-head">
+                <h3 class="doc-title">AI Engineering · Prompt → Context → Harness → Loop</h3>
+                <span class="badge badge--new">NEW</span>
+              </div>
+              <p class="doc-desc">大模型应用的四次能力升维：Prompt → Context → Harness → Loop，智能增益的演进路径</p>
+            </div>
+            <div class="doc-side">
+              <span class="doc-kind">架构推演</span>
+              <time class="doc-date" datetime="2026-07-13">2026.07.13</time>
+            </div>
+            <span class="doc-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
 
+        <!-- 条目：AI-SE.html -->
+        <li class="doc-item">
+          <a class="doc" href="AI-SE.html">
+            <span class="doc-no" aria-hidden="true"><span class="doc-type">HTML</span></span>
+            <div class="doc-body">
+              <div class="doc-head">
+                <h3 class="doc-title">AI 驱动软件研发机制 · 四区架构</h3>
+                <span class="badge badge--new">NEW</span>
+              </div>
+              <p class="doc-desc">四区协作模型：创造、审查、适配、部署——各司其职的研发能力分区</p>
+            </div>
+            <div class="doc-side">
+              <span class="doc-kind">架构设计</span>
+              <time class="doc-date" datetime="2026-06-17">2026.06.17</time>
+            </div>
+            <span class="doc-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
 
+        <!-- 条目：README.md -->
+        <li class="doc-item">
+          <a class="doc" href="README.md">
+            <span class="doc-no" aria-hidden="true"><span class="doc-type">MD</span></span>
+            <div class="doc-body">
+              <div class="doc-head">
+                <h3 class="doc-title">README</h3>
+                <span class="badge badge--index">INDEX</span>
+              </div>
+              <p class="doc-desc">仓库说明文件</p>
+            </div>
+            <div class="doc-side">
+              <span class="doc-kind">—</span>
+              <time class="doc-date" datetime="2026-07-27">2026.07.27</time>
+            </div>
+            <span class="doc-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
 
-      <!-- 条目：AI-SE.html -->
-      <a href="AI-SE.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">AI 驱动软件研发机制 · 四区架构 <span class="badge new">NEW</span></div>
-          <div class="file-desc">四区协作模型：创造、审查、适配、部署——各司其职的研发能力分区</div>
-          <div class="file-meta">
-            <span>2026-06-17</span>
-            <span>架构设计</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
+        <!-- 新增文档：复制下面 <template> 里的结构到列表末尾，改 href / 标题 / 描述 / 分类 / 日期。
+             编号由 CSS counter 自动生成，不需要手写。 -->
+        <template id="doc-template">
+          <li class="doc-item">
+            <a class="doc" href="文件名.html">
+              <span class="doc-no" aria-hidden="true"><span class="doc-type">HTML</span></span>
+              <div class="doc-body">
+                <div class="doc-head">
+                  <h3 class="doc-title">显示名称</h3>
+                  <span class="badge badge--new">NEW</span>
+                </div>
+                <p class="doc-desc">一句话描述文档内容</p>
+              </div>
+              <div class="doc-side">
+                <span class="doc-kind">分类</span>
+                <time class="doc-date" datetime="2026-10-15">2026.10.15</time>
+              </div>
+              <span class="doc-arrow" aria-hidden="true">→</span>
+            </a>
+          </li>
+        </template>
 
-      <!-- 条目：AI-Audit-PPT.html -->
-      <a href="AI-Audit-PPT.html" class="file-card">
-        <div class="file-icon html">HTML</div>
-        <div class="file-info">
-          <div class="file-name">大模型在审计条线的应用 · 金控集团 <span class="badge new">NEW</span></div>
-          <div class="file-desc">审计领域 AI 能力场景：13 页场景化呈现，覆盖数据采集到风险识别</div>
-          <div class="file-meta">
-            <span>2026-07-27</span>
-            <span>交流材料</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
+      </ol>
 
-      <!-- 条目：README.md -->
-      <a href="README.md" class="file-card">
-        <div class="file-icon md">MD</div>
-        <div class="file-info">
-          <div class="file-name">README <span class="badge index">索引</span></div>
-          <div class="file-desc">仓库说明文件</div>
-          <div class="file-meta">
-            <span>2026-07-27</span>
-            <span>—</span>
-          </div>
-        </div>
-        <span class="file-arrow">→</span>
-      </a>
+      <div class="empty" id="empty" hidden>
+        <p class="empty-k">No match</p>
+        <p class="empty-t">没有找到匹配的文档</p>
+        <button class="empty-btn" id="clear-filter" type="button">清除筛选</button>
+      </div>
+    </section>
 
-    </div><!-- /file-list -->
-
-    <!-- Footer -->
-    <div class="footer">
-      <a href="https://github.com/Peanut-Rice/Talks" target="_blank">Peanut-Rice/Talks</a> ·
-      底层逻辑不变，表达层在进化
-    </div>
-
-  </div><!-- /container -->
+    <!-- 页脚 -->
+    <footer class="footer">
+      <a href="https://github.com/Peanut-Rice/Talks" target="_blank" rel="noopener">Peanut-Rice/Talks</a>
+      <span class="foot-note">底层逻辑不变，表达层在进化</span>
+    </footer>
+  </main>
 
   <script>
-    // Theme switcher
-    document.querySelectorAll('.theme-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.documentElement.setAttribute('data-theme', btn.dataset.theme);
-        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
-
-    // Stats: count docs, pick latest date
     (() => {
-      const cards = document.querySelectorAll('.file-card');
-      document.getElementById('doc-count').textContent = cards.length;
+      'use strict';
+      const root = document.documentElement;
+      const THEME_KEY = 'talks.theme';
 
-      const dates = [...document.querySelectorAll('.file-meta span:first-child')]
-        .map(s => s.textContent.trim())
+      /* 主题：切换 + 记忆（首屏恢复在 head 的内联脚本里完成） */
+      const themeBtns = Array.from(document.querySelectorAll('.theme-btn'));
+      const syncTheme = () => {
+        const active = root.getAttribute('data-theme') || 'dark';
+        themeBtns.forEach(btn => {
+          const on = btn.dataset.theme === active;
+          btn.classList.toggle('active', on);
+          btn.setAttribute('aria-pressed', String(on));
+        });
+      };
+      themeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          root.setAttribute('data-theme', btn.dataset.theme);
+          try { localStorage.setItem(THEME_KEY, btn.dataset.theme); } catch (e) {}
+          syncTheme();
+        });
+      });
+      syncTheme();
+
+      /* 索引：条目数 / 最近更新 / 筛选 */
+      const items = Array.from(document.querySelectorAll('.doc-item'));
+      const total = items.length;
+      const pad = n => String(n).padStart(2, '0');
+      const countEl = document.getElementById('doc-count');
+      const countLiveEl = document.getElementById('list-count');
+      const lastUpdateEl = document.getElementById('last-update');
+      const filterEl = document.getElementById('filter');
+      const emptyEl = document.getElementById('empty');
+      const clearBtn = document.getElementById('clear-filter');
+
+      const dates = items
+        .map(li => {
+          const t = li.querySelector('time[datetime]');
+          return t ? t.getAttribute('datetime') : '';
+        })
         .filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d))
-        .sort()
-        .reverse();
-      document.getElementById('last-update').textContent = dates[0] || '—';
+        .sort();
+      const latest = dates[dates.length - 1];
+
+      if (countEl) countEl.textContent = pad(total);
+      if (latest && lastUpdateEl) {
+        lastUpdateEl.setAttribute('datetime', latest);
+        lastUpdateEl.textContent = latest.replace(/-/g, '.');
+      }
+
+      const applyFilter = () => {
+        const q = (filterEl ? filterEl.value : '').trim().toLowerCase();
+        let shown = 0;
+        items.forEach(li => {
+          const t = li.querySelector('time[datetime]');
+          const hay = (li.textContent + ' ' + (t ? t.getAttribute('datetime') : '')).toLowerCase();
+          const hit = !q || hay.indexOf(q) !== -1;
+          li.hidden = !hit;
+          if (hit) shown += 1;
+        });
+        if (countLiveEl) countLiveEl.textContent = q ? pad(shown) + ' / ' + pad(total) : pad(total);
+        if (emptyEl) emptyEl.hidden = shown !== 0;
+      };
+
+      if (filterEl) {
+        filterEl.addEventListener('input', applyFilter);
+        document.addEventListener('keydown', event => {
+          const active = document.activeElement;
+          const typing = active && (/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName) || active.isContentEditable);
+          if (event.key === '/' && !typing && !event.metaKey && !event.ctrlKey && !event.altKey) {
+            event.preventDefault();
+            filterEl.focus();
+            filterEl.select();
+            return;
+          }
+          if (event.key === 'Escape' && active === filterEl) {
+            if (filterEl.value) {
+              filterEl.value = '';
+              applyFilter();
+            } else {
+              filterEl.blur();
+            }
+          }
+        });
+      }
+
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          if (!filterEl) return;
+          filterEl.value = '';
+          applyFilter();
+          filterEl.focus();
+        });
+      }
+
+      applyFilter();
     })();
   </script>
 </body>

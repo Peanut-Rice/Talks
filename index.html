@@ -278,6 +278,24 @@
     .badge--beta  { color: var(--warn); background: var(--warn-soft); }
     .badge--index { color: var(--text-secondary); background: var(--card-hover); }
 
+    /* 首条：桌面端做成一枚「精选行」，≤700px 回落为普通行 */
+    @media (min-width: 701px) {
+      .doc-item--featured { padding-top: 10px; border-bottom: 0; }
+      .doc--featured {
+        padding: 1.35rem 13px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--bg-card-solid);
+        transition: background-color 0.3s ease, border-color 0.2s ease;
+      }
+      .doc--featured:hover { background: var(--card-hover); border-color: var(--accent); }
+      .doc--featured::before { transform: scaleY(1); top: 1rem; bottom: 1rem; }
+      .doc--featured .doc-no::before {
+        font-size: 1.125rem; font-weight: 500; color: var(--accent-ink);
+      }
+      .doc--featured .doc-title { font-size: 1.125rem; line-height: 1.45; }
+    }
+
     /* 空状态 */
     .empty { padding: 4rem 1rem 4.5rem; text-align: center; }
     .empty-k {
@@ -445,9 +463,9 @@
 
       <ol class="doc-list" id="doc-list">
 
-        <!-- 条目：digital-employee.html -->
-        <li class="doc-item">
-          <a class="doc" href="digital-employee.html">
+        <!-- 条目：digital-employee.html（首条在桌面端显示为精选卡，移动端为普通行） -->
+        <li class="doc-item doc-item--featured">
+          <a class="doc doc--featured" href="digital-employee.html">
             <span class="doc-no" aria-hidden="true"><span class="doc-type">HTML</span></span>
             <div class="doc-body">
               <div class="doc-head">

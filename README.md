@@ -22,6 +22,10 @@
 - **可维护性：** 序号由 CSS counter 生成，新增条目不再手写编号；`<template>` 取代原先转义过的 `<pre>` 模板
 - **规范同步：** 配色仍为族 Ⅰ 四主题，新增 `--accent-ink` / `--accent-soft` / `--warn` / `--warn-soft` / `--bar` 五个派生 token（未新开色板）；补 `aria-label` / `aria-pressed` / `aria-live`、`prefers-reduced-motion` 与 `@media print`
 - **验证：** 计算字体断言（中文元素首字体为 `-apple-system`，微标签为 `JetBrains Mono`）+ 几何检测（1440 / 768 / 701 / 390 / 360 / 320 均无横向滚动、无裁切），并实测四主题、筛选、空态、键盘焦点、无 JS 回退与打印样式
+- **外壳统一：** E-Work ([e-work-intro.html](e-work-intro.html)) 与 数字员工 ([digital-employee.html](digital-employee.html)) 合并族 Ⅲ 页面外壳 —— 同一套 `sticky` 56px 顶栏、1000px 内容宽、圆点品牌锁形、12px 导航、72px 章节节奏、14px 描边卡片（零阴影）与「品牌 + 索引 + 上一篇/下一篇」页脚；e-work 补上缺失的「04 流程」，移动端导航改为两行横向滚动并加 `scroll-margin-top`
+- **重做学习笔记：** AI 的下一步 ([ai_understanding_tool.html](ai_understanding_tool.html)) 移动端阅读优先 —— 正文 16px / 1.9 行高、卡片内边距 15–18px、对照/模拟/接口单列、五步流程改纵向编号轨道、标题按语义断行；新增吸顶栏 + 2px 阅读进度、7 个章节编号与页脚返回；模拟器首屏即有结果、滑杆 `max` 同步、四种接口改为 `button` + `aria-pressed`，并补 `aria-live`、打印与无 JS 兜底
+- **规范同步（续）：** 族 Ⅳ（冷灰蓝）完成 token 化，四族配色均进入 `:root`；[DESIGN-SYSTEM.md](DESIGN-SYSTEM.md) 更新文档分类（补 digital-employee）、断点表、打印/减动效/无障碍现状，并清掉「学习笔记颜色未 token 化」「e-work 缺打印与移动导航」两条已解决项；[CLAUDE.md](CLAUDE.md) 同步文档数与移动导航约束
+- **验证（续）：** 族 Ⅲ 两页与学习笔记页均跑计算字体 + 几何检测（380–1440 无横向滚动、无裁切）；族 Ⅲ 锚点落位 77/100px，学习笔记在 320px 起标题仍按语义断行、全页无 CJK-on-mono
 
 ### 2026-10-15
 - **新增文档：** 从 AI 应用到数字员工 · 初步思考 ([digital-employee.html](digital-employee.html)) — **beta 版，独立单页**。核心判断：从「AI 应用」到「数字员工」隔的不是模型能力，而是**主体资格的授予**——现有架构回答「AI 能不能用」，数字员工要回答「AI 算不算数」；技术侧已具备上岗条件，缺口集中在组织层，因此**下一阶段的重心不在写代码**。含存量盘点（技术侧就位 vs 组织侧空缺）、**七道组织关口**（岗位化 / 身份化 / 授权分级 / 成本核算 / 上岗准入 / 问责双签 / 运营与退役，按依赖顺序而非风险高低排列）、三个岗位画像（制度合规问答员 / 审计底稿整理员 / 经营指标简报员）、三阶段路线图、等效人力核算口径，以及**六个翻车风险**（问责真空 / 影子成本低估 / 超级助手 / 叙事错位 / AI 炼化 / 能力不足）

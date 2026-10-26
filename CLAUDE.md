@@ -23,12 +23,12 @@ Centerpiece is a large hand-crafted inline SVG diagram (1200–1300px wide). Bel
 - **`AI-Audit-PPT.html`**: 13 full-screen slides, keyboard/scroll/touch navigation, dual WebGL canvas backgrounds, Motion library, slide dots. Press `B` for low-power mode. Uses a serif stack on purpose — see DESIGN-SYSTEM.md §6.
 - **`workflow-to-agent.html`**: Single-page responsive slide, two-column on desktop. Fixed light theme.
 
-### 4. Fixed-Theme Single Pages — `e-work-intro.html`, `index.html`
-Do **not** participate in the 4-theme switcher; each has its own fixed palette. `e-work-intro.html` has a fixed top nav with anchor links + scrollspy; `index.html` is the document index.
+### 4. Index & Fixed-Theme Single Pages — `e-work-intro.html`, `digital-employee.html`, `index.html`
+The two family-Ⅲ pages have fixed palettes and share one sticky-nav/footer shell (`e-work-intro.html` = manual, `digital-employee.html` = long-form note). `index.html` is the document index and, exceptionally, uses the 4-theme family Ⅰ.
 
 ## Theme System
 
-**Only 3 of 8 documents** use the 4-theme system: `index.html`, `AI-SE.html`, `AI-Architecture.html`. Toggled via `<html data-theme="dark|light|warm|cool">`; the circular color buttons top-right are the standard UI.
+**Only 3 of 9 documents** use the 4-theme system: `index.html`, `AI-SE.html`, `AI-Architecture.html`. Toggled via `<html data-theme="dark|light|warm|cool">`; the circular color buttons top-right are the standard UI.
 
 | Theme | `--bg` |
 |-------|--------|
@@ -56,7 +56,7 @@ Chinese is **never** fetched as a web font — multi-MB cost with no benefit ove
 | Role | Font | Documents |
 |------|------|-----------|
 | 中文正文/标题 | system CJK (`PingFang SC` / `Microsoft YaHei`) | all |
-| 拉丁 + 数字 + 代码标签 | `JetBrains Mono` | index, AI-SE, AI-Architecture, AI-Engineering, ai_understanding_tool, e-work-intro |
+| 拉丁 + 数字 + 代码标签 | `JetBrains Mono` | index, AI-SE, AI-Architecture, AI-Engineering, ai_understanding_tool, e-work-intro, digital-employee |
 | 拉丁标题 | `DM Sans` | AI-Engineering, workflow-to-agent |
 | 印刷级衬线（例外） | `Playfair Display` + `Source Serif 4` + `IBM Plex Mono` + `Noto Serif SC` + `Noto Sans SC` | AI-Audit-PPT only |
 
@@ -68,7 +68,7 @@ After any visual change, verify with **computed-font assertions + geometry check
 
 ## Responsive Design
 
-Desktop-first, with per-document breakpoints at 480 / 560 / 640 / 700 / 800 / 860 / 900 px (see DESIGN-SYSTEM.md §7 for the per-document table). The two architecture-diagram documents have no breakpoints at all. Documents with animation must honor `prefers-reduced-motion: reduce`. Documents with a `position:fixed` bar or interactive UI should provide `@media print` to hide it.
+Desktop-first, with per-document breakpoints between 380 and 900 px (see DESIGN-SYSTEM.md §7 for the per-document table). The two architecture-diagram documents have no breakpoints at all. Documents with animation must honor `prefers-reduced-motion: reduce`. Documents with a sticky/fixed bar or interactive UI should provide `@media print` to hide it. Mobile navigation must not be hidden entirely — use a two-row scrollable strip or a drawer, and give sections `scroll-margin-top`.
 
 ## Static Site — No Build Step
 

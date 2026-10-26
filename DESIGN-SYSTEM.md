@@ -59,18 +59,18 @@
 | **A 滚动文档** | [`AI-Engineering.html`](AI-Engineering.html)、[`ai_understanding_tool.html`](ai_understanding_tool.html) | 自上而下阅读；卡片网格、流程条、表格 |
 | **B 架构图** | [`AI-SE.html`](AI-SE.html)、[`AI-Architecture.html`](AI-Architecture.html) | 核心是 1200–1300px 手写内联 SVG；下方 2–4 列信息卡 |
 | **C 幻灯片** | [`AI-Audit-PPT.html`](AI-Audit-PPT.html)、[`workflow-to-agent.html`](workflow-to-agent.html) | 全屏翻页或单页响应式；键盘/滚动/触摸导航 |
-| **D 固定主题单页** | [`e-work-intro.html`](e-work-intro.html)、[`index.html`](index.html) | 不参与 4 主题切换，各自一套固定配色；锚点导航或列表 |
+| **D 索引与固定主题单页** | [`e-work-intro.html`](e-work-intro.html)、[`digital-employee.html`](digital-employee.html)、[`index.html`](index.html) | e-work / digital 固定族 Ⅲ，并共用同一套导航 / 页脚外壳；index 是索引页，使用族 Ⅰ 四主题（D 类中的例外） |
 
 ---
 
-## 3. 配色家族现状（3 族，尚未收敛）
+## 3. 配色家族现状（4 族，均已 token 化）
 
 | 族 | 文档 | 画布 | 主强调色 | 次强调色 |
 |---|---|---|---|---|
 | **Ⅰ 深空青（4 主题）** | [`index.html`](index.html)、[`AI-SE.html`](AI-SE.html)、[`AI-Architecture.html`](AI-Architecture.html) | `#020617` 深空 / `#f8fafc` 亮白 / `#fef7ed` 暖阳 / `#f0f4f8` 冷杉 | `#22d3ee` cyan（Dark） | `#f59e0b` amber |
 | **Ⅱ 浅板岩青绿** | [`workflow-to-agent.html`](workflow-to-agent.html)、[`AI-Engineering.html`](AI-Engineering.html) | `#f4f2ef` 暖灰 | `#2d9d73` teal | `#4a85a8` slate blue |
-| **Ⅲ 暖白墨绿金** | [`e-work-intro.html`](e-work-intro.html) | `#f7f5f0` 暖白 | `#1f4438` 深墨绿 | `#b8860b` 琥珀金 |
-| **（散列，未 token 化）** | [`ai_understanding_tool.html`](ai_understanding_tool.html) | `#f5f7fb` 冷灰蓝 | `#172033` 墨蓝 | `#eef2ff` 淡紫 |
+| **Ⅲ 暖白墨绿金** | [`e-work-intro.html`](e-work-intro.html)、[`digital-employee.html`](digital-employee.html) | `#f7f5f0` 暖白 | `#1f4438` 深墨绿 | `#b8860b` 琥珀金 |
+| **Ⅳ 冷灰蓝（固定主题）** | [`ai_understanding_tool.html`](ai_understanding_tool.html) | `#f5f7fb` 冷灰蓝 | `#3d4ed8` 靛蓝 | `#eef2ff` 淡紫 |
 
 **强调色配额：** 同一文档内主强调色只用于「数据/连接/关键路径」，次强调色只用于「阈值/警示/次级状态」。不要为装饰新增第三种强调色。
 
@@ -131,6 +131,8 @@
 
 历史上效果最好的是 [`AI-Audit-PPT.html`](AI-Audit-PPT.html) 的 `.chrome` / `.kicker` / `.foot`（`IBM Plex Mono`，字距 `.14em`–`.3em`，透明度 `.5`–`.65`）。
 
+> **含中文的微标签不适用上面的 mono 栈。** 中文改走 `--sans`（族 Ⅲ 用 `--label`），保留字号、字距与大小写规则；拉丁与数字仍走 `--mono`。`ai_understanding_tool.html` 的 `.tag`、`.diagram .lab` 与数字员工的 `.nav-links a` 都按这条处理。
+
 ### 4.3 数字
 
 所有指标、编号、进度数值加：
@@ -139,7 +141,7 @@
 font-variant-numeric: tabular-nums;
 ```
 
-已应用：[`ai_understanding_tool.html`](ai_understanding_tool.html)、[`e-work-intro.html`](e-work-intro.html)、[`index.html`](index.html)。
+已应用：[`ai_understanding_tool.html`](ai_understanding_tool.html)、[`e-work-intro.html`](e-work-intro.html)、[`digital-employee.html`](digital-employee.html)、[`index.html`](index.html)。
 [`AI-Audit-PPT.html`](AI-Audit-PPT.html) 用的是等效的 `font-feature-settings:"tnum"`。
 
 ### 4.4 中文标题
@@ -152,17 +154,17 @@ font-variant-numeric: tabular-nums;
 
 | 项 | 现状 | 备注 |
 |---|---|---|
-| 卡片圆角 | 12px（族 Ⅱ）、14–20px（单页）、16px（墨绿）；索引改为 flush 列表：行本身无圆角，只有悬停底色带 10px 圆角 | 未统一 |
-| 卡片描边 | 族 Ⅰ 用 `--border` 1px；族 Ⅱ/Ⅲ 用 1px + 轻阴影 | 阴影使用不一致，见 §7 |
-| 区块间距 | 56–88px（单页）、48px（族 Ⅱ）、`clamp(2.5rem,6vw,4rem)`（索引） | |
-| 响应式断点 | 480 / 560 / 640 / 700 / 800 / 860 / 900 px | 各文档自选，未统一；两个架构图文档无断点 |
-| 入场动效 | `translateY(12–24px)` + `opacity` | 只做位移与淡入，不做扫描线/故障字等装饰效果。索引页按**整块列表**入场（不是逐行）：逐行动画会在筛选回填时重播，导致行半透明闪烁 |
+| 卡片圆角 | 族 Ⅱ 12px、族 Ⅲ 14px、族 Ⅳ 16px（内层 12px）；单页 14–20px；索引为 flush 列表，行本身无圆角，只有悬停底色带 10px 圆角 | 未完全统一 |
+| 卡片描边 | 族 Ⅰ/Ⅲ/Ⅳ 以 1px 发丝线 + 零卡片阴影为主；AI-Engineering 仍有 9 处 `box-shadow` | 阴影待收敛，见 §7 |
+| 区块间距 | 56–88px（单页）、72px（族 Ⅲ）、48px（族 Ⅱ）、16px 卡片间距（族 Ⅳ）、`clamp(2.5rem,6vw,4rem)`（索引） | |
+| 响应式断点 | 380–900px 之间按文档自选（明细见下表） | 未统一；两个架构图文档无断点 |
+| 入场动效 | `translateY(12–24px)` + `opacity` | 只做位移与淡入，不做扫描线/故障字等装饰效果。索引页按**整块列表**入场（不是逐行）：逐行动画会在筛选回填时重播，导致行半透明闪烁。学习笔记不做入场动画，只保留 0.2s 级交互过渡 |
 
 **减动效：** 有动画的文档必须支持 `prefers-reduced-motion: reduce`。
-现状：[`workflow-to-agent.html`](workflow-to-agent.html)、[`e-work-intro.html`](e-work-intro.html)、[`AI-Engineering.html`](AI-Engineering.html)、[`AI-Audit-PPT.html`](AI-Audit-PPT.html)、[`index.html`](index.html) 已支持。
+现状：除 [`AI-SE.html`](AI-SE.html)、[`AI-Architecture.html`](AI-Architecture.html) 外均已支持（这两页仍有无限 pulse，待补）。
 
-**打印：** 有 `position:fixed` 顶栏或主题切换器的文档应提供 `@media print` 隐藏交互 UI。
-现状：[`index.html`](index.html)（吸顶栏 + 筛选器 + 主题切换器全部隐藏）、[`AI-SE.html`](AI-SE.html)、[`AI-Architecture.html`](AI-Architecture.html)、[`AI-Engineering.html`](AI-Engineering.html) 有；[`e-work-intro.html`](e-work-intro.html) **缺**（有 fixed 顶栏 + `backdrop-filter`，打印会糊）。
+**打印：** 有吸顶/固定顶栏或交互 UI 的文档应提供 `@media print` 隐藏交互 UI。
+现状：仅 [`AI-Audit-PPT.html`](AI-Audit-PPT.html) 与 [`workflow-to-agent.html`](workflow-to-agent.html) **缺**；[`index.html`](index.html)（吸顶栏 + 筛选器 + 主题切换器全部隐藏）、[`e-work-intro.html`](e-work-intro.html)、[`digital-employee.html`](digital-employee.html)、[`ai_understanding_tool.html`](ai_understanding_tool.html)、[`AI-Engineering.html`](AI-Engineering.html)、[`AI-SE.html`](AI-SE.html)、[`AI-Architecture.html`](AI-Architecture.html) 均已提供。
 
 ---
 
@@ -176,12 +178,10 @@ font-variant-numeric: tabular-nums;
 
 ## 7. 已知不一致（待收敛，按优先级）
 
-1. **配色家族未收敛** —— 3 族 + 1 组散列共存。新文档应复用族 Ⅰ 或族 Ⅱ，不要再开新色板。
-2. **[`ai_understanding_tool.html`](ai_understanding_tool.html) 配色未 token 化** —— 颜色全是散列字面量（`#172033`、`#f5f7fb`、`#eef2ff`…）。它的 `:root` 只有排版升级时加入的 `--sans` / `--mono` 两个变量，没有颜色变量。建议抽出 `--bg` / `--ink` / `--accent`。
-3. **阴影政策不一致** —— [`AI-Engineering.html`](AI-Engineering.html) 9 处 `box-shadow`、[`e-work-intro.html`](e-work-intro.html) 6 处，而族 Ⅰ 基本不用阴影。族 Ⅰ 的「描边优先、克制阴影」是更好的方向。
-4. **[`e-work-intro.html`](e-work-intro.html) 缺打印样式**，且 640px 以下 `.nav-links{display:none}` 隐藏全部导航且无替代菜单。
-5. **无障碍仍普遍缺失** —— [`index.html`](index.html) 已补 `aria-label` / `aria-pressed` / `aria-live` 与 `.sr-only`（筛选器、主题按钮、结果计数），共 37 处 `aria-*`；其余 8 个文档仍为 **0**：[`AI-Audit-PPT.html`](AI-Audit-PPT.html) 的翻页按钮无 `aria-label`；[`ai_understanding_tool.html`](ai_understanding_tool.html) 的 `.tool` 是 `onclick` 的 `div`，键盘不可达。
-6. **[`index.html`](index.html) 的 `NEW` 徽章不自动过期** —— 仍然是手写标签（5 个条目挂 `NEW`），最久的来自 6 月。索引已按日期倒序排列，但徽章不会随日期失效。
+1. **配色家族未完全收敛** —— 4 族共存（均已 token 化）。新文档应复用族 Ⅰ 或族 Ⅱ，不要再开新色板。
+2. **阴影政策仍不一致** —— [`AI-Engineering.html`](AI-Engineering.html) 仍有 9 处 `box-shadow`；其余文档已收敛为「1px 描边 + 零卡片阴影」（索引仅主题按钮的选中环、学习笔记仅滑杆 thumb 使用 `box-shadow`）。
+3. **无障碍仍不均衡** —— [`index.html`](index.html) 37 处 `aria-*`、[`ai_understanding_tool.html`](ai_understanding_tool.html) 17 处、[`e-work-intro.html`](e-work-intro.html) 与 [`digital-employee.html`](digital-employee.html) 各 5 处；其余 5 个文档仍为 **0**：AI-Engineering / AI-SE / AI-Architecture / AI-Audit-PPT / workflow-to-agent。其中 PPT 的 6 个翻页圆点无 `aria-label`，AI-Engineering 没有任何可聚焦链接。
+4. **[`index.html`](index.html) 的 `NEW` 徽章不自动过期** —— 仍然是手写标签（5 个条目挂 `NEW`），最久的来自 6 月。索引已按日期倒序排列，但徽章不会随日期失效。
 
 ### 各文档断点明细
 
@@ -190,9 +190,10 @@ font-variant-numeric: tabular-nums;
 | [`AI-Architecture.html`](AI-Architecture.html) | 无（仅容器 1350px） |
 | [`AI-SE.html`](AI-SE.html) | 无（仅容器 1400px） |
 | [`AI-Audit-PPT.html`](AI-Audit-PPT.html) | 900 |
-| [`ai_understanding_tool.html`](ai_understanding_tool.html) | 700, 800（另容器 1120 / 900） |
+| [`ai_understanding_tool.html`](ai_understanding_tool.html) | 380, 420, 520, 760, 820（另容器 1000） |
 | [`AI-Engineering.html`](AI-Engineering.html) | 480, 900（另容器 1100） |
-| [`e-work-intro.html`](e-work-intro.html) | 560, 640, 900（另容器 1080） |
+| [`digital-employee.html`](digital-employee.html) | 480, 600, 640, 768, 820（另容器 1000） |
+| [`e-work-intro.html`](e-work-intro.html) | 480, 640, 768, 900（另容器 1000） |
 | [`index.html`](index.html) | 480, 700（另容器 900） |
 | [`workflow-to-agent.html`](workflow-to-agent.html) | 480, 560, 860, 1024, 1280 |
 
@@ -202,10 +203,12 @@ font-variant-numeric: tabular-nums;
 
 - [ ] 复用族 Ⅰ 或族 Ⅱ 配色，**不新开色板**
 - [ ] 中文不请求网页字体；拉丁/数字用 `--mono`
-- [ ] 微标签等宽 + 大写 + 字距；数字加 `tabular-nums`
+- [ ] 微标签：拉丁/数字等宽 + 大写 + 字距；**含中文时改用 `--label` / `--sans`**；数字加 `tabular-nums`
 - [ ] 不含 `Noto Sans SC` / `Noto Serif SC` 的网络请求（例外见 §6）
 - [ ] 有动画则支持 `prefers-reduced-motion`
-- [ ] 有 fixed 顶栏或交互 UI 则提供 `@media print`
+- [ ] 有吸顶/固定顶栏或交互 UI 则提供 `@media print`
+- [ ] 移动端导航不得整体 `display:none`：用两行横向滚动或抽屉，并给 section 配 `scroll-margin-top`
+- [ ] 交互控件用原生 `button`（带 `aria-pressed`），动态结果用 `aria-live`；首屏内容不依赖 JS 才有值
 - [ ] 图片路径 `Images/`（**大写 I**，GitHub Pages 大小写敏感）
 - [ ] **同时**登记到 [`index.html`](index.html) 与 [`README.md`](README.md)
 - [ ] 验证方式用 §1.3 的几何检测 + 计算字体断言，不用逐像素对照

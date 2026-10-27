@@ -181,7 +181,7 @@ font-variant-numeric: tabular-nums;
 1. **配色家族未完全收敛** —— 4 族共存（均已 token 化）。新文档应复用族 Ⅰ 或族 Ⅱ，不要再开新色板。
 2. **阴影政策仍不一致** —— [`AI-Engineering.html`](AI-Engineering.html) 仍有 9 处 `box-shadow`；其余文档已收敛为「1px 描边 + 零卡片阴影」（索引仅主题按钮的选中环、学习笔记仅滑杆 thumb 使用 `box-shadow`）。
 3. **无障碍仍不均衡** —— [`index.html`](index.html) 37 处 `aria-*`、[`ai_understanding_tool.html`](ai_understanding_tool.html) 17 处、[`e-work-intro.html`](e-work-intro.html) 与 [`digital-employee.html`](digital-employee.html) 各 5 处；其余 5 个文档仍为 **0**：AI-Engineering / AI-SE / AI-Architecture / AI-Audit-PPT / workflow-to-agent。其中 PPT 的 6 个翻页圆点无 `aria-label`，AI-Engineering 没有任何可聚焦链接。
-4. **[`index.html`](index.html) 的 `NEW` 徽章不自动过期** —— 仍然是手写标签（5 个条目挂 `NEW`），最久的来自 6 月。索引已按日期倒序排列，但徽章不会随日期失效。
+4. **[`index.html`](index.html) 的 `NEW` 徽章不自动过期** —— 仍然是手写标签（6 个条目挂 `NEW`），最久的来自 6 月。索引已按日期倒序排列，但徽章不会随日期失效。
 
 ### 各文档断点明细
 
